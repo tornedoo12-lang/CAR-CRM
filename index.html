@@ -12,7 +12,7 @@
   --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
   --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
   --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
-  --gh:#24292f;--gh-hover:#1b1f23;--sec:#8e44ad;--sec-hover:#732d91;
+  --gh:#24292f;--gh-hover:#1b1f23;
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
 @media (prefers-color-scheme:dark){
@@ -40,8 +40,6 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .btn-gray{background:var(--gray);color:#fff}
 .btn-gh{background:var(--gh);color:#fff}
 .btn-gh:hover:not(:disabled){background:var(--gh-hover)}
-.btn-sec{background:var(--sec);color:#fff}
-.btn-sec:hover:not(:disabled){background:var(--sec-hover)}
 .btn-small{padding:6px 12px;font-size:12px}
 .note{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .note-ok{background:var(--ok-bg);color:var(--ok-fg)}
@@ -76,7 +74,6 @@ tr:hover td{background:var(--hover)}
 .empty-state{text-align:center;padding:40px;color:var(--muted)}
 .modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 .modal.active{display:flex}
-#lockScreen{z-index:3500;background:rgba(12,14,24,.98);backdrop-filter:blur(14px)}
 .modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-header h2{font-size:20px}
@@ -100,15 +97,12 @@ textarea{resize:vertical;min-height:70px}
 .confirm-box h2{font-size:20px;margin-bottom:8px}
 .confirm-box p{margin:6px 0 18px;line-height:1.8;font-size:14px}
 .confirm-box .modal-footer{justify-content:center}
-.stack{flex-direction:column;align-items:stretch}
-.link-btn{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;text-decoration:underline;padding:4px}
-.app-locked #appContainer{display:none !important}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:5000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 #toast.show{opacity:1}
 @media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
 </style>
 </head>
-<body class="app-locked">
+<body>
 <div class="container" id="appContainer">
   <header>
     <h1>🚗 نظام إدارة السيارات</h1>
@@ -118,8 +112,6 @@ textarea{resize:vertical;min-height:70px}
       <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
       <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
       <button class="btn-gh" id="githubBtn">☁️ GitHub</button>
-      <button class="btn-sec" id="securityBtn">🔒 إعدادات الحماية</button>
-      <button class="btn-danger" id="quickLockBtn">🔐 قفل النظام</button>
       <input type="file" id="restoreFile" accept=".json,application/json" hidden>
     </div>
   </header>
@@ -218,112 +210,6 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- نافذة تغيير الرقم السري وسؤال الأمان -->
-<div id="securityModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>🔒 إعدادات الحماية والتشفير</h2>
-      <button class="close-btn" type="button" id="closeSecBtn" aria-label="إغلاق">&times;</button>
-    </div>
-    <form id="securityForm">
-      <div class="form-note">يتم تشفير جميع بياناتك وتوكين GitHub بالكامل بواسطة الرقم السري الخاص بك. لا يتم حفظ الرقم السري أو أي بيانات كنص صريح أبداً.</div>
-      <div class="form-group">
-        <label for="secCurrentPin">الرقم السري الحالي *</label>
-        <input type="password" id="secCurrentPin" dir="ltr" autocomplete="off" placeholder="أدخل الرقم السري الحالي للتأكيد" required>
-      </div>
-      <div class="form-group">
-        <label for="secNewPin">الرقم السري الجديد (4 رموز على الأقل) *</label>
-        <input type="password" id="secNewPin" dir="ltr" minlength="4" autocomplete="off" placeholder="أدخل الرقم السري الجديد" required>
-      </div>
-      <div class="form-group">
-        <label for="secQuestion">سؤال الأمان (لاستعادة الدخول عند النسيان) *</label>
-        <input type="text" id="secQuestion" placeholder="مثال: ما هو اسم أول سيارة اشتريتها؟" required>
-      </div>
-      <div class="form-group">
-        <label for="secAnswer">إجابة سؤال الأمان *</label>
-        <input type="text" id="secAnswer" placeholder="اكتب الإجابة هنا..." autocomplete="off" required>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn-primary">💾 تحديث التشفير والرقم السري</button>
-        <button type="button" class="btn-gray" id="cancelSecBtn">إغلاق</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- شاشة القفل المشفرة -->
-<div id="lockScreen" class="modal active">
-  <div class="modal-content confirm-box">
-    <!-- 1. إعداد لأول مرة (ظاهر افتراضياً لمنع الشاشة الفارغة) -->
-    <div id="lockSetupBox">
-      <h2>🛡️ إعداد الحماية المشفرة لأول مرة</h2>
-      <p>قم بتعيين رقم سري قوي لتشفير بيانات النظام وتوكين GitHub بالكامل.</p>
-      <form id="setupPinForm">
-        <div class="form-group" style="text-align:right">
-          <label for="setupNewPin">الرقم السري الجديد (4 خانات على الأقل) *</label>
-          <input type="password" id="setupNewPin" dir="ltr" minlength="4" style="text-align:center;font-size:20px;letter-spacing:4px;font-weight:700" placeholder="••••" autocomplete="off" required>
-        </div>
-        <div class="form-group" style="text-align:right">
-          <label for="setupConfirmPin">تأكيد الرقم السري *</label>
-          <input type="password" id="setupConfirmPin" dir="ltr" minlength="4" style="text-align:center;font-size:20px;letter-spacing:4px;font-weight:700" placeholder="••••" autocomplete="off" required>
-        </div>
-        <div class="form-group" style="text-align:right">
-          <label for="setupQuestion">سؤال الأمان (في حال نسيان الرقم السري) *</label>
-          <input type="text" id="setupQuestion" placeholder="مثال: ما هو رقم هاتفي القديم؟" required>
-        </div>
-        <div class="form-group" style="text-align:right">
-          <label for="setupAnswer">إجابة سؤال الأمان *</label>
-          <input type="text" id="setupAnswer" autocomplete="off" placeholder="اكتب الإجابة هنا..." required>
-        </div>
-        <div class="form-group" style="text-align:right">
-          <label for="setupGhToken">توكين GitHub (اختياري الآن - لجلب السيارات فوراً)</label>
-          <input type="password" id="setupGhToken" dir="ltr" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-        </div>
-        <div class="modal-footer stack">
-          <button type="submit" class="btn-primary">🔐 تشفير وتفعيل الحماية</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- 2. تسجيل الدخول وفك التشفير -->
-    <div id="lockVerifyBox" style="display:none">
-      <h2>🔒 النظام محمي ومشفر</h2>
-      <p>أدخل الرقم السري لفك تشفير البيانات والدخول إلى النظام</p>
-      <form id="unlockForm">
-        <div class="form-group">
-          <input type="password" id="unlockPinInput" dir="ltr" style="text-align:center;font-size:22px;letter-spacing:6px;font-weight:700" placeholder="••••" autocomplete="off" required>
-          <div class="hint bad" id="lockoutHint" style="margin-top:8px;font-weight:700"></div>
-        </div>
-        <div class="modal-footer stack">
-          <button type="submit" class="btn-primary" id="unlockSubmitBtn">🔓 فك التشفير والدخول</button>
-          <button type="button" class="link-btn" id="forgotPinBtn">هل نسيت الرقم السري؟ (استعادة بسؤال الأمان)</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- 3. استعادة الرقم السري بسؤال الأمان -->
-    <div id="lockRecoverBox" style="display:none">
-      <h2>🔑 استعادة الرقم السري</h2>
-      <p style="margin-bottom:10px">أجب عن سؤال الأمان لفك القفل وتعيين رقم سري جديد:</p>
-      <div class="form-note" id="recoverQuestionDisplay" style="font-weight:700;color:var(--text);font-size:14px"></div>
-      <form id="recoverForm">
-        <div class="form-group" style="text-align:right">
-          <label for="recoverAnswerInput">الإجابة *</label>
-          <input type="text" id="recoverAnswerInput" autocomplete="off" required placeholder="اكتب إجابتك هنا...">
-        </div>
-        <div class="form-group" style="text-align:right">
-          <label for="recoverNewPinInput">الرقم السري الجديد (4 خانات على الأقل) *</label>
-          <input type="password" id="recoverNewPinInput" dir="ltr" minlength="4" autocomplete="off" required placeholder="أدخل الرقم السري الجديد">
-        </div>
-        <div class="modal-footer stack">
-          <button type="submit" class="btn-primary">تعيين الرقم السري والدخول</button>
-          <button type="button" class="link-btn" id="backToLoginBtn">العودة لتسجيل الدخول</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <!-- نافذة إعدادات GitHub Data Storage -->
 <div id="githubModal" class="modal">
   <div class="modal-content">
@@ -333,7 +219,7 @@ textarea{resize:vertical;min-height:70px}
     </div>
     <form id="githubForm">
       <div class="form-note">
-        بيانات المستودع الافتراضية محفوظة وجاهزة، ما عليك سوى إدخال <b>رمز الوصول الشخصي (Token)</b> وسيتم حفظه مشفراً بالرقم السري على جهازك.
+        بيانات المستودع الافتراضية محفوظة وجاهزة، ما عليك سوى إدخال <b>رمز الوصول الشخصي (Token)</b> وسيتم حفظه في متصفحك على هذا الجهاز لجلب ومزامنة البيانات تلقائياً.
       </div>
       <div class="row2">
         <div class="form-group">
@@ -358,7 +244,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="form-group">
         <label for="ghToken">رمز الوصول الشخصي (Personal Access Token)</label>
         <input type="password" id="ghToken" dir="ltr" placeholder="أدخل التوكين هنا (ghp_xxxx...)" autocomplete="off">
-        <div class="hint">يُحفظ التوكين مشفراً داخل متصفحك ولا يُكتب في الكود أبداً.</div>
+        <div class="hint">يُحفظ التوكين محلياً داخل متصفحك ولا يُكتب في الكود أبداً.</div>
       </div>
       <div class="form-group">
         <label class="chk"><input type="checkbox" id="ghAutoSync" checked> <span>مزامنة وحفظ تلقائي في GitHub عند أي تعديل</span></label>
@@ -386,8 +272,7 @@ textarea{resize:vertical;min-height:70px}
 <div id="toast" role="status"></div>
 
 <script>
-/* لا توجد أي بيانات سيارات مدمجة في الكود نهائياً - يتم جلبها من GitHub بعد فك القفل */
-const VAULT_KEY = 'cars_crm_vault_v5';
+const STORAGE_KEY = 'cars_crm_data_v5';
 const GH_KEY = 'cars_crm_github_v5';
 const DATA_FILE = 'cars-data.json';
 
@@ -414,164 +299,9 @@ const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توس�
 
 let cars = [];
 let editingId = null;
-let sessionPin = null;
-let sessionGhToken = '';
-let failedAttempts = 0;
-let lockoutUntil = 0;
 
 function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
 function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
-
-/* ---------- محرك التشفير المزدوج (يعمل على HTTPS وعلى file:// المحلي بكفاءة) ---------- */
-function bufToB64(buf){
-  const bytes = new Uint8Array(buf);
-  let bin = '';
-  for(let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-function b64ToBuf(b64){
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
-}
-function jsHashHex(str, rounds = 5000){
-  let h1 = 0xdeadbeef ^ str.length, h2 = 0x41c6ce57 ^ str.length, h3 = 0x9e3779b9, h4 = 0x85ebca6b;
-  for(let r = 0; r < rounds; r++){
-    for(let i = 0; i < str.length; i++){
-      const ch = str.charCodeAt(i) ^ r;
-      h1 = Math.imul(h1 ^ ch, 2654435761);
-      h2 = Math.imul(h2 ^ ch, 1597334677);
-      h3 = Math.imul(h3 ^ (ch << 3), 2246822507);
-      h4 = Math.imul(h4 ^ (ch << 5), 3266489909);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  }
-  return [h1, h2, h3, h4].map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
-}
-function jsStreamTransform(bytes, secret, saltB64){
-  const seedStr = secret + '::' + saltB64 + '::' + jsHashHex(secret + saltB64, 2000);
-  let s0 = parseInt(seedStr.slice(-32, -24), 16) || 0x12345678;
-  let s1 = parseInt(seedStr.slice(-24, -16), 16) || 0x9abcdef0;
-  let s2 = parseInt(seedStr.slice(-16, -8), 16) || 0x0fedcba9;
-  let s3 = parseInt(seedStr.slice(-8), 16) || 0x87654321;
-  const out = new Uint8Array(bytes.length);
-  for(let i = 0; i < bytes.length; i++){
-    let t = s3;
-    const s = s0;
-    s3 = s2; s2 = s1; s1 = s;
-    t ^= t << 11; t ^= t >>> 8;
-    s0 = (t ^ s ^ (s >>> 19)) >>> 0;
-    out[i] = bytes[i] ^ (s0 & 0xff);
-  }
-  return out;
-}
-const hasSubtle = !!(window.crypto && window.crypto.subtle);
-
-async function sha256Hex(str){
-  if(hasSubtle){
-    try{
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }catch(e){}
-  }
-  return jsHashHex(str, 6000);
-}
-async function deriveAesKey(secret, saltBytes){
-  const enc = new TextEncoder();
-  const baseKey = await crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    {name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256'},
-    baseKey,
-    {name: 'AES-GCM', length: 256},
-    false,
-    ['encrypt', 'decrypt']
-  );
-}
-async function encryptText(plainText, secret){
-  const salt = new Uint8Array(16);
-  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(salt);
-  else for(let i=0;i<16;i++) salt[i] = Math.floor(Math.random()*256);
-
-  if(hasSubtle){
-    try{
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await deriveAesKey(secret, salt);
-      const cipher = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, new TextEncoder().encode(plainText));
-      return {m: 'aes', s: bufToB64(salt), iv: bufToB64(iv), c: bufToB64(cipher)};
-    }catch(e){}
-  }
-  const sB64 = bufToB64(salt);
-  const plainBytes = new TextEncoder().encode(plainText);
-  const encBytes = jsStreamTransform(plainBytes, secret, sB64);
-  const mac = jsHashHex(secret + '::' + sB64 + '::' + plainText, 1500);
-  return {m: 'js', s: sB64, mac, c: bufToB64(encBytes)};
-}
-async function decryptText(pkg, secret){
-  if(!pkg || !pkg.s || !pkg.c) throw new Error('Invalid cipher package');
-  if(pkg.m === 'aes' && hasSubtle){
-    const key = await deriveAesKey(secret, b64ToBuf(pkg.s));
-    const plainBuf = await crypto.subtle.decrypt({name: 'AES-GCM', iv: b64ToBuf(pkg.iv)}, key, b64ToBuf(pkg.c));
-    return new TextDecoder().decode(plainBuf);
-  }
-  const decBytes = jsStreamTransform(b64ToBuf(pkg.c), secret, pkg.s);
-  const plainText = new TextDecoder().decode(decBytes);
-  const expectedMac = jsHashHex(secret + '::' + pkg.s + '::' + plainText, 1500);
-  if(expectedMac !== pkg.mac) throw new Error('Wrong key or corrupted data');
-  return plainText;
-}
-function normAnswer(a){
-  return latin(a).trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
-/* ---------- إدارة الخزنة المشفرة (Vault) ---------- */
-function getVault(){
-  try{
-    const v = JSON.parse(localStorage.getItem(VAULT_KEY));
-    if(v && v.pinVerifier && v.question) return v;
-  }catch(e){}
-  return null;
-}
-async function buildAndSaveVault(pin, question, answerPlain){
-  const existingVault = getVault();
-  const currentQuestion = question || (existingVault ? existingVault.question : '');
-  let answerHash = existingVault ? existingVault.answerHash : '';
-  let recoveryData = existingVault ? existingVault.recoveryData : null;
-
-  const verifier = await encryptText('VAULT_OK_V5', pin);
-  const dataJson = JSON.stringify(makePayload());
-  const encryptedData = await encryptText(dataJson, pin);
-  const ghCfg = getGhConfig();
-  const encryptedToken = sessionGhToken ? await encryptText(sessionGhToken, pin) : null;
-
-  if(answerPlain !== null && answerPlain !== undefined){
-    const cleanAns = normAnswer(answerPlain);
-    answerHash = await sha256Hex('SEC_ANS_SALT_V5::' + cleanAns);
-    recoveryData = await encryptText(JSON.stringify({payload: makePayload(), ghToken: sessionGhToken || ''}), cleanAns);
-  }
-
-  const vaultObj = {
-    version: 5,
-    pinVerifier: verifier,
-    encryptedData,
-    encryptedToken,
-    question: currentQuestion,
-    answerHash,
-    recoveryData
-  };
-  localStorage.setItem(VAULT_KEY, JSON.stringify(vaultObj));
-  saveGhConfig({...ghCfg, token: ''});
-}
-
-async function saveEncryptedSessionState(){
-  if(!sessionPin) return;
-  const v = getVault();
-  if(!v) return;
-  v.encryptedData = await encryptText(JSON.stringify(makePayload()), sessionPin);
-  v.encryptedToken = sessionGhToken ? await encryptText(sessionGhToken, sessionPin) : null;
-  localStorage.setItem(VAULT_KEY, JSON.stringify(v));
-}
 
 /* ---------- التواريخ: ميلادي وهجري + أزرار التبديل ---------- */
 const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
@@ -666,7 +396,7 @@ function dateCell(iso, main){
 }
 function fmtNum(v){ const n = Number(latin(v)); return (v === '' || v == null || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
 
-/* ---------- معالجة البيانات ---------- */
+/* ---------- معالجة وحفظ البيانات محلياً ---------- */
 function parseCars(text){
   let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف'); }
   const arr = Array.isArray(d) ? d : (d && d.cars);
@@ -685,183 +415,23 @@ function parseCars(text){
 function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
 function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
 
-/* ---------- شاشة القفل، إعداد أول مرة، وفك التشفير ---------- */
-function showLockScreen(){
-  sessionPin = null;
-  cars = [];
-  refresh();
-  document.body.classList.add('app-locked');
-  const vault = getVault();
-  $('lockScreen').classList.add('active');
-  $('lockRecoverBox').style.display = 'none';
-  if(!vault){
-    $('lockSetupBox').style.display = '';
-    $('lockVerifyBox').style.display = 'none';
-    setTimeout(() => $('setupNewPin').focus(), 100);
-  }else{
-    $('lockSetupBox').style.display = 'none';
-    $('lockVerifyBox').style.display = '';
-    $('unlockPinInput').value = '';
-    setTimeout(() => $('unlockPinInput').focus(), 100);
+function loadLocalData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      cars = withIds(parseCars(raw), 'loc');
+    }
+  }catch(e){
+    cars = [];
   }
 }
-
-async function onUnlockSuccess(pin, loadedCars, loadedToken){
-  sessionPin = pin;
-  sessionGhToken = loadedToken || '';
-  cars = withIds(loadedCars || [], 'v');
-  document.body.classList.remove('app-locked');
-  $('lockScreen').classList.remove('active');
-  refresh();
-  renderGhNote();
-  if(sessionGhToken){
-    await githubPull(true);
-  }
+function saveLocalData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(makePayload()));
+  }catch(e){}
 }
 
-$('setupPinForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const p1 = latin($('setupNewPin').value).trim();
-  const p2 = latin($('setupConfirmPin').value).trim();
-  const q = $('setupQuestion').value.trim();
-  const a = $('setupAnswer').value.trim();
-  const tok = $('setupGhToken').value.trim();
-  if(p1.length < 4){ toast('الرقم السري يجب أن يكون 4 خانات على الأقل'); return; }
-  if(p1 !== p2){ toast('❌ الرقم السري وتأكيده غير متطابقين'); return; }
-  if(!q || !a){ toast('الرجاء إدخال سؤال الأمان وإجابته'); return; }
-
-  cars = [];
-  sessionPin = p1;
-  sessionGhToken = tok;
-  await buildAndSaveVault(p1, q, a);
-  await onUnlockSuccess(p1, [], sessionGhToken);
-  toast('✅ تم تشفير النظام وتفعيل الحماية بنجاح');
-});
-
-$('unlockForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const now = Date.now();
-  if(now < lockoutUntil){
-    const sec = Math.ceil((lockoutUntil - now) / 1000);
-    $('lockoutHint').textContent = `محاولات خاطئة كثيرة. انتظر ${sec} ثانية.`;
-    return;
-  }
-  const entered = latin($('unlockPinInput').value).trim();
-  const vault = getVault();
-  if(!vault) return;
-
-  try{
-    const check = await decryptText(vault.pinVerifier, entered);
-    if(check !== 'VAULT_OK_V5') throw new Error('Mismatch');
-    let loadedCars = [];
-    if(vault.encryptedData){
-      const jsonStr = await decryptText(vault.encryptedData, entered);
-      loadedCars = parseCars(jsonStr);
-    }
-    let tok = '';
-    if(vault.encryptedToken){
-      tok = await decryptText(vault.encryptedToken, entered).catch(() => '');
-    }
-    failedAttempts = 0;
-    $('lockoutHint').textContent = '';
-    await onUnlockSuccess(entered, loadedCars, tok);
-    toast('✅ تم فك التشفير والدخول بنجاح');
-  }catch(err){
-    failedAttempts++;
-    if(failedAttempts >= 5){
-      lockoutUntil = Date.now() + 30000;
-      $('lockoutHint').textContent = 'تم قفل المحاولات مؤقتاً لمدة 30 ثانية لحماية النظام!';
-    }else{
-      $('lockoutHint').textContent = `الرقم السري غير صحيح (المحاولة ${failedAttempts} من 5)`;
-    }
-    toast('❌ الرقم السري غير صحيح');
-    $('unlockPinInput').select();
-  }
-});
-
-$('quickLockBtn').onclick = () => {
-  showLockScreen();
-  toast('🔐 تم قفل النظام وتأمين البيانات');
-};
-
-$('forgotPinBtn').onclick = () => {
-  const vault = getVault();
-  if(!vault) return;
-  $('recoverQuestionDisplay').textContent = 'سؤال الأمان: ' + vault.question;
-  $('recoverAnswerInput').value = '';
-  $('recoverNewPinInput').value = '';
-  $('lockVerifyBox').style.display = 'none';
-  $('lockRecoverBox').style.display = '';
-  setTimeout(() => $('recoverAnswerInput').focus(), 100);
-};
-$('backToLoginBtn').onclick = () => {
-  $('lockRecoverBox').style.display = 'none';
-  $('lockVerifyBox').style.display = '';
-};
-
-$('recoverForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const vault = getVault();
-  if(!vault) return;
-  const cleanAns = normAnswer($('recoverAnswerInput').value);
-  const newPin = latin($('recoverNewPinInput').value).trim();
-  if(newPin.length < 4){ toast('الرقم السري الجديد يجب أن يكون 4 خانات على الأقل'); return; }
-
-  const ansHash = await sha256Hex('SEC_ANS_SALT_V5::' + cleanAns);
-  if(ansHash !== vault.answerHash){
-    toast('❌ إجابة سؤال الأمان غير صحيحة');
-    $('recoverAnswerInput').select();
-    return;
-  }
-  try{
-    let loadedCars = [];
-    let tok = '';
-    if(vault.recoveryData){
-      const recJson = JSON.parse(await decryptText(vault.recoveryData, cleanAns));
-      if(recJson.payload) loadedCars = parseCars(JSON.stringify(recJson.payload));
-      if(recJson.ghToken) tok = recJson.ghToken;
-    }
-    cars = withIds(loadedCars, 'rec');
-    sessionGhToken = tok;
-    await buildAndSaveVault(newPin, vault.question, cleanAns);
-    await onUnlockSuccess(newPin, loadedCars, tok);
-    toast('✅ تم استعادة النظام وتعيين الرقم السري الجديد');
-  }catch(err){
-    toast('❌ تعذر استعادة البيانات');
-  }
-});
-
-$('securityBtn').onclick = () => {
-  const vault = getVault();
-  $('securityForm').reset();
-  if(vault) $('secQuestion').value = vault.question || '';
-  $('securityModal').classList.add('active');
-};
-$('closeSecBtn').onclick = () => $('securityModal').classList.remove('active');
-$('cancelSecBtn').onclick = () => $('securityModal').classList.remove('active');
-$('securityForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const cur = latin($('secCurrentPin').value).trim();
-  const newPin = latin($('secNewPin').value).trim();
-  const q = $('secQuestion').value.trim();
-  const a = $('secAnswer').value.trim();
-
-  if(cur !== sessionPin){
-    toast('❌ الرقم السري الحالي غير صحيح');
-    $('secCurrentPin').focus();
-    return;
-  }
-  if(newPin.length < 4 || !q || !a){
-    toast('الرجاء ملء جميع الحقول (الرقم السري 4 خانات على الأقل)');
-    return;
-  }
-  sessionPin = newPin;
-  await buildAndSaveVault(newPin, q, a);
-  $('securityModal').classList.remove('active');
-  toast('✅ تم تحديث الرقم السري وإعادة تشفير البيانات بنجاح');
-});
-
-/* ---------- GitHub Repository Storage (الإعدادات محفوظة افتراضياً بدون التوكين) ---------- */
+/* ---------- GitHub Repository Storage ---------- */
 let ghState = 'ready', ghLastSync = null, ghSha = null, ghTimer = null;
 
 function getGhConfig(){
@@ -874,7 +444,7 @@ function getGhConfig(){
         repo: parsed.repo || DEFAULT_GH.repo,
         branch: parsed.branch || DEFAULT_GH.branch,
         path: parsed.path || DEFAULT_GH.path,
-        token: '',
+        token: parsed.token || '',
         autoSync: parsed.autoSync !== false
       };
     }
@@ -888,7 +458,7 @@ function saveGhConfig(cfg){
     repo: cfg.repo || DEFAULT_GH.repo,
     branch: cfg.branch || DEFAULT_GH.branch,
     path: cfg.path || DEFAULT_GH.path,
-    token: '',
+    token: cfg.token || '',
     autoSync: cfg.autoSync !== false
   };
   localStorage.setItem(GH_KEY, JSON.stringify(safeCfg));
@@ -910,7 +480,7 @@ function encodeGhPath(path){
 }
 async function githubPull(silent = false){
   const cfg = getGhConfig();
-  if(!sessionGhToken){
+  if(!cfg.token){
     ghState = 'notoken'; renderGhNote();
     if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
     return false;
@@ -923,7 +493,7 @@ async function githubPull(silent = false){
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github+json',
-        'Authorization': `Bearer ${sessionGhToken}`,
+        'Authorization': `Bearer ${cfg.token}`,
         'X-GitHub-Api-Version': '2022-11-28'
       },
       cache: 'no-store'
@@ -941,7 +511,7 @@ async function githubPull(silent = false){
     ghSha = data.sha;
     const text = base64ToUtf8(data.content || '');
     cars = withIds(parseCars(text), 'gh');
-    await saveEncryptedSessionState();
+    saveLocalData();
     ghLastSync = new Date();
     ghState = 'ready';
     refresh(); renderGhNote();
@@ -955,7 +525,7 @@ async function githubPull(silent = false){
 }
 async function githubPush(silent = false){
   const cfg = getGhConfig();
-  if(!sessionGhToken){
+  if(!cfg.token){
     ghState = 'notoken'; renderGhNote();
     if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
     return false;
@@ -967,7 +537,7 @@ async function githubPush(silent = false){
     const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
     const headers = {
       'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${sessionGhToken}`,
+      'Authorization': `Bearer ${cfg.token}`,
       'X-GitHub-Api-Version': '2022-11-28'
     };
     if(!ghSha){
@@ -1021,12 +591,12 @@ async function githubPush(silent = false){
 }
 function scheduleGhSync(){
   const cfg = getGhConfig();
-  if(!cfg || !cfg.autoSync || !sessionGhToken) return;
+  if(!cfg || !cfg.autoSync || !cfg.token) return;
   clearTimeout(ghTimer);
   ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 500);
 }
 async function persist(){
-  await saveEncryptedSessionState();
+  saveLocalData();
   scheduleGhSync();
 }
 function renderGhNote(){
@@ -1034,7 +604,7 @@ function renderGhNote(){
   const cfg = getGhConfig();
   const repoLabel = `${cfg.owner}/${cfg.repo}:${cfg.branch || 'main'}`;
   let cls = 'note-ok', txt = '';
-  if(!sessionGhToken){
+  if(!cfg.token){
     cls = 'note-warn';
     txt = `☁️ مستودع GitHub «${repoLabel}» جاهز • اضغط على زر GitHub لإدخال الـ Token وجلب السيارات تلقائياً.`;
   }else if(ghState === 'syncing'){
@@ -1055,7 +625,7 @@ function fillGhForm(cfg){
   $('ghRepo').value = cfg.repo || DEFAULT_GH.repo;
   $('ghBranch').value = cfg.branch || DEFAULT_GH.branch;
   $('ghPath').value = cfg.path || DEFAULT_GH.path;
-  $('ghToken').value = sessionGhToken || '';
+  $('ghToken').value = cfg.token || '';
   $('ghAutoSync').checked = cfg.autoSync !== false;
 }
 $('githubBtn').onclick = () => {
@@ -1076,14 +646,12 @@ function readGhFormConfig(){
 $('githubForm').addEventListener('submit', async e => {
   e.preventDefault();
   const cfg = readGhFormConfig();
-  sessionGhToken = cfg.token;
   saveGhConfig(cfg);
-  await saveEncryptedSessionState();
-  ghState = sessionGhToken ? 'ready' : 'notoken';
+  ghState = cfg.token ? 'ready' : 'notoken';
   renderGhNote();
   $('githubModal').classList.remove('active');
-  if(sessionGhToken){
-    toast('تم تشفير وحفظ التوكين وإعدادات GitHub، جاري جلب السيارات...');
+  if(cfg.token){
+    toast('تم حفظ إعدادات GitHub، جاري جلب السيارات...');
     await githubPull(false);
   }else{
     toast('تم حفظ إعدادات GitHub (بدون توكين)');
@@ -1091,22 +659,16 @@ $('githubForm').addEventListener('submit', async e => {
 });
 $('ghPushNowBtn').onclick = async () => {
   const cfg = readGhFormConfig();
-  sessionGhToken = cfg.token;
   saveGhConfig(cfg);
-  await saveEncryptedSessionState();
   await githubPush(false);
 };
 $('ghPullNowBtn').onclick = async () => {
   const cfg = readGhFormConfig();
-  sessionGhToken = cfg.token;
   saveGhConfig(cfg);
-  await saveEncryptedSessionState();
   await githubPull(false);
 };
 $('ghResetDefaultBtn').onclick = async () => {
-  sessionGhToken = '';
   saveGhConfig({...DEFAULT_GH});
-  await saveEncryptedSessionState();
   fillGhForm(DEFAULT_GH);
   renderGhNote();
   toast('تمت استعادة إعدادات GitHub الافتراضية ومسح التوكين');
@@ -1225,7 +787,6 @@ $('addBtn').onclick = () => openModal(null);
 $('closeBtn').onclick = closeModal;
 $('cancelBtn').onclick = closeModal;
 $('carModal').addEventListener('click', e => { if(e.target === $('carModal')) closeModal(); });
-$('securityModal').addEventListener('click', e => { if(e.target === $('securityModal')) $('securityModal').classList.remove('active'); });
 $('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
 $('confirmNo').onclick = closeConfirm;
 $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
@@ -1235,7 +796,6 @@ $('showInactive').addEventListener('change', renderTable);
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
     closeModal(); closeConfirm();
-    $('securityModal').classList.remove('active');
     $('githubModal').classList.remove('active');
   }
 });
@@ -1358,9 +918,14 @@ async function exportPDF(){
 }
 $('pdfBtn').onclick = exportPDF;
 
-function init(){
-  getGhConfig();
-  showLockScreen();
+async function init(){
+  loadLocalData();
+  refresh();
+  const cfg = getGhConfig();
+  renderGhNote();
+  if(cfg.token){
+    await githubPull(true);
+  }
 }
 
 init();
