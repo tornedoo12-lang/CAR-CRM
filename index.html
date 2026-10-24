@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام إدارة السيارات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
+  --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
+  --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
+  --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    color-scheme:dark;
+    --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
+    --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
+    --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;min-height:100vh;padding:20px;color:var(--text)}
+.container{max-width:1350px;margin:0 auto}
+header{background:var(--card);padding:20px;border-radius:10px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+h1{font-size:26px;flex:1;min-width:200px}
+.header-controls{display:flex;gap:8px;flex-wrap:wrap}
+button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--accent-hover)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:var(--danger-hover)}
+.btn-gray{background:var(--gray);color:#fff}
+.btn-small{padding:6px 12px;font-size:12px}
+.note{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600}
+.note-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.note-warn{background:var(--warn-bg);color:var(--warn-fg)}
+.search-bar{display:flex;gap:10px;margin-bottom:16px;background:var(--card);padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-wrap:wrap}
+input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;background:var(--input);color:var(--text)}
+.search-bar input,.search-bar select{flex:1;min-width:160px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:16px}
+.stat-card{background:var(--card);padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.stat-number{font-size:28px;font-weight:700;color:var(--accent)}
+.stat-number.bad{color:var(--danger)}
+.stat-number.warn{color:#f39c12}
+.stat-label{color:var(--muted);font-size:12px;margin-top:5px}
+.table-container{background:var(--card);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+th{background:var(--thead);color:var(--thead-text);padding:13px 12px;text-align:right;font-weight:600;font-size:13px;white-space:nowrap}
+th small{font-weight:400;opacity:.75;font-size:11px}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:hover td{background:var(--hover)}
+.date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
+.sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
+.warn-line{color:var(--warn-fg);direction:rtl;text-align:right;white-space:normal;margin-top:3px}
+.days{display:inline-block;margin-top:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
+.lvl-danger{background:var(--bad-bg);color:var(--bad-fg)}
+.action-buttons{display:flex;gap:6px}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
+.modal.active{display:flex}
+#gate, #pinModal{z-index:3000;background:rgba(15,18,30,.92)}
+.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-header h2{font-size:20px}
+.close-btn{background:none;color:var(--muted);font-size:28px;padding:0 6px}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;margin-bottom:5px;font-weight:600;font-size:13px}
+.form-group input,.form-group textarea,.form-group select{width:100%}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;min-height:14px}
+.hint.bad{color:var(--danger)}
+.form-note{font-size:12px;color:var(--muted);background:var(--hover);padding:8px 12px;border-radius:6px;margin-bottom:13px;line-height:1.7}
+textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;margin-top:18px}
+.confirm-box{max-width:420px;text-align:center}
+.confirm-box h2{font-size:20px;margin-bottom:8px}
+.confirm-box p{margin:6px 0 20px;line-height:1.8}
+.confirm-box .modal-footer{justify-content:center}
+.stack{flex-direction:column;align-items:stretch}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:4000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+@media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
+
+.btn-cloud{background:#27ae60;color:#fff}
+.btn-cloud:hover:not(:disabled){background:#219150}
+.btn-gdrive{background:#4285F4;color:#fff}
+.btn-gdrive:hover:not(:disabled){background:#3367d6}
+.btn-auth{background:#8e44ad;color:#fff}
+.btn-auth:hover:not(:disabled){background:#732d91}
+.tabs{display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:8px}
+.tab-btn{background:var(--hover);color:var(--text);padding:8px 14px;border-radius:6px;font-size:13px}
+.tab-btn.active{background:var(--accent);color:#fff}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.code-box{background:var(--input);border:1px solid var(--border);padding:10px;border-radius:6px;font-family:monospace;font-size:11px;direction:ltr;text-align:left;max-height:160px;overflow-y:auto;white-space:pre;margin:8px 0}
+.badge-sync{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+
+.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
+.label-row label{margin-bottom:0 !important}
+.cal-toggle{padding:3px 9px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
+.cal-toggle:hover{background:var(--accent);color:#fff}
+.cal-toggle.hijri-mode{background:#8e44ad;color:#fff;border-color:#8e44ad}
+.global-cal-bar{display:flex;justify-content:space-between;align-items:center;background:var(--hover);padding:9px 12px;border-radius:8px;margin-bottom:13px;border:1px solid var(--border);flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🚗 نظام إدارة السيارات</h1>
+    <div class="header-controls">
+      <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
+      <button class="btn-gray" id="toggleTableCalBtn" title="تبديل عرض التاريخ الأساسي والثانوي في الجدول">📅 الأساسي: ميلادي ⇄ هجري</button>
+      <button class="btn-auth" id="changePinBtn">🔐 تغيير الرقم السري</button>
+      <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
+      <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
+      <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
+      <button class="btn-cloud" id="cloudBtn">☁️ ربط جوجل درايف</button>
+      <button class="btn-primary" id="syncNowBtn" style="display:none">🔄 مزامنة الآن</button>
+      <button class="btn-gray" id="folderBtn">📁 المجلد المحلي</button>
+      <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <div id="backupNote" class="note" role="status"></div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">إجمالي السيارات</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInspExpired">0</div><div class="stat-label">فحص منتهي</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين..." aria-label="بحث">
+    <select id="statusFilter" aria-label="تصفية الحالة">
+      <option value="">جميع الحالات</option>
+      <option value="ok">سارية</option>
+      <option value="warning">قريبة الانتهاء (30 يوم)</option>
+      <option value="danger">فيها منتهي</option>
+    </select>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>السيارة</th><th>رقم اللوحة</th><th>شركة التأمين</th>
+          <th>التأمين <small>(ميلادي / هجري)</small></th>
+          <th>الاستمارة <small>(ميلادي / هجري)</small></th>
+          <th>الفحص <small>(ميلادي / هجري)</small></th>
+          <th>سنة الصنع</th><th>القيمة</th><th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- نافذة حماية النظام بالرقم السري -->
+<div id="pinModal" class="modal active">
+  <div class="modal-content confirm-box">
+    <h2 id="pinTitle">🔒 الدخول إلى النظام</h2>
+    <p id="pinSubMsg">يرجى إدخال الرقم السري للمتابعة</p>
+    
+    <div id="pinFormArea">
+      <!-- نموذج الإدخال لشاشة القفل -->
+      <div id="viewLoginPin">
+        <div class="form-group">
+          <input type="password" id="inputLoginPin" placeholder="أدخل الرقم السري" dir="ltr" style="text-align:center;font-size:18px;letter-spacing:4px;" autocomplete="off">
+        </div>
+        <div class="modal-footer stack">
+          <button type="button" class="btn-primary" id="btnLoginPin">دخول</button>
+          <button type="button" class="btn-gray btn-small" id="btnForgotPin" style="margin-top:6px;">نسيت الرقم السري؟</button>
+        </div>
+      </div>
+
+      <!-- نموذج إنشاء/تغيير الرقم السري -->
+      <div id="viewSetupPin" style="display:none;text-align:right;">
+        <div class="form-group" id="groupOldPin" style="display:none;">
+          <label>الرقم السري الحالي *</label>
+          <input type="password" id="inputOldPin" placeholder="****" dir="ltr" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>الرقم السري الجديد *</label>
+          <input type="password" id="inputNewPin" placeholder="****" dir="ltr" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>تأكيد الرقم السري الجديد *</label>
+          <input type="password" id="inputConfirmPin" placeholder="****" dir="ltr" autocomplete="off">
+        </div>
+        <hr style="margin:15px 0;border:none;border-top:1px solid var(--border);">
+        <div class="form-group">
+          <label>سؤال الأمان (لاسترجاع الرقم عند النسيان) *</label>
+          <select id="selectSecurityQuestion">
+            <option value="ما هو اسم أول مدرسة درست فيها؟">ما هو اسم أول مدرسة درست فيها؟</option>
+            <option value="ما هو اسم مدينتك المفضلة؟">ما هو اسم مدينتك المفضلة؟</option>
+            <option value="ما هو اسم طعامك المفضل؟">ما هو اسم طعامك المفضل؟</option>
+            <option value="ما هو اسم أول سيارة قمت بفيادتها؟">ما هو اسم أول سيارة قمت بفيادتها؟</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>إجابة سؤال الأمان *</label>
+          <input type="text" id="inputSecurityAnswer" placeholder="اكتب إجابة تذكرها جيداً" autocomplete="off">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-primary" id="btnSavePinSetup">حفظ وتعيين</button>
+          <button type="button" class="btn-gray" id="btnCancelPinSetup" style="display:none;">إلغاء</button>
+        </div>
+      </div>
+
+      <!-- نموذج استعادة الرقم السري عبر سؤال الأمان -->
+      <div id="viewResetPin" style="display:none;text-align:right;">
+        <div class="form-group">
+          <label id="lblSecurityQuestion" style="color:var(--accent);font-size:14px;"></label>
+          <input type="text" id="inputResetAnswer" placeholder="أدخل الإجابة هنا" autocomplete="off">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-primary" id="btnVerifyReset">التحقق وإعادة الضبط</button>
+          <button type="button" class="btn-gray" id="btnBackToLogin">رجوع للدخول</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="carModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">إضافة سيارة جديدة</h2>
+      <button class="close-btn" type="button" id="closeBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <form id="carForm">
+      <div class="row2">
+        <div class="form-group"><label for="carName">نوع السيارة *</label><input type="text" id="carName" required></div>
+        <div class="form-group"><label for="plateNumber">رقم اللوحة *</label><input type="text" id="plateNumber" required></div>
+      </div>
+      <div class="form-group"><label for="insurance">شركة التأمين</label><input type="text" id="insurance"></div>
+      <div class="global-cal-bar">
+        <span style="font-size:12px;font-weight:700">📅 نظام إدخال وعرض التواريخ في النافذة:</span>
+        <button type="button" class="cal-toggle" id="toggleAllDatesBtn">🔄 تبديل الكل (الآن: ميلادي أساسي ⇄ هجري ثانوي)</button>
+      </div>
+      <input type="hidden" id="insuranceHijri">
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="insuranceDate">انتهاء التأمين</label>
+            <button type="button" class="cal-toggle field-cal-btn" data-field="insuranceDate" id="calBtn_insuranceDate">🔄 ميلادي</button>
+          </div>
+          <input type="text" id="insuranceDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_insuranceDate"></div>
+        </div>
+        <div class="form-group">
+          <div class="label-row">
+            <label for="registrationDate">انتهاء الاستمارة</label>
+            <button type="button" class="cal-toggle field-cal-btn" data-field="registrationDate" id="calBtn_registrationDate">🔄 ميلادي</button>
+          </div>
+          <input type="text" id="registrationDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_registrationDate"></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="inspectionDate">انتهاء الفحص</label>
+            <button type="button" class="cal-toggle field-cal-btn" data-field="inspectionDate" id="calBtn_inspectionDate">🔄 ميلادي</button>
+          </div>
+          <input type="text" id="inspectionDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_inspectionDate"></div>
+        </div>
+        <div class="form-group">
+          <label for="yearOfManufacture">سنة الصنع</label>
+          <input type="text" id="yearOfManufacture" inputmode="numeric" dir="ltr" placeholder="2020" maxlength="4" autocomplete="off">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group"><label for="carValue">قيمة السيارة</label><input type="text" id="carValue" inputmode="decimal" dir="ltr" autocomplete="off"></div>
+        <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
+      </div>
+      <div class="form-group"><label for="notes">ملاحظات</label><textarea id="notes"></textarea></div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">حفظ</button>
+        <button type="button" class="btn-gray" id="cancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="cloudModal" class="modal">
+  <div class="modal-content" style="max-width:620px">
+    <div class="modal-header">
+      <h2>☁️ الربط المباشر مع Google Drive</h2>
+      <button class="close-btn" type="button" id="closeCloudBtn" aria-label="إغلاق">&times;</button>
+    </div>
+
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabGasBtn">🚀 الطريقة 1: رابط سحابي مباشر (الأسهل والأنسب لكل الأجهزة)</button>
+      <button type="button" class="tab-btn" id="tabApiBtn">🔑 الطريقة 2: Google Drive API (OAuth)</button>
+    </div>
+
+    <div id="paneGas" class="tab-pane active">
+      <div class="form-note">
+        <strong>مميزات هذه الطريقة:</strong> تعمل فوراً حتى لو فتحت الملف مباشرة من جهازك (<code>file://</code>) أو من الموبايل، وتحفظ ملف <code>cars-data.json</code> ونسخ احتياطية يومية تلقائياً داخل مجلد في حسابك على <strong>Google Drive</strong> بدون طلب تسجيل دخول في كل مرة.
+      </div>
+      <div class="form-group">
+        <label for="gasUrlInput">رابط تطبيق جوجل درايف (Web App URL)</label>
+        <input type="url" id="gasUrlInput" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div class="form-group">
+        <label for="gasSecretInput">كلمة سر الحماية (اختياري - لمزيد من الأمان)</label>
+        <input type="password" id="gasSecretInput" dir="ltr" placeholder="اتركها فارغة أو اكتب نفس الكلمة الموجودة في السكريبت">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <button type="button" class="btn-cloud" id="saveGasBtn">💾 حفظ واتصال بجوجل درايف</button>
+        <button type="button" class="btn-primary" id="pushGasBtn">⬆️ رفع البيانات الحالية إلى درايف</button>
+        <button type="button" class="btn-danger" id="disconnectGasBtn" style="display:none">إلغاء الربط</button>
+      </div>
+
+      <details style="background:var(--hover);padding:12px;border-radius:8px;font-size:12px;line-height:1.7">
+        <summary style="cursor:pointer;font-weight:700;color:var(--accent)">📋 كيف تحصل على الرابط في دقيقة واحدة؟ (اضغط هنا للشرح والكود)</summary>
+        <ol style="margin:10px 18px 10px 0">
+          <li>افتح موقع <a href="https://script.google.com" target="_blank" style="color:var(--accent)">script.google.com</a> واضغط <strong>New Project (مشروع جديد)</strong>.</li>
+          <li>امسح الكود الموجود فيه والصق الكود التالي:</li>
+        </ol>
+        <div class="code-box" id="gasCodeBox"></div>
+        <button type="button" class="btn-gray btn-small" id="copyGasCodeBtn">📋 نسخ كود جوجل درايف</button>
+        <ol start="3" style="margin:10px 18px 0 0">
+          <li>اضغط <strong>Deploy (نشر)</strong> من الأعلى ثم <strong>New deployment</strong>.</li>
+          <li>اختر النوع (⚙️) <strong>Web app</strong>، واجعل <em>Execute as:</em> <strong>Me</strong>، واجعل <em>Who has access:</em> <strong>Anyone</strong>.</li>
+          <li>اضغط <strong>Deploy</strong>، ووافق على الصلاحيات (Authorize access -> Advanced -> Go to project)، ثم انسخ رابط <strong>Web app URL</strong> والصقه في الخانة بالأعلى!</li>
+        </ol>
+      </details>
+    </div>
+
+    <div id="paneApi" class="tab-pane">
+      <div class="form-note">
+        <strong>الربط الرسمي عبر Google Cloud OAuth 2.0:</strong> يتصل مباشرة بـ Google Drive API v3 لحفظ ومزامنة <code>cars-data.json</code> في حسابك.<br>
+        <small>⚠️ ملاحظة من جوجل: لتشغيل OAuth 2.0، يجب فتح البرنامج عبر متصفح مع خادم محلي (مثل <code>http://localhost:8080</code>) أو استضافة ويب.</small>
+      </div>
+      <div class="form-group">
+        <label for="gClientIdInput">معرّف العميل (Google OAuth Client ID)</label>
+        <input type="text" id="gClientIdInput" dir="ltr" placeholder="1234567890-abcdefg.apps.googleusercontent.com">
+      </div>
+      <div class="form-group">
+        <label for="gFolderIdInput">معرّف مجلد Google Drive (Folder ID - اختياري)</label>
+        <input type="text" id="gFolderIdInput" dir="ltr" placeholder="اتركه فارغاً لإنشاء مجلد Cars-CRM تلقائياً في درايف">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button type="button" class="btn-gdrive" id="connectGapiBtn">🔑 تسجيل الدخول والربط مع Google Drive</button>
+        <button type="button" class="btn-danger" id="disconnectGapiBtn" style="display:none">تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="modal-footer">
+      <button type="button" class="btn-danger" id="confirmYes">نعم، متأكد</button>
+      <button type="button" class="btn-gray" id="confirmNo">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="gate" class="modal">
+  <div class="modal-content confirm-box">
+    <h2 id="gateTitle"></h2>
+    <p id="gateMsg"></p>
+    <div class="modal-footer stack">
+      <button type="button" class="btn-cloud" id="gateCloud">☁️ الربط المباشر مع Google Drive</button>
+      <button type="button" class="btn-primary" id="gatePrimary"></button>
+      <button type="button" class="btn-gray" id="gateSecondary"></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+const initialCars = [{"carName": "هيونداى الينترا", "plateNumber": "د ك ه 8063", "insurance": "الراجحي", "insuranceDate": "2027-01-09", "insuranceHijri": "", "registrationDate": "2028-10-21", "inspectionDate": "2027-04-26", "carValue": 35000, "yearOfManufacture": 2019, "serialNumber": 89036710, "notes": ""}, {"carName": "نيسان صني عيسوي", "plateNumber": "ا ي ح 5868", "insurance": "الراجحي", "insuranceDate": "2025-02-15", "insuranceHijri": "2025-02-15", "registrationDate": "2024-11-22", "inspectionDate": "2025-01-03", "carValue": 10000, "yearOfManufacture": 2010, "serialNumber": 171649900, "notes": ""}, {"carName": "تويوتا ياريس", "plateNumber": "ر س و 4323", "insurance": "اتحاد الخليج", "insuranceDate": "2027-09-07", "insuranceHijri": "2026-09-06", "registrationDate": "2029-07-03", "inspectionDate": "2026-12-13", "carValue": 25000, "yearOfManufacture": 2016, "serialNumber": 101619410, "notes": ""}, {"carName": "ايسوزو", "plateNumber": "ا ك م 2570", "insurance": "ليفا", "insuranceDate": "2027-06-27", "insuranceHijri": "2026-06-26", "registrationDate": "", "inspectionDate": "2026-12-17", "carValue": "", "yearOfManufacture": 2011, "serialNumber": 57760110, "notes": ""}, {"carName": "تويوتا  فان بضاعة", "plateNumber": "ا ي ن 5533", "insurance": "اسيج", "insuranceDate": "2027-08-16", "insuranceHijri": "2026-07-25", "registrationDate": "2029-09-27", "inspectionDate": "2026-12-08", "carValue": "", "yearOfManufacture": 2015, "serialNumber": 951141410, "notes": ""}, {"carName": "تويوتا رش", "plateNumber": "ب ب ب 8154", "insurance": "الراجحي", "insuranceDate": "2027-01-07", "insuranceHijri": "2026-01-09", "registrationDate": "2028-01-17", "inspectionDate": "2027-07-02", "carValue": "", "yearOfManufacture": 2019, "serialNumber": 273421710, "notes": ""}, {"carName": "nisan 1814", "plateNumber": "ر د ه 3754", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-11-14", "inspectionDate": "2026-12-03", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 215091810, "notes": ""}, {"carName": "nisan 1815", "plateNumber": "د ن ن 1815", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2029-10-12", "inspectionDate": "2026-12-14", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 464091810, "notes": ""}, {"carName": "هيونداي توسان", "plateNumber": "د ي ي 8633", "insurance": "اسيج", "insuranceDate": "2025-08-29", "insuranceHijri": "2025-08-29", "registrationDate": "2025-08-22", "inspectionDate": "", "carValue": "", "yearOfManufacture": "", "serialNumber": 879886810, "notes": ""}, {"carName": "ليكزس", "plateNumber": "د ق ن 999", "insurance": "ولاء", "insuranceDate": "2025-08-27", "insuranceHijri": "2025-08-27", "registrationDate": "2026-08-04", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": 493939910, "notes": ""}, {"carName": "نيسان باترول", "plateNumber": "د ه ر 4040", "insurance": "الراجحي", "insuranceDate": "2026-11-24", "insuranceHijri": "", "registrationDate": "2027-03-29", "inspectionDate": "2027-04-28", "carValue": "", "yearOfManufacture": 2022, "serialNumber": 485856910, "notes": ""}, {"carName": "رينو دوكر 1", "plateNumber": "ب ر ر 7979", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-11-05", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 692724710, "notes": ""}, {"carName": "رينو دوكر 2", "plateNumber": "7985 ب ر ر", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-09-28", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 504724710, "notes": ""}, {"carName": "رينو دوكر 3", "plateNumber": "ب ر ر 7944", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2027-07-02", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 351424710, "notes": ""}, {"carName": "ماهيندرا", "plateNumber": "ب ط د 4793", "insurance": "المتحدة للتامين التعاوني", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-09-14", "inspectionDate": "2026-09-11", "carValue": 50000, "yearOfManufacture": 2021, "serialNumber": 62742020, "notes": ""}, {"carName": "فورد رابتور", "plateNumber": "س س د 999", "insurance": "ولاء", "insuranceDate": "2027-01-22", "insuranceHijri": "", "registrationDate": "2027-12-28", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2018, "serialNumber": 937221020, "notes": ""}, {"carName": "رانج روفر", "plateNumber": "د ق ن 999", "insurance": "ميدغلف", "insuranceDate": "2026-09-07", "insuranceHijri": "", "registrationDate": "2028-08-12", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": "", "notes": ""}];
+const LOCAL_KEY = 'cars_crm_local_v3';
+const AUTH_KEY = 'cars_crm_auth_pin_v1';
+const DATA_FILE = 'cars-data.json';
+const $ = id => document.getElementById(id);
+const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶translate(d)');
+const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const FIELDS = ['carName','plateNumber','insurance','insuranceDate','insuranceHijri','registrationDate','inspectionDate','yearOfManufacture','carValue','serialNumber','notes'];
+const DATE_FIELDS = ['insuranceDate','insuranceHijri','registrationDate','inspectionDate'];
+
+function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
+function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
+
+/* ---------- إدارة الرقم السري ونظام الحماية ---------- */
+let authConfig = { pin: '', question: '', answer: '' };
+
+function loadAuthConfig(){
+  try {
+    const data = localStorage.getItem(AUTH_KEY);
+    if(data) authConfig = JSON.parse(data);
+  } catch(e){}
+}
+
+function saveAuthConfig(){
+  try {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(authConfig));
+  } catch(e){}
+}
+
+function checkAuthPin(pin){
+  return authConfig.pin && authConfig.pin === latin(pin).trim();
+}
+
+function showPinModal(mode){
+  const modal = $('pinModal');
+  modal.classList.add('active');
+  
+  $('viewLoginPin').style.display = 'none';
+  $('viewSetupPin').style.display = 'none';
+  $('viewResetPin').style.display = 'none';
+
+  if(mode === 'login'){
+    $('pinTitle').textContent = '🔒 الدخول إلى النظام';
+    $('pinSubMsg').textContent = 'يرجى إدخال الرقم السري للمتابعة';
+    $('viewLoginPin').style.display = 'block';
+    $('inputLoginPin').value = '';
+    setTimeout(() => $('inputLoginPin').focus(), 100);
+  } else if(mode === 'setup_first') {
+    $('pinTitle').textContent = '🔑 إنشاء رقم سري لأول مرة';
+    $('pinSubMsg').textContent = 'قم بتعيين رقم سري وسؤال أمان لحماية بياناتك';
+    $('viewSetupPin').style.display = 'block';
+    $('groupOldPin').style.display = 'none';
+    $('btnCancelPinSetup').style.display = 'none';
+    $('inputNewPin').value = '';
+    $('inputConfirmPin').value = '';
+    $('inputSecurityAnswer').value = '';
+  } else if(mode === 'change') {
+    $('pinTitle').textContent = '🔐 تغيير الرقم السري';
+    $('pinSubMsg').textContent = 'قم بتحديث الرقم السري وسؤال الأمان الخاص بك';
+    $('viewSetupPin').style.display = 'block';
+    $('groupOldPin').style.display = 'block';
+    $('btnCancelPinSetup').style.display = 'inline-block';
+    $('inputOldPin').value = '';
+    $('inputNewPin').value = '';
+    $('inputConfirmPin').value = '';
+    $('inputSecurityAnswer').value = authConfig.answer || '';
+    if(authConfig.question) $('selectSecurityQuestion').value = authConfig.question;
+  } else if(mode === 'reset') {
+    $('pinTitle').textContent = '🧩 استعادة الرقم السري';
+    $('pinSubMsg').textContent = 'أجب عن سؤال الأمان لإعادة ضبط الرقم السري';
+    $('viewResetPin').style.display = 'block';
+    $('lblSecurityQuestion').textContent = authConfig.question || 'ما هو سؤال الأمان الخاص بك؟';
+    $('inputResetAnswer').value = '';
+  }
+}
+
+function closePinModal(){
+  $('pinModal').classList.remove('active');
+}
+
+// الأحداث والتفاعل الخاص بالرقم السري
+$('btnLoginPin').onclick = () => {
+  const pin = $('inputLoginPin').value;
+  if(checkAuthPin(pin)){
+    closePinModal();
+    toast('✅ تم تسجيل الدخول بنجاح');
+    initAppCore();
+  } else {
+    toast('❌ الرقم السري غير صحيح');
+    $('inputLoginPin').value = '';
+    $('inputLoginPin').focus();
+  }
+};
+
+$('inputLoginPin').addEventListener('keypress', e => { if(e.key === 'Enter') $('btnLoginPin').click(); });
+
+$('btnForgotPin').onclick = () => {
+  if(!authConfig.question || !authConfig.answer){
+    toast('⚠️ لم يتم ضبط سؤال الأمان مسبقاً');
+    return;
+  }
+  showPinModal('reset');
+};
+
+$('btnBackToLogin').onclick = () => showPinModal('login');
+
+$('btnVerifyReset').onclick = () => {
+  const ans = latin($('inputResetAnswer').value).trim().toLowerCase();
+  const actual = latin(authConfig.answer).trim().toLowerCase();
+  if(ans && ans === actual){
+    toast('✅ الإجابة صحيحة، يرجى تعيين رقم سري جديد');
+    showPinModal('setup_first');
+  } else {
+    toast('❌ إجابة سؤال الأمان غير صحيحة');
+  }
+};
+
+$('btnSavePinSetup').onclick = () => {
+  const isChanging = (authConfig.pin && $('groupOldPin').style.display !== 'none');
+  
+  if(isChanging){
+    const oldPin = latin($('inputOldPin').value).trim();
+    if(!checkAuthPin(oldPin)){
+      toast('❌ الرقم السري الحالي غير صحيح');
+      return;
+    }
+  }
+
+  const newPin = latin($('inputNewPin').value).trim();
+  const confirmPin = latin($('inputConfirmPin').value).trim();
+  const question = $('selectSecurityQuestion').value;
+  const answer = latin($('inputSecurityAnswer').value).trim();
+
+  if(!newPin || newPin.length < 4){
+    toast('يرجى كتابة رقم سري مكون من 4 أرقام/رموز على الأقل');
+    return;
+  }
+  if(newPin !== confirmPin){
+    toast('❌ الرقم السري الجديد وتأكيده غير متطابقين');
+    return;
+  }
+  if(!answer){
+    toast('يرجى إدخال إجابة لسؤال الأمان');
+    return;
+  }
+
+  authConfig = { pin: newPin, question, answer };
+  saveAuthConfig();
+  closePinModal();
+  toast('🎉 تم حفظ الرقم السري وسؤال الأمان بنجاح!');
+  initAppCore();
+};
+
+$('btnCancelPinSetup').onclick = closePinModal;
+$('changePinBtn').onclick = () => showPinModal('change');
+
+
+/* ---------- التواريخ: ميلادي أساسي وهجري ثانوي ---------- */
+const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
+function isoToMs(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null; }
+function msToIso(ms){ return new Date(ms).toISOString().slice(0, 10); }
+function hijriParts(ms){
+  if(!HF) return null;
+  const p = HF.formatToParts(new Date(ms));
+  const g = t => { const x = p.find(q => q.type === t); return x ? parseInt(x.value.replace(/\D/g, ''), 10) : NaN; };
+  return {y:g('year'), m:g('month'), d:g('day')};
+}
+function hijriStr(iso, sep = '/'){
+  const ms = isoToMs(iso); if(ms === null) return '';
+  const h = hijriParts(ms); return h ? h.y + sep + pad(h.m) + sep + pad(h.d) : '';
+}
+function fromHijri(y, m, d){
+  if(!HF || m < 1 || m > 12 || d < 1 || d > 30) return null;
+  const approx = Date.UTC(622, 6, 16) + ((y-1)*354.3671 + (m-1)*29.5306 + (d-1)) * 86400000;
+  for(let k = 0; k <= 60; k++){
+    for(const s of (k ? [k, -k] : [0])){
+      const ms = approx + s*86400000; const h = hijriParts(ms);
+      if(h && h.y === y && h.m === m && h.d === d) return msToIso(ms);
+    }
+  }
+  return null;
+}
+function normDate(s){
+  s = latin(s).trim().replace(/[\/.]/g, '-'); if(!s) return '';
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s); if(!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  if(y >= 1300 && y <= 1600) return fromHijri(y, mo, d);
+  const ms = Date.UTC(y, mo-1, d), dt = new Date(ms);
+  if(dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo-1 || dt.getUTCDate() !== d) return null;
+  return msToIso(ms);
+}
+function daysUntil(s){
+  const ms = isoToMs(latin(s)); if(ms === null) return null;
+  const t = new Date(); return Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+}
+function level(d){ if(d === null) return 'none'; if(d < 0) return 'danger'; if(d <= 30) return 'warning'; return 'ok'; }
+function daysText(d){
+  if(d === null) return '';
+  if(d < 0) return 'منتهي منذ ' + Math.abs(d) + ' يوم';
+  if(d === 0) return 'ينتهي اليوم';
+  return 'متبقي ' + d + ' يوم';
+}
+function insEff(c){ return c.insuranceDate ? {iso:c.insuranceDate, cal:'g'} : {iso:c.insuranceHijri, cal:'g'}; }
+function worst(car){
+  const ls = [insEff(car).iso, car.registrationDate, car.inspectionDate].map(x => level(daysUntil(x)));
+  if(ls.includes('danger')) return 'danger';
+  if(ls.includes('warning')) return 'warning';
+  if(ls.includes('ok')) return 'ok';
+  return 'none';
+}
+let tableCalMode = 'g';
+function dateCell(iso){
+  const d = daysUntil(iso);
+  if(d === null) return '<span class="sub">—</span>';
+  const h = hijriStr(iso, '-');
+  const first = tableCalMode === 'g' ? (iso + ' م') : (h ? h + ' هـ' : iso + ' م');
+  const second = tableCalMode === 'g' ? (h ? h + ' هـ' : '') : (iso + ' م');
+  return '<div class="date-line">' + esc(first) + '</div>' + (second ? '<div class="sub">' + esc(second) + '</div>' : '') +
+         '<span class="days lvl-' + level(d) + '">' + daysText(d) + '</span>';
+}
+function insCell(c){
+  const e = insEff(c);
+  if(daysUntil(e.iso) === null) return '<span class="sub">—</span>';
+  return dateCell(e.iso);
+}
+function fmtNum(v){ const n = Number(latin(v)); return (v === '' || v == null || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
+
+/* ---------- البيانات ---------- */
+function parseCars(text){
+  let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)'); }
+  const arr = Array.isArray(d) ? d : (d && d.cars);
+  if(!Array.isArray(arr) || !arr.every(c => c && typeof c === 'object' && 'carName' in c)) throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)');
+  return arr.map(c => {
+    const o = {};
+    FIELDS.forEach(k => {
+      if(DATE_FIELDS.includes(k)){ const n = normDate(c[k]); o[k] = n === null ? '' : n; }
+      else o[k] = c[k] == null ? '' : latin(c[k]);
+    });
+    return o;
+  });
+}
+function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
+function makePayload(){ return {app:'cars-crm', version:3, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
+function loadLocal(){
+  try{ const s = localStorage.getItem(LOCAL_KEY); if(s) return parseCars(s); }catch(e){}
+  return parseCars(JSON.stringify(initialCars));
+}
+function cacheLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(makePayload())); }catch(e){} }
+let cars = withIds(loadLocal(), 'l');
+let editingId = null;
+
+/* ---------- التخزين في مجلد ---------- */
+const FSA = typeof window.showDirectoryPicker === 'function';
+let dataDir = null, fileStamp = 0, folderState = 'none', lastSaveAt = null, backupFailed = false;
+let saveTimer = null, saving = Promise.resolve(), pendingHandle = null, folderName = '';
+
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open('cars-crm-db', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbGet(k){ const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+async function idbSet(k, v){ const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+
+async function resolveDataDir(root){
+  try{ await root.getFileHandle(DATA_FILE); return root; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  return root.getDirectoryHandle('data', {create:true});
+}
+async function connect(root){
+  try{
+    folderName = root.name;
+    dataDir = await resolveDataDir(root);
+    let fh = null;
+    try{ fh = await dataDir.getFileHandle(DATA_FILE); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+    if(fh){
+      const f = await fh.getFile();
+      cars = withIds(parseCars(await f.text()), 'f');
+      fileStamp = f.lastModified;
+      folderState = 'ready';
+    }else{
+      folderState = 'ready';
+      await writeFolder();
+    }
+    cacheLocal(); hideGate(); refresh(); renderNote();
+    toast('تم الاتصال بالمجلد: ' + folderName);
+  }catch(e){
+    dataDir = null; folderState = 'error';
+    showGate('error', e && e.message ? e.message : String(e));
+  }
+}
+async function pickFolder(){
+  if(!FSA){ toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); return; }
+  try{
+    const h = await window.showDirectoryPicker({id:'cars-crm', mode:'readwrite'});
+    try{ await idbSet('dir', h); }catch(e){}
+    await connect(h);
+  }catch(e){ if(!(e && e.name === 'AbortError')) toast('تعذّر فتح المجلد: ' + (e && e.message ? e.message : e)); }
+}
+async function reconnect(){
+  try{
+    const p = await pendingHandle.requestPermission({mode:'readwrite'});
+    if(p === 'granted') await connect(pendingHandle); else toast('لم يتم السماح بالوصول للمجلد');
+  }catch(e){ toast('تعذّر الاتصال: ' + (e && e.message ? e.message : e)); }
+}
+function useLocal(){ folderState = 'local'; hideGate(); renderNote(); }
+
+async function dailyBackup(){
+  const name = 'cars-' + todayLocal() + '.json';
+  const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
+  try{ await bdir.getFileHandle(name); return; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  let text = null;
+  try{ text = await (await (await dataDir.getFileHandle(DATA_FILE)).getFile()).text(); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  if(!text) return;
+  const bf = await bdir.getFileHandle(name, {create:true});
+  const w = await bf.createWritable(); await w.write(text); await w.close();
+  const names = [];
+  for await (const [n, h] of bdir.entries()){ if(h.kind === 'file' && /^cars-\d{4}-\d{2}-\d{2}\.json$/.test(n)) names.push(n); }
+  names.sort();
+  while(names.length > 30){ await bdir.removeEntry(names.shift()); }
+}
+async function manualBackup(label){
+  if(!dataDir) return false;
+  try{
+    const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
+    const bf = await bdir.getFileHandle('cars-' + label + '-' + nowStamp() + '.json', {create:true});
+    const w = await bf.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
+    return true;
+  }catch(e){ return false; }
+}
+async function writeFolder(){
+  if(!dataDir) return;
+  try{
+    try{ await dailyBackup(); backupFailed = false; }catch(e){ backupFailed = true; console.warn(e); }
+    const fh = await dataDir.getFileHandle(DATA_FILE, {create:true});
+    const w = await fh.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
+    fileStamp = (await fh.getFile()).lastModified; lastSaveAt = new Date(); folderState = 'ready'; renderNote();
+  }catch(e){
+    folderState = 'error'; renderNote(); toast('تعذّر الحفظ في المجلد: ' + (e && e.message ? e.message : e));
+  }
+}
+
+/* ---------- الربط المباشر مع Google Drive (Apps Script & REST API v3) ---------- */
+const GAS_CONFIG_KEY = 'cars_crm_gas_config_v1';
+const GAPI_CONFIG_KEY = 'cars_crm_gapi_config_v1';
+
+const GAS_SCRIPT_CODE = `// كود الربط المباشر لنظام إدارة السيارات (Cars CRM) مع Google Drive
+const FOLDER_NAME = 'Cars-CRM-Data';
+const FILE_NAME = 'cars-data.json';
+const SECRET_KEY = '';
+
+function getOrCreateFolder(name, parent) {
+  const root = parent || DriveApp.getRootFolder();
+  const iter = root.getFoldersByName(name);
+  return iter.hasNext() ? iter.next() : root.createFolder(name);
+}
+
+function doGet(e) {
+  try {
+    const p = (e && e.parameter) || {};
+    if (SECRET_KEY && p.secret !== SECRET_KEY) {
+      return jsonOut({status: 'error', message: 'كلمة السر غير صحيحة'});
+    }
+    const folder = getOrCreateFolder(FOLDER_NAME);
+    const files = folder.getFilesByName(FILE_NAME);
+    if (!files.hasNext()) {
+      return jsonOut({status: 'empty', message: 'لا يوجد ملف بيانات بعد في جوجل درايف'});
+    }
+    const file = files.next();
+    const content = file.getBlob().getDataAsString('UTF-8');
+    return jsonOut({
+      status: 'ok',
+      updatedAt: file.getLastUpdated().getTime(),
+      data: JSON.parse(content)
+    });
+  } catch (err) {
+    return jsonOut({status: 'error', message: err.toString()});
+  }
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    if (SECRET_KEY && body.secret !== SECRET_KEY) {
+      return jsonOut({status: 'error', message: 'كلمة السر غير صحيحة'});
+    }
+    const payloadStr = JSON.stringify(body.payload, null, 2);
+    const folder = getOrCreateFolder(FOLDER_NAME);
+    
+    const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    const bFolder = getOrCreateFolder('backups', folder);
+    const bName = 'cars-' + today + '.json';
+    if (!bFolder.getFilesByName(bName).hasNext()) {
+      const existing = folder.getFilesByName(FILE_NAME);
+      if (existing.hasNext()) {
+        bFolder.createFile(bName, existing.next().getBlob().getDataAsString('UTF-8'), MimeType.PLAIN_TEXT);
+      }
+    }
+    if (body.backupLabel) {
+      const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd_HH-mm');
+      bFolder.createFile('cars-' + body.backupLabel + '-' + stamp + '.json', payloadStr, MimeType.PLAIN_TEXT);
+    }
+
+    const files = folder.getFilesByName(FILE_NAME);
+    let file;
+    if (files.hasNext()) {
+      file = files.next();
+      file.setContent(payloadStr);
+    } else {
+      file = folder.createFile(FILE_NAME, payloadStr, MimeType.PLAIN_TEXT);
+    }
+    return jsonOut({
+      status: 'ok',
+      updatedAt: file.getLastUpdated().getTime()
+    });
+  } catch (err) {
+    return jsonOut({status: 'error', message: err.toString()});
+  }
+}
+
+function jsonOut(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+let cloudMode = 'none';
+let cloudState = 'disconnected';
+let cloudErrorMsg = '';
+let gasConfig = { url: '', secret: '' };
+let gapiConfig = { clientId: '', folderId: '', accessToken: '', fileId: '' };
+let gTokenClient = null;
+let cloudStamp = 0;
+
+function loadCloudConfigs(){
+  try{ const g = JSON.parse(localStorage.getItem(GAS_CONFIG_KEY) || '{}'); if(g.url) gasConfig = g; }catch(e){}
+  try{ const a = JSON.parse(localStorage.getItem(GAPI_CONFIG_KEY) || '{}'); if(a.clientId) gapiConfig = {...gapiConfig, ...a}; }catch(e){}
+}
+function saveGasConfig(){ try{ localStorage.setItem(GAS_CONFIG_KEY, JSON.stringify(gasConfig)); }catch(e){} }
+function saveGapiConfig(){ try{ localStorage.setItem(GAPI_CONFIG_KEY, JSON.stringify({clientId:gapiConfig.clientId, folderId:gapiConfig.folderId, fileId:gapiConfig.fileId})); }catch(e){} }
+
+async function pullFromGas(silent){
+  if(!gasConfig.url) return false;
+  try{
+    cloudState = 'syncing'; renderNote();
+    const u = new URL(gasConfig.url);
+    u.searchParams.set('action', 'get');
+    u.searchParams.set('t', Date.now());
+    if(gasConfig.secret) u.searchParams.set('secret', gasConfig.secret);
+    const res = await fetch(u.toString(), { method: 'GET', redirect: 'follow' });
+    const json = await res.json();
+    if(json.status === 'error') throw new Error(json.message || 'خطأ من سكريبت جوجل درايف');
+    if(json.status === 'empty'){
+      await pushToGas();
+      return true;
+    }
+    if(json.status === 'ok' && json.data){
+      if(!silent || !cloudStamp || json.updatedAt !== cloudStamp){
+        cars = withIds(parseCars(JSON.stringify(json.data)), 'gd');
+        cloudStamp = json.updatedAt || Date.now();
+        cacheLocal(); refresh();
+        if(!silent) toast('☁️ تم جلب أحدث البيانات من Google Drive');
+      }
+      cloudMode = 'gas'; cloudState = 'ready'; lastSaveAt = new Date(); renderNote();
+      return true;
+    }
+    throw new Error('استجابة غير متوقعة من Google Drive');
+  }catch(e){
+    cloudState = 'error'; cloudErrorMsg = e && e.message ? e.message : String(e);
+    renderNote();
+    if(!silent) toast('⚠️ تعذّر الاتصال بـ Google Drive: ' + cloudErrorMsg);
+    return false;
+  }
+}
+
+async function pushToGas(backupLabel){
+  if(!gasConfig.url) return false;
+  try{
+    cloudState = 'syncing'; renderNote();
+    const bodyObj = {
+      action: 'save',
+      secret: gasConfig.secret || '',
+      backupLabel: backupLabel || '',
+      payload: makePayload()
+    };
+    const res = await fetch(gasConfig.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(bodyObj),
+      redirect: 'follow'
+    });
+    const json = await res.json();
+    if(json.status !== 'ok') throw new Error(json.message || 'تعذّر الحفظ في درايف');
+    cloudStamp = json.updatedAt || Date.now();
+    cloudMode = 'gas'; cloudState = 'ready'; lastSaveAt = new Date();
+    renderNote();
+    return true;
+  }catch(e){
+    cloudState = 'error'; cloudErrorMsg = e && e.message ? e.message : String(e);
+    renderNote();
+    toast('⚠️ تعذّر الحفظ في Google Drive: ' + cloudErrorMsg);
+    return false;
+  }
+}
+
+async function gapiFetch(url, options = {}){
+  const headers = new Headers(options.headers || {});
+  headers.set('Authorization', 'Bearer ' + gapiConfig.accessToken);
+  const res = await fetch(url, { ...options, headers });
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error('Drive API (' + res.status + '): ' + errText.slice(0, 120));
+  }
+  return res.json();
+}
+
+async function ensureGapiFileId(){
+  if(gapiConfig.fileId) return gapiConfig.fileId;
+  let q = "name = 'cars-data.json' and trashed = false";
+  if(gapiConfig.folderId) q += " and '" + gapiConfig.folderId.trim() + "' in parents";
+  const searchUrl = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name,modifiedTime)&pageSize=1';
+  const data = await gapiFetch(searchUrl);
+  if(data.files && data.files.length > 0){
+    gapiConfig.fileId = data.files[0].id;
+    saveGapiConfig();
+    return gapiConfig.fileId;
+  }
+  return null;
+}
+
+async function pullFromGapi(silent){
+  if(!gapiConfig.accessToken) return false;
+  try{
+    cloudState = 'syncing'; renderNote();
+    const fid = await ensureGapiFileId();
+    if(!fid){
+      await pushToGapi();
+      return true;
+    }
+    const res = await fetch('https://www.googleapis.com/drive/v3/files/' + fid + '?alt=media', {
+      headers: { 'Authorization': 'Bearer ' + gapiConfig.accessToken }
+    });
+    if(!res.ok) throw new Error('تعذّر قراءة الملف من Google Drive');
+    const text = await res.text();
+    cars = withIds(parseCars(text), 'ga');
+    cacheLocal(); refresh();
+    cloudMode = 'gapi'; cloudState = 'ready'; lastSaveAt = new Date(); renderNote();
+    if(!silent) toast('☁️ تم جلب البيانات من Google Drive API');
+    return true;
+  }catch(e){
+    cloudState = 'error'; cloudErrorMsg = e && e.message ? e.message : String(e);
+    renderNote();
+    if(!silent) toast('⚠️ خطأ Google Drive API: ' + cloudErrorMsg);
+    return false;
+  }
+}
+
+async function pushToGapi(){
+  if(!gapiConfig.accessToken) return false;
+  try{
+    cloudState = 'syncing'; renderNote();
+    let fid = await ensureGapiFileId();
+    const content = JSON.stringify(makePayload(), null, 2);
+    if(!fid){
+      const meta = { name: DATA_FILE, mimeType: 'application/json' };
+      if(gapiConfig.folderId) meta.parents = [gapiConfig.folderId.trim()];
+      const boundary = '-------cars_crm_boundary_' + Date.now();
+      const body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' +
+                   JSON.stringify(meta) + '\r\n--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' +
+                   content + '\r\n--' + boundary + '--';
+      const created = await gapiFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+        body
+      });
+      gapiConfig.fileId = created.id;
+      saveGapiConfig();
+    }else{
+      await gapiFetch('https://www.googleapis.com/upload/drive/v3/files/' + fid + '?uploadType=media', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+        body: content
+      });
+    }
+    cloudMode = 'gapi'; cloudState = 'ready'; lastSaveAt = new Date(); renderNote();
+    return true;
+  }catch(e){
+    cloudState = 'error'; cloudErrorMsg = e && e.message ? e.message : String(e);
+    renderNote();
+    toast('⚠️ تعذّر رفع الملف إلى Google Drive API: ' + cloudErrorMsg);
+    return false;
+  }
+}
+
+function connectGapiOAuth(){
+  const cid = $('gClientIdInput').value.trim();
+  const fid = $('gFolderIdInput').value.trim();
+  if(!cid){ toast('يرجى إدخال Google OAuth Client ID أولاً'); $('gClientIdInput').focus(); return; }
+  if(!window.google || !window.google.accounts || !window.google.accounts.oauth2){
+    toast('تأكد من اتصالك بالإنترنت لتحميل مكتبة Google Identity'); return;
+  }
+  gapiConfig.clientId = cid; gapiConfig.folderId = fid; gapiConfig.fileId = '';
+  saveGapiConfig();
+  try{
+    gTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: cid,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: async (resp) => {
+        if(resp.error){ toast('خطأ في تسجيل الدخول: ' + resp.error); return; }
+        gapiConfig.accessToken = resp.access_token;
+        cloudMode = 'gapi';
+        hideGate(); closeCloudModal();
+        await pullFromGapi(false);
+        updateCloudUI();
+      }
+    });
+    gTokenClient.requestAccessToken({prompt: 'consent'});
+  }catch(e){
+    toast('تعذّر بدء OAuth (تأكد من فتح البرنامج عبر localhost أو خادم ويب): ' + (e.message || e));
+  }
+}
+
+async function writeCloud(){
+  if(cloudMode === 'gas') await pushToGas();
+  else if(cloudMode === 'gapi') await pushToGapi();
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    saving = saving.then(async () => {
+      if(dataDir) await writeFolder();
+      if(cloudMode !== 'none') await writeCloud();
+    }).catch(() => {});
+  }, 300);
+}
+function persist(){ cacheLocal(); if(dataDir || cloudMode !== 'none') scheduleSave(); }
+
+async function checkExternal(){
+  if(saveTimer) return;
+  if(cloudMode === 'gas' && cloudState === 'ready'){
+    await pullFromGas(true);
+  }
+  if(dataDir && folderState === 'ready'){
+    try{
+      const f = await (await dataDir.getFileHandle(DATA_FILE)).getFile();
+      if(f.lastModified !== fileStamp){
+        cars = withIds(parseCars(await f.text()), 'f'); fileStamp = f.lastModified;
+        cacheLocal(); refresh(); toast('تم تحديث البيانات من المجلد المحلي');
+      }
+    }catch(e){}
+  }
+}
+window.addEventListener('focus', checkExternal);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) checkExternal(); });
+
+function renderNote(){
+  const n = $('backupNote'); let cls = 'note-ok', msg;
+  const syncBtn = $('syncNowBtn');
+  if(syncBtn) syncBtn.style.display = (cloudMode !== 'none') ? '' : 'none';
+
+  if(cloudMode !== 'none'){
+    const modeLabel = cloudMode === 'gas' ? 'Google Drive (مباشر)' : 'Google Drive API';
+    if(cloudState === 'syncing'){
+      cls = 'note-warn'; msg = '🔄 جاري المزامنة المباشرة مع ' + modeLabel + '...';
+    }else if(cloudState === 'ready'){
+      cls = 'note-ok';
+      msg = '☁️ متصل مباشرة بـ ' + modeLabel + (lastSaveAt ? ' • آخر مزامنة ' + pad(lastSaveAt.getHours()) + ':' + pad(lastSaveAt.getMinutes()) : '') + ' • تُحفظ التعديلات والنسخ الاحتياطية تلقائياً في درايف';
+      if(folderState === 'ready') msg += ' + المجلد المحلي «' + folderName + '»';
+    }else if(cloudState === 'error'){
+      cls = 'note-warn';
+      msg = '⚠️ تعذّرت المزامنة مع Google Drive (' + (cloudErrorMsg || 'تحقق من الاتصال') + '). اضغط «☁️ ربط جوجل درايف» أو «🔄 مزامنة الآن».';
+    }
+  }else if(folderState === 'ready'){
+    msg = '✅ تُحفظ البيانات تلقائياً في المجلد المحلي «' + folderName + '»' + (lastSaveAt ? ' • آخر حفظ ' + pad(lastSaveAt.getHours()) + ':' + pad(lastSaveAt.getMinutes()) : '') + ' • نسخة احتياطية يومية داخل backups';
+    if(backupFailed){ cls = 'note-warn'; msg = '⚠️ البيانات محفوظة في المجلد لكن تعذّر إنشاء النسخة الاحتياطية اليومية.'; }
+  }else if(folderState === 'error'){
+    cls = 'note-warn'; msg = '⚠️ تعذّر الحفظ في المجلد. تأكد من الصلاحية أو اربط النظام مباشرة بـ «☁️ ربط جوجل درايف».';
+  }else{
+    cls = 'note-warn'; msg = '⚠️ التخزين داخل المتصفح فقط حالياً. اضغط «☁️ ربط جوجل درايف» للمزامنة السحابية المباشرة أو «📁 المجلد المحلي».';
+  }
+  n.className = 'note ' + cls; n.textContent = msg;
+}
+
+/* ---------- نافذة الاتصال بالمجلد أو Google Drive ---------- */
+function hideGate(){ $('gate').classList.remove('active'); }
+function openCloudModal(){
+  $('gasUrlInput').value = gasConfig.url || '';
+  $('gasSecretInput').value = gasConfig.secret || '';
+  $('gClientIdInput').value = gapiConfig.clientId || '';
+  $('gFolderIdInput').value = gapiConfig.folderId || '';
+  $('gasCodeBox').textContent = GAS_SCRIPT_CODE;
+  updateCloudUI();
+  $('cloudModal').classList.add('active');
+}
+function closeCloudModal(){ $('cloudModal').classList.remove('active'); }
+function updateCloudUI(){
+  $('disconnectGasBtn').style.display = (cloudMode === 'gas' && gasConfig.url) ? '' : 'none';
+  $('disconnectGapiBtn').style.display = (cloudMode === 'gapi' && gapiConfig.accessToken) ? '' : 'none';
+}
+
+function showGate(mode, msg){
+  $('gate').classList.add('active');
+  const T = $('gateTitle'), M = $('gateMsg'), P = $('gatePrimary'), S = $('gateSecondary'), C = $('gateCloud');
+  S.style.display = '';
+  C.style.display = '';
+  C.onclick = () => { hideGate(); openCloudModal(); };
+  if(mode === 'first'){
+    T.textContent = '☁️ إعداد حفظ ومزامنة البيانات';
+    M.textContent = 'يمكنك ربط النظام مباشرة بحسابك في Google Drive للمزامنة السحابية التلقائية من أي جهاز، أو اختيار مجلد محلي على جهازك.';
+    P.textContent = '📁 اختيار مجلد محلي'; P.onclick = pickFolder;
+    S.textContent = 'متابعة بدون ربط (تخزين المتصفح فقط)'; S.onclick = useLocal;
+  }else if(mode === 'reconnect'){
+    T.textContent = '📁 الاتصال بمجلد البيانات';
+    M.textContent = 'اضغط للسماح للمتصفح بالوصول إلى المجلد «' + folderName + '»، أو اربط النظام مباشرة مع Google Drive.';
+    P.textContent = 'فتح المجلد «' + folderName + '»'; P.onclick = reconnect;
+    S.textContent = 'اختيار مجلد آخر'; S.onclick = pickFolder;
+  }else if(mode === 'unsupported'){
+    T.textContent = '☁️ الربط مع Google Drive';
+    M.textContent = 'متصفحك الحالي لا يدعم فتح مجلد محلي مباشرة، لكن يمكنك الربط المباشر مع Google Drive لحفظ ومزامنة البيانات تلقائياً!';
+    P.textContent = 'متابعة بتخزين المتصفح المؤقت'; P.onclick = useLocal;
+    S.style.display = 'none';
+  }else{
+    T.textContent = 'تعذّر فتح مجلد البيانات';
+    M.textContent = msg || 'حدث خطأ غير متوقع.';
+    P.textContent = 'اختيار مجلد آخر'; P.onclick = pickFolder;
+    S.textContent = 'متابعة بتخزين المتصفح'; S.onclick = useLocal;
+  }
+}
+
+// البدء الأساسي عند تحميل الصفحة
+function startAuthFlow(){
+  loadAuthConfig();
+  if(!authConfig.pin){
+    showPinModal('setup_first');
+  } else {
+    showPinModal('login');
+  }
+}
+
+async function initAppCore(){
+  loadCloudConfigs();
+  refresh(); renderNote();
+
+  if(gasConfig.url){
+    cloudMode = 'gas';
+    hideGate();
+    await pullFromGas(true);
+    return;
+  }
+
+  if(!FSA){ showGate('unsupported'); return; }
+  let h = null; try{ h = await idbGet('dir'); }catch(e){}
+  if(h){
+    folderName = h.name;
+    let perm = 'prompt'; try{ perm = await h.queryPermission({mode:'readwrite'}); }catch(e){}
+    if(perm === 'granted'){ await connect(h); return; }
+    pendingHandle = h; showGate('reconnect'); return;
+  }
+  showGate('first');
+}
+
+/* ---------- العرض ---------- */
+function getFiltered(){
+  const q = latin($('searchInput').value).trim().toLowerCase();
+  const st = $('statusFilter').value;
+  return cars.filter(c => {
+    const hay = latin([c.carName, c.plateNumber, c.insurance, c.serialNumber].join(' ')).toLowerCase();
+    if(q && !hay.includes(q)) return false;
+    if(st && worst(c) !== st) return false;
+    return true;
+  });
+}
+function renderTable(){
+  const list = getFiltered(); const tb = $('tableBody');
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات. اضغط «إضافة سيارة» للبدء') + '</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(c => '<tr>' +
+    '<td><strong>' + esc(c.carName) + '</strong></td>' +
+    '<td>' + esc(c.plateNumber) + '</td>' +
+    '<td>' + esc(c.insurance || '—') + '</td>' +
+    '<td>' + insCell(c) + '</td>' +
+    '<td>' + dateCell(c.registrationDate) + '</td>' +
+    '<td>' + dateCell(c.inspectionDate) + '</td>' +
+    '<td>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td>' + fmtNum(c.carValue) + '</td>' +
+    '<td><div class="action-buttons">' +
+      '<button class="btn-primary btn-small" data-edit="' + c.id + '">تعديل</button>' +
+      '<button class="btn-danger btn-small" data-del="' + c.id + '">حذف</button>' +
+    '</div></td></tr>').join('');
+}
+function updateStats(){
+  const n = f => cars.filter(f).length;
+  $('stTotal').textContent = cars.length;
+  $('stInsExpired').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'danger');
+  $('stInsSoon').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'warning');
+  $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
+  $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+}
+function refresh(){ renderTable(); updateStats(); }
+
+/* ---------- النماذج والتبديل بين الميلادي والهجري ---------- */
+const VISIBLE_DATE_FIELDS = ['insuranceDate','registrationDate','inspectionDate'];
+let fieldCalMode = { insuranceDate: 'g', registrationDate: 'g', inspectionDate: 'g' };
+let modalAllCalMode = 'g';
+
+function updateFieldCalBtn(f){
+  const btn = $('calBtn_' + f);
+  const inp = $(f);
+  if(!btn || !inp) return;
+  const mode = fieldCalMode[f] || 'g';
+  if(mode === 'g'){
+    btn.textContent = '🔄 ميلادي (أساسي) ⇄ هجري';
+    btn.classList.remove('hijri-mode');
+    inp.placeholder = 'YYYY-MM-DD (ميلادي مثال 2027-01-09)';
+  }else{
+    btn.textContent = '🔄 هجري (أساسي) ⇄ ميلادي';
+    btn.classList.add('hijri-mode');
+    inp.placeholder = 'YYYY-MM-DD (هجري مثال 1448-08-01)';
+  }
+}
+
+function updateMasterCalBtn(){
+  const btn = $('toggleAllDatesBtn');
+  if(!btn) return;
+  if(modalAllCalMode === 'g'){
+    btn.textContent = '🔄 تبديل الكل (الآن: الميلادي أساسي ⇄ الهجري ثانوي)';
+    btn.classList.remove('hijri-mode');
+  }else{
+    btn.textContent = '🔄 تبديل الكل (الآن: الهجري أساسي ⇄ الميلادي ثانوي)';
+    btn.classList.add('hijri-mode');
+  }
+}
+
+function setFieldCalMode(f, targetMode){
+  fieldCalMode[f] = targetMode;
+  const inp = $(f);
+  const v = latin(inp.value).trim();
+  if(v){
+    const iso = normDate(v);
+    if(iso){
+      inp.value = targetMode === 'h' ? (hijriStr(iso, '-') || iso) : iso;
+    }
+  }
+  updateFieldCalBtn(f);
+  updateHint(f);
+}
+
+function toggleSingleFieldCal(f){
+  const next = (fieldCalMode[f] === 'g') ? 'h' : 'g';
+  setFieldCalMode(f, next);
+  const allSame = VISIBLE_DATE_FIELDS.every(k => fieldCalMode[k] === next);
+  if(allSame){ modalAllCalMode = next; updateMasterCalBtn(); }
+}
+
+function toggleAllModalDates(){
+  modalAllCalMode = (modalAllCalMode === 'g') ? 'h' : 'g';
+  VISIBLE_DATE_FIELDS.forEach(f => setFieldCalMode(f, modalAllCalMode));
+  updateMasterCalBtn();
+}
+
+function updateHint(f){
+  const el = $(f), h = $('h_' + f);
+  if(!el || !h) return;
+  const v = latin(el.value).trim();
+  h.className = 'hint';
+  if(!v){ h.textContent = ''; return; }
+  const n = normDate(v);
+  if(n === null){ h.textContent = 'تاريخ غير صالح'; h.className = 'hint bad'; return; }
+  const y = parseInt(v, 10);
+  if(y >= 1300 && y <= 1600){
+    h.textContent = 'المقابل الميلادي: ' + n + ' م';
+  }else{
+    const hs = hijriStr(n, '-');
+    h.textContent = hs ? 'المقابل الهجري (ثانوي): ' + hs + ' هـ' : '';
+  }
+}
+
+VISIBLE_DATE_FIELDS.forEach(f => {
+  $(f).addEventListener('input', e => {
+    const d = latin(e.target.value).replace(/\D/g, '').slice(0, 8);
+    let out = d;
+    if(d.length > 6) out = d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6);
+    else if(d.length > 4) out = d.slice(0,4) + '-' + d.slice(4);
+    e.target.value = out;
+    if(d.length >= 4){
+      const y = parseInt(d.slice(0,4), 10);
+      if(y >= 1300 && y <= 1600 && fieldCalMode[f] !== 'h'){ fieldCalMode[f] = 'h'; updateFieldCalBtn(f); }
+      else if(y >= 1900 && y <= 2200 && fieldCalMode[f] !== 'g'){ fieldCalMode[f] = 'g'; updateFieldCalBtn(f); }
+    }
+    updateHint(f);
+  });
+  $(f).addEventListener('change', e => {
+    const n = normDate(e.target.value);
+    if(n){
+      e.target.value = (fieldCalMode[f] === 'h') ? (hijriStr(n, '-') || n) : n;
+    }
+    updateHint(f);
+  });
+  const btn = $('calBtn_' + f);
+  if(btn) btn.onclick = () => toggleSingleFieldCal(f);
+});
+
+$('toggleAllDatesBtn').onclick = toggleAllModalDates;
+
+$('toggleTableCalBtn').onclick = () => {
+  tableCalMode = (tableCalMode === 'g') ? 'h' : 'g';
+  $('toggleTableCalBtn').textContent = tableCalMode === 'g' ? '📅 الأساسي: ميلادي ⇄ هجري' : '📅 الأساسي: هجري ⇄ ميلادي';
+  renderTable();
+  toast(tableCalMode === 'g' ? 'تم جعل التاريخ الميلادي هو الأساسي والهجري ثانوي' : 'تم جعل التاريخ الهجري هو الأساسي والميلادي ثانوي');
+};
+
+$('yearOfManufacture').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/\D/g, '').slice(0, 4); });
+$('carValue').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/[^\d.]/g, ''); });
+['plateNumber','serialNumber'].forEach(f => $(f).addEventListener('input', e => { e.target.value = latin(e.target.value); }));
+
+let modalLocked = false;
+function openModal(car){
+  modalLocked = true;
+  editingId = car ? car.id : null;
+  $('modalTitle').textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
+  $('carForm').reset();
+  modalAllCalMode = 'g';
+  VISIBLE_DATE_FIELDS.forEach(f => { fieldCalMode[f] = 'g'; updateFieldCalBtn(f); });
+  updateMasterCalBtn();
+  if(car){
+    FIELDS.forEach(f => { if($(f)) $(f).value = latin(car[f]); });
+    if(!car.insuranceDate && car.insuranceHijri){
+      $('insuranceDate').value = latin(car.insuranceHijri);
+    }
+  }
+  VISIBLE_DATE_FIELDS.forEach(updateHint);
+  $('carModal').classList.add('active');
+}
+function closeModal(force){
+  if(force !== true) return;
+  modalLocked = false;
+  $('carModal').classList.remove('active');
+}
+let confirmCb = null;
+function askConfirm(msg, cb){ $('confirmMsg').textContent = msg; confirmCb = cb; $('confirmModal').classList.add('active'); }
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; }
+let toastT;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4000); }
+
+$('addBtn').onclick = () => openModal(null);
+$('closeBtn').onclick = () => closeModal(true);
+$('cancelBtn').onclick = () => closeModal(true);
+$('carModal').addEventListener('mousedown', e => { if(e.target === $('carModal')){ e.stopPropagation(); e.preventDefault(); } });
+$('carModal').addEventListener('click', e => { if(e.target === $('carModal')){ e.stopPropagation(); e.preventDefault(); toast('⚠️ لا يمكن إغلاق النافذة إلا بزر «حفظ» أو «إلغاء» أو «×»'); } });
+$('confirmNo').onclick = closeConfirm;
+$('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
+$('searchInput').addEventListener('input', renderTable);
+$('statusFilter').addEventListener('change', renderTable);
+$('folderBtn').onclick = () => { if(FSA) pickFolder(); else toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); };
+
+$('carForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = {};
+  FIELDS.forEach(f => { if($(f)) data[f] = latin($(f).value).trim(); });
+  for(const f of VISIBLE_DATE_FIELDS){
+    const n = normDate(data[f]);
+    if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
+    data[f] = n;
+  }
+  data.insuranceHijri = data.insuranceDate;
+  if(editingId){
+    const i = cars.findIndex(c => c.id === editingId);
+    if(i > -1) cars[i] = {...cars[i], ...data};
+  }else{
+    cars.push({id:'c_' + Date.now().toString(36), ...data});
+  }
+  persist(); closeModal(true); refresh();
+});
+$('tableBody').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
+  if(b.dataset.del){
+    const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
+    askConfirm('هل تريد حذف «' + c.carName + '»؟', () => { cars = cars.filter(x => x.id !== c.id); persist(); refresh(); });
+  }
+});
+
+/* ---------- نسخة احتياطية واسترجاع ---------- */
+function saveBlob(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+$('backupBtn').onclick = async () => {
+  if(cloudMode === 'gas'){
+    const ok = await pushToGas('manual');
+    toast(ok ? '☁️ تم حفظ نسخة احتياطية مباشرة داخل مجلد backups في Google Drive' : 'تعذّر حفظ النسخة الاحتياطية في Google Drive');
+  }else if(dataDir){
+    const ok = await manualBackup('manual');
+    toast(ok ? 'تم حفظ نسخة احتياطية داخل مجلد backups المحلي' : 'تعذّر حفظ النسخة الاحتياطية في المجلد');
+  }else{
+    saveBlob('cars-backup-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+    toast('تم تحميل ملف النسخة الاحتياطية');
+  }
+};
+$('restoreBtn').onclick = () => $('restoreFile').click();
+$('restoreFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const clean = parseCars(await f.text());
+    if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
+    askConfirm('سيتم استبدال البيانات الحالية (' + cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
+      if(dataDir) await manualBackup('before-restore');
+      if(cloudMode === 'gas') await pushToGas('before-restore');
+      cars = withIds(clean, 'r'); persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة');
+    });
+  }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
+});
+
+/* ---------- أحداث نافذة Google Drive ---------- */
+$('cloudBtn').onclick = openCloudModal;
+$('closeCloudBtn').onclick = closeCloudModal;
+
+$('tabGasBtn').onclick = () => {
+  $('tabGasBtn').classList.add('active'); $('tabApiBtn').classList.remove('active');
+  $('paneGas').classList.add('active'); $('paneApi').classList.remove('active');
+};
+$('tabApiBtn').onclick = () => {
+  $('tabApiBtn').classList.add('active'); $('tabGasBtn').classList.remove('active');
+  $('paneApi').classList.add('active'); $('paneGas').classList.remove('active');
+};
+
+$('copyGasCodeBtn').onclick = async () => {
+  try{
+    await navigator.clipboard.writeText(GAS_SCRIPT_CODE);
+    toast('📋 تم نسخ الكود! الصقه الآن في Google Apps Script');
+  }catch(e){
+    const sel = window.getSelection(), range = document.createRange();
+    range.selectNodeContents($('gasCodeBox')); sel.removeAllRanges(); sel.addRange(range);
+    document.execCommand('copy');
+    toast('📋 تم نسخ الكود!');
+  }
+};
+
+$('saveGasBtn').onclick = async () => {
+  const url = $('gasUrlInput').value.trim();
+  const secret = $('gasSecretInput').value.trim();
+  if(!url || !url.startsWith('https://script.google.com/')){
+    toast('يرجى إدخال رابط Web App الصحيح من Google Apps Script');
+    $('gasUrlInput').focus(); return;
+  }
+  gasConfig = { url, secret };
+  saveGasConfig();
+  const btn = $('saveGasBtn'); btn.disabled = true; btn.textContent = 'جاري الاتصال...';
+  const ok = await pullFromGas(false);
+  btn.disabled = false; btn.textContent = '💾 حفظ واتصال بجوجل درايف';
+  if(ok){ updateCloudUI(); closeCloudModal(); hideGate(); }
+};
+
+$('pushGasBtn').onclick = async () => {
+  const url = $('gasUrlInput').value.trim();
+  const secret = $('gasSecretInput').value.trim();
+  if(!url || !url.startsWith('https://script.google.com/')){
+    toast('يرجى إدخال رابط Web App الصحيح أولاً');
+    $('gasUrlInput').focus(); return;
+  }
+  gasConfig = { url, secret };
+  saveGasConfig();
+  const btn = $('pushGasBtn'); btn.disabled = true; btn.textContent = 'جاري الرفع...';
+  const ok = await pushToGas('initial-upload');
+  btn.disabled = false; btn.textContent = '⬆️ رفع البيانات الحالية إلى درايف';
+  if(ok){ toast('☁️ تم رفع البيانات الحالية إلى Google Drive بنجاح!'); updateCloudUI(); closeCloudModal(); hideGate(); }
+};
+
+$('disconnectGasBtn').onclick = () => {
+  gasConfig = { url: '', secret: '' };
+  saveGasConfig();
+  if(cloudMode === 'gas'){ cloudMode = 'none'; cloudState = 'disconnected'; }
+  updateCloudUI(); renderNote();
+  toast('تم إلغاء الربط السحابي المباشر');
+};
+
+$('connectGapiBtn').onclick = connectGapiOAuth;
+$('disconnectGapiBtn').onclick = () => {
+  gapiConfig.accessToken = '';
+  if(cloudMode === 'gapi'){ cloudMode = 'none'; cloudState = 'disconnected'; }
+  updateCloudUI(); renderNote();
+  toast('تم تسجيل الخروج من Google Drive API');
+};
+
+$('syncNowBtn').onclick = async () => {
+  if(cloudMode === 'gas') await pullFromGas(false);
+  else if(cloudMode === 'gapi') await pullFromGapi(false);
+};
+
+/* ---------- تصدير PDF ---------- */
+const LV = {ok:['#d4edda','#155724'], warning:['#fff3cd','#856404'], danger:['#f8d7da','#721c24']};
+function pdfDate(iso){
+  const d = daysUntil(iso);
+  if(d === null) return '<span style="color:#999">—</span>';
+  const c = LV[level(d)], h = hijriStr(iso, '-');
+  const first = tableCalMode === 'g' ? (iso + ' م') : (h ? h + ' هـ' : iso + ' م');
+  const second = tableCalMode === 'g' ? (h ? h + ' هـ' : '') : (iso + ' م');
+  return '<div style="direction:ltr;text-align:right;font-weight:700">' + esc(first) + '</div>' +
+    (second ? '<div style="direction:ltr;text-align:right;font-size:10px;color:#777">' + esc(second) + '</div>' : '') +
+    '<span style="display:inline-block;margin-top:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' + c[0] + ';color:' + c[1] + '">' + daysText(d) + '</span>';
+}
+function pdfIns(c){
+  const e = insEff(c);
+  return pdfDate(e.iso);
+}
+function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
+  const th = 'style="background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const body = rows.map((c, i) => '<tr>' +
+    '<td ' + td + '>' + (startIdx + i + 1) + '</td>' +
+    '<td ' + td + '><strong>' + esc(c.carName) + '</strong></td>' +
+    '<td ' + td + '>' + esc(c.plateNumber) + '</td>' +
+    '<td ' + td + '>' + esc(c.insurance || '—') + '</td>' +
+    '<td ' + td + '>' + pdfIns(c) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.registrationDate) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.inspectionDate) + '</td>' +
+    '<td ' + td + '>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>').join('');
+  return '<div style="width:1123px;height:794px;background:#fff;color:#1f2937;padding:26px 30px;box-sizing:border-box;direction:rtl;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;position:relative">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
+      '<div><div style="font-size:24px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
+      '<div style="font-size:12px;color:#666;margin-top:4px">' + (filtered ? 'نتائج التصفية: ' : 'الإجمالي: ') + total + ' سيارة</div></div>' +
+      '<div style="font-size:12px;color:#666;direction:ltr">' + todayStr + ' • ' + hijriStr(todayStr, '-') + ' H</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse"><thead><tr>' +
+      '<th ' + th + '>#</th><th ' + th + '>السيارة</th><th ' + th + '>اللوحة</th><th ' + th + '>شركة التأمين</th>' +
+      '<th ' + th + '>التأمين</th><th ' + th + '>الاستمارة</th><th ' + th + '>الفحص</th>' +
+      '<th ' + th + '>سنة الصنع</th><th ' + th + '>القيمة</th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table>' +
+    '<div style="position:absolute;bottom:16px;left:30px;right:30px;display:flex;justify-content:space-between;font-size:11px;color:#888">' +
+      '<span>أخضر: ساري • أصفر: ينتهي خلال 30 يوم • أحمر: منتهي</span><span>صفحة ' + pageNo + ' من ' + pages + '</span>' +
+    '</div></div>';
+}
+async function exportPDF(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
+  if(!window.html2canvas || !window.jspdf){ toast('تعذّر تحميل مكتبة الـ PDF. تحتاج اتصال إنترنت لتصدير PDF'); return; }
+  const btn = $('pdfBtn'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = 'جاري التجهيز...';
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-99999px;top:0;';
+  document.body.appendChild(holder);
+  try{
+    const PER = 10, pages = Math.ceil(list.length / PER), todayStr = todayLocal();
+    const doc = new window.jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    for(let p = 0; p < pages; p++){
+      holder.innerHTML = pageHtml(list.slice(p*PER, (p+1)*PER), p*PER, p+1, pages, list.length, list.length !== cars.length, todayStr);
+      const canvas = await html2canvas(holder.firstChild, {scale:2, backgroundColor:'#ffffff', logging:false});
+      if(p > 0) doc.addPage();
+      doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
+    }
+    saveBlob('cars-report-' + todayStr + '.pdf', doc.output('blob'));
+    toast('تم تجهيز ملف PDF');
+  }catch(err){
+    toast('تعذّر إنشاء الـ PDF' + (err && err.message ? ': ' + err.message : ''));
+  }finally{
+    holder.remove(); btn.disabled = false; btn.textContent = old;
+  }
+}
+$('pdfBtn').onclick = exportPDF;
+
+// تشغيل نظام الحماية أولاً
+startAuthFlow();
+</script>
+</body>
+</html>
