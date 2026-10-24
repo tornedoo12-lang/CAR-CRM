@@ -6,13 +6,14 @@
 <title>نظام إدارة السيارات</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   color-scheme:light;
   --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
   --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
   --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
-  --gh:#24292f;--gh-hover:#1b1f23;
+  --gh:#24292f;--gh-hover:#1b1f23;--excel:#1d6f42;--excel-hover:#155732;
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
 @media (prefers-color-scheme:dark){
@@ -20,7 +21,7 @@
     color-scheme:dark;
     --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
     --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
-    --gh:#2f363d;--gh-hover:#444d56;
+    --gh:#2f363d;--gh-hover:#444d56;--excel:#21884f;--excel-hover:#196c3e;
     --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
   }
 }
@@ -35,6 +36,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 button:disabled{opacity:.6;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){background:var(--accent-hover)}
+.btn-excel{background:var(--excel);color:#fff}
+.btn-excel:hover:not(:disabled){background:var(--excel-hover)}
 .btn-danger{background:var(--danger);color:#fff}
 .btn-danger:hover:not(:disabled){background:var(--danger-hover)}
 .btn-gray{background:var(--gray);color:#fff}
@@ -108,6 +111,7 @@ textarea{resize:vertical;min-height:70px}
     <h1>🚗 نظام إدارة السيارات</h1>
     <div class="header-controls">
       <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
+      <button class="btn-excel" id="excelBtn">📊 تصدير Excel</button>
       <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
       <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
       <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
@@ -848,6 +852,70 @@ $('restoreFile').addEventListener('change', async e => {
     });
   }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
 });
+
+/* ---------- تصدير Excel ---------- */
+function exportExcel(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
+  const todayStr = todayLocal();
+  const rows = list.map((c, i) => {
+    const dIns = daysUntil(c.insuranceDate);
+    const dReg = daysUntil(c.registrationDate);
+    const dInsp = daysUntil(c.inspectionDate);
+    const valNum = Number(latin(c.carValue));
+    return {
+      '#': i + 1,
+      'نوع السيارة': c.carName || '',
+      'الحالة': c.active ? 'نشطة' : 'غير نشطة',
+      'رقم اللوحة': c.plateNumber || '',
+      'شركة التأمين': c.insurance || '',
+      'انتهاء التأمين (ميلادي)': c.insuranceDate || '',
+      'انتهاء التأمين (هجري)': hijriStr(c.insuranceDate, '-') || '',
+      'حالة التأمين': daysText(dIns) || '—',
+      'انتهاء الاستمارة (ميلادي)': c.registrationDate || '',
+      'انتهاء الاستمارة (هجري)': hijriStr(c.registrationDate, '-') || '',
+      'حالة الاستمارة': daysText(dReg) || '—',
+      'انتهاء الفحص (ميلادي)': c.inspectionDate || '',
+      'انتهاء الفحص (هجري)': hijriStr(c.inspectionDate, '-') || '',
+      'حالة الفحص': daysText(dInsp) || '—',
+      'سنة الصنع': c.yearOfManufacture || '',
+      'قيمة السيارة': (c.carValue !== '' && !isNaN(valNum)) ? valNum : (c.carValue || ''),
+      'الرقم التسلسلي': c.serialNumber || '',
+      'ملاحظات': c.notes || ''
+    };
+  });
+
+  if(window.XLSX){
+    try{
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        {wch:5}, {wch:22}, {wch:11}, {wch:15}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:11}, {wch:14}, {wch:16}, {wch:28}
+      ];
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      XLSX.utils.book_append_sheet(wb, ws, 'السيارات');
+      XLSX.writeFile(wb, 'cars-report-' + todayStr + '.xlsx');
+      toast('📊 تم تحميل ملف الإكسيل (.xlsx) بنجاح');
+      return;
+    }catch(e){}
+  }
+
+  /* بديل تلقائي CSV متوافق مع Excel باللغة العربية في حال عدم توفر الإنترنت */
+  const headers = Object.keys(rows[0]);
+  const csvCell = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csvLines = [
+    headers.map(csvCell).join(','),
+    ...rows.map(r => headers.map(k => csvCell(r[k])).join(','))
+  ];
+  const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+  saveBlob('cars-report-' + todayStr + '.csv', blob);
+  toast('📊 تم تحميل ملف الإكسيل (.csv) بنجاح');
+}
+$('excelBtn').onclick = exportExcel;
 
 /* ---------- تصدير PDF ---------- */
 const LV = {ok:['#d4edda','#155724'], warning:['#fff3cd','#856404'], danger:['#f8d7da','#721c24']};
