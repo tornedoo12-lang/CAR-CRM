@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>نظام إدارة السيارات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   color-scheme:light;
@@ -12,6 +14,14 @@
   --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
+@media (prefers-color-scheme:dark){
+  :root{
+    color-scheme:dark;
+    --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
+    --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
+    --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
+  }
+}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;min-height:100vh;padding:20px;color:var(--text)}
 .container{max-width:1350px;margin:0 auto}
@@ -19,13 +29,18 @@ header{background:var(--card);padding:20px;border-radius:10px;margin-bottom:16px
 h1{font-size:26px;flex:1;min-width:200px}
 .header-controls{display:flex;gap:8px;flex-wrap:wrap}
 button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.6;cursor:wait}
 .btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:hover:not(:disabled){background:var(--accent-hover)}
 .btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:var(--danger-hover)}
 .btn-gray{background:var(--gray);color:#fff}
 .btn-small{padding:6px 12px;font-size:12px}
 .btn-github{background:#24292e;color:#fff}
+.btn-github:hover:not(:disabled){background:#000}
 .btn-auth{background:#8e44ad;color:#fff}
+.btn-auth:hover:not(:disabled){background:#732d91}
 .note{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600}
 .note-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .note-warn{background:var(--warn-bg);color:var(--warn-fg)}
@@ -35,23 +50,53 @@ input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-ra
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:16px}
 .stat-card{background:var(--card);padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .stat-number{font-size:28px;font-weight:700;color:var(--accent)}
+.stat-number.bad{color:var(--danger)}
+.stat-number.warn{color:#f39c12}
 .stat-label{color:var(--muted);font-size:12px;margin-top:5px}
 .table-container{background:var(--card);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:1100px}
 th{background:var(--thead);color:var(--thead-text);padding:13px 12px;text-align:right;font-weight:600;font-size:13px;white-space:nowrap}
+th small{font-weight:400;opacity:.75;font-size:11px}
 td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:hover td{background:var(--hover)}
+.date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
+.sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
+.days{display:inline-block;margin-top:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
+.lvl-danger{background:var(--bad-bg);color:var(--bad-fg)}
+.action-buttons{display:flex;gap:6px}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
 .modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 .modal.active{display:flex}
-#pinModal{z-index:3000;background:rgba(15,18,30,.95)}
-.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:480px}
+#pinModal{z-index:3000;background:rgba(15,18,30,.92)}
+.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-header h2{font-size:20px}
+.close-btn{background:none;color:var(--muted);font-size:28px;padding:0 6px}
 .form-group{margin-bottom:13px}
 .form-group label{display:block;margin-bottom:5px;font-weight:600;font-size:13px}
-.form-group input,.form-group select{width:100%}
+.form-group input,.form-group textarea,.form-group select{width:100%}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;min-height:14px}
+.hint.bad{color:var(--danger)}
+.form-note{font-size:12px;color:var(--muted);background:var(--hover);padding:8px 12px;border-radius:6px;margin-bottom:13px;line-height:1.7}
+textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-footer{display:flex;gap:10px;margin-top:18px}
-.confirm-box{text-align:center}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:4000;opacity:0;pointer-events:none;transition:opacity .25s}
+.confirm-box{max-width:420px;text-align:center}
+.confirm-box h2{font-size:20px;margin-bottom:8px}
+.confirm-box p{margin:6px 0 20px;line-height:1.8}
+.confirm-box .modal-footer{justify-content:center}
+.stack{flex-direction:column;align-items:stretch}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:4000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center}
 #toast.show{opacity:1}
+@media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
+.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
+.label-row label{margin-bottom:0 !important}
+.cal-toggle{padding:3px 9px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
+.cal-toggle:hover{background:var(--accent);color:#fff}
+.cal-toggle.hijri-mode{background:#8e44ad;color:#fff;border-color:#8e44ad}
+.global-cal-bar{display:flex;justify-content:space-between;align-items:center;background:var(--hover);padding:9px 12px;border-radius:8px;margin-bottom:13px;border:1px solid var(--border);flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body>
@@ -60,8 +105,14 @@ tr:hover td{background:var(--hover)}
     <h1>🚗 نظام إدارة السيارات</h1>
     <div class="header-controls">
       <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
+      <button class="btn-gray" id="toggleTableCalBtn">📅 الأساسي: ميلادي ⇄ هجري</button>
       <button class="btn-auth" id="changePinBtn">🔐 تغيير الرقم السري</button>
       <button class="btn-github" id="githubConfigBtn">🐙 إعداد ربط GitHub</button>
+      <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
+      <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
+      <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
+      <button class="btn-primary" id="syncGithubBtn" style="display:none">🔄 مزامنة GitHub</button>
+      <input type="file" id="restoreFile" accept=".json,application/json" hidden>
     </div>
   </header>
 
@@ -69,13 +120,31 @@ tr:hover td{background:var(--hover)}
 
   <div class="stats">
     <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">إجمالي السيارات</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInspExpired">0</div><div class="stat-label">فحص منتهي</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين...">
+    <select id="statusFilter">
+      <option value="">جميع الحالات</option>
+      <option value="ok">سارية</option>
+      <option value="warning">قريبة الانتهاء (30 يوم)</option>
+      <option value="danger">فيها منتهي</option>
+    </select>
   </div>
 
   <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>السيارة</th><th>رقم اللوحة</th><th>شركة التأمين</th><th>الإجراءات</th>
+          <th>السيارة</th><th>رقم اللوحة</th><th>شركة التأمين</th>
+          <th>التأمين <small>(ميلادي / هجري)</small></th>
+          <th>الاستمارة <small>(ميلادي / هجري)</small></th>
+          <th>الفحص <small>(ميلادي / هجري)</small></th>
+          <th>سنة الصنع</th><th>القيمة</th><th>الإجراءات</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -86,43 +155,150 @@ tr:hover td{background:var(--hover)}
 <!-- نافذة إعدادات GitHub -->
 <div id="githubModal" class="modal">
   <div class="modal-content" style="max-width:500px">
-    <h2>🐙 ربط الحفظ المباشر مع GitHub</h2>
-    <div class="form-group"><label>اسم المستخدم (Owner)</label><input type="text" id="ghOwner" dir="ltr"></div>
-    <div class="form-group"><label>اسم المستودع (Repo)</label><input type="text" id="ghRepo" dir="ltr"></div>
-    <div class="form-group"><label>رمز الوصول (Token)</label><input type="password" id="ghToken" dir="ltr"></div>
+    <div class="modal-header">
+      <h2>🐙 ربط الحفظ المباشر مع GitHub</h2>
+      <button class="close-btn" type="button" id="closeGithubModal">&times;</button>
+    </div>
+    <div class="form-note">
+      قم بإدخال بيانات المستودع الخاص بك على جيت هب ليقوم النظام برفع وحفظ ملف البيانات <code>cars-data.json</code> تلقائياً عند كل تعديل.
+    </div>
+    <div class="form-group">
+      <label>اسم المالك / اسم المستخدم (Owner)</label>
+      <input type="text" id="ghOwner" placeholder="مثال: username" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label>اسم المستودع (Repository Name)</label>
+      <input type="text" id="ghRepo" placeholder="مثال: CAR-CRM" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label>مسار الملف داخل المستودع (Path)</label>
+      <input type="text" id="ghPath" value="cars-data.json" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label>رمز الوصول الشخصي (Personal Access Token - PAT)</label>
+      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" dir="ltr">
+    </div>
     <div class="modal-footer">
-      <button type="button" class="btn-primary" id="saveGithubConfig">حفظ الاتصال وجلب البيانات</button>
-      <button type="button" class="btn-danger" id="closeGithubModal">إغلاق</button>
+      <button type="button" class="btn-primary" id="saveGithubConfig">حفظ وتفعيل الاتصال</button>
+      <button type="button" class="btn-danger" id="disconnectGithub" style="display:none">إلغاء الربط</button>
     </div>
   </div>
 </div>
 
-<!-- نافذة الأمان والرمز السري -->
+<!-- نافذة الأمان والرقم السري -->
 <div id="pinModal" class="modal active">
   <div class="modal-content confirm-box">
-    <h2 id="pinTitle">🔒 تسجيل الدخول</h2>
-    <p id="pinSubMsg" style="margin-bottom:15px;color:var(--muted)">أدخل الرقم السري للمتابعة</p>
-    
+    <h2 id="pinTitle">🔒 الدخول إلى النظام</h2>
+    <p id="pinSubMsg">يرجى إدخال الرقم السري للمتابعة</p>
     <div id="viewLoginPin">
       <div class="form-group">
-        <input type="password" id="inputLoginPin" placeholder="أدخل الرقم السري" dir="ltr" style="text-align:center;font-size:20px;letter-spacing:5px;" autocomplete="off">
+        <input type="password" id="inputLoginPin" placeholder="أدخل الرقم السري" dir="ltr" style="text-align:center;font-size:18px;letter-spacing:4px;" autocomplete="off">
       </div>
-      <div class="modal-footer" style="flex-direction:column;">
-        <button type="button" class="btn-primary" id="btnLoginPin" style="width:100%;">دخول</button>
-        <button type="button" class="btn-gray btn-small" id="btnForgotPin" style="margin-top:8px;background:none;color:var(--accent);">نسيت الرقم السري؟</button>
+      <div class="modal-footer stack">
+        <button type="button" class="btn-primary" id="btnLoginPin">دخول</button>
+        <button type="button" class="btn-gray btn-small" id="btnForgotPin" style="margin-top:6px;">نسيت الرقم السري؟</button>
       </div>
     </div>
-
     <div id="viewSetupPin" style="display:none;text-align:right;">
-      <div class="form-group"><label>الرقم السري الجديد *</label><input type="password" id="inputNewPin" dir="ltr" autocomplete="off"></div>
-      <div class="form-group"><label>سؤال الأمان *</label><select id="selectSecurityQuestion"><option value="ما هو اسم أول مدرسة درست فيها؟">ما هو اسم أول مدرسة درست فيها؟</option></select></div>
-      <div class="form-group"><label>إجابة سؤال الأمان *</label><input type="text" id="inputSecurityAnswer" autocomplete="off"></div>
-      <div class="modal-footer"><button type="button" class="btn-primary" id="btnSavePinSetup" style="width:100%;">حفظ وتعيين</button></div>
+      <div class="form-group" id="groupOldPin" style="display:none;">
+        <label>الرقم السري الحالي *</label>
+        <input type="password" id="inputOldPin" placeholder="****" dir="ltr" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>الرقم السري الجديد *</label>
+        <input type="password" id="inputNewPin" placeholder="****" dir="ltr" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>تأكيد الرقم السري الجديد *</label>
+        <input type="password" id="inputConfirmPin" placeholder="****" dir="ltr" autocomplete="off">
+      </div>
+      <hr style="margin:15px 0;border:none;border-top:1px solid var(--border);">
+      <div class="form-group">
+        <label>سؤال الأمان *</label>
+        <select id="selectSecurityQuestion">
+          <option value="ما هو اسم أول مدرسة درست فيها؟">ما هو اسم أول مدرسة درست فيها؟</option>
+          <option value="ما هو اسم مدينتك المفضلة؟">ما هو اسم مدينتك المفضلة؟</option>
+          <option value="ما هو اسم طعامك المفضل؟">ما هو اسم طعامك المفضل؟</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>إجابة سؤال الأمان *</label>
+        <input type="text" id="inputSecurityAnswer" placeholder="الإجابة" autocomplete="off">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnSavePinSetup">حفظ وتعيين</button>
+        <button type="button" class="btn-gray" id="btnCancelPinSetup" style="display:none;">إلغاء</button>
+      </div>
     </div>
-
     <div id="viewResetPin" style="display:none;text-align:right;">
-      <div class="form-group"><label id="lblSecurityQuestion" style="color:var(--accent);"></label><input type="text" id="inputResetAnswer" autocomplete="off"></div>
-      <div class="modal-footer"><button type="button" class="btn-primary" id="btnVerifyReset" style="width:100%;">التحقق</button></div>
+      <div class="form-group">
+        <label id="lblSecurityQuestion" style="color:var(--accent);font-size:14px;"></label>
+        <input type="text" id="inputResetAnswer" placeholder="أدخل الإجابة" autocomplete="off">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnVerifyReset">التحقق وإعادة الضبط</button>
+        <button type="button" class="btn-gray" id="btnBackToLogin">رجوع</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="carModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">إضافة سيارة جديدة</h2>
+      <button class="close-btn" type="button" id="closeBtn">&times;</button>
+    </div>
+    <form id="carForm">
+      <div class="row2">
+        <div class="form-group"><label for="carName">نوع السيارة *</label><input type="text" id="carName" required></div>
+        <div class="form-group"><label for="plateNumber">رقم اللوحة *</label><input type="text" id="plateNumber" required></div>
+      </div>
+      <div class="form-group"><label for="insurance">شركة التأمين</label><input type="text" id="insurance"></div>
+      <div class="global-cal-bar">
+        <span style="font-size:12px;font-weight:700">📅 نظام إدخال وعرض التواريخ:</span>
+        <button type="button" class="cal-toggle" id="toggleAllDatesBtn">🔄 تبديل الكل</button>
+      </div>
+      <input type="hidden" id="insuranceHijri">
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row"><label for="insuranceDate">انتهاء التأمين</label><button type="button" class="cal-toggle field-cal-btn" data-field="insuranceDate" id="calBtn_insuranceDate">🔄 ميلادي</button></div>
+          <input type="text" id="insuranceDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_insuranceDate"></div>
+        </div>
+        <div class="form-group">
+          <div class="label-row"><label for="registrationDate">انتهاء الاستمارة</label><button type="button" class="cal-toggle field-cal-btn" data-field="registrationDate" id="calBtn_registrationDate">🔄 ميلادي</button></div>
+          <input type="text" id="registrationDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_registrationDate"></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row"><label for="inspectionDate">انتهاء الفحص</label><button type="button" class="cal-toggle field-cal-btn" data-field="inspectionDate" id="calBtn_inspectionDate">🔄 ميلادي</button></div>
+          <input type="text" id="inspectionDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_inspectionDate"></div>
+        </div>
+        <div class="form-group"><label for="yearOfManufacture">سنة الصنع</label><input type="text" id="yearOfManufacture" inputmode="numeric" dir="ltr" maxlength="4" autocomplete="off"></div>
+      </div>
+      <div class="row2">
+        <div class="form-group"><label for="carValue">قيمة السيارة</label><input type="text" id="carValue" inputmode="decimal" dir="ltr" autocomplete="off"></div>
+        <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
+      </div>
+      <div class="form-group"><label for="notes">ملاحظات</label><textarea id="notes"></textarea></div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">حفظ</button>
+        <button type="button" class="btn-gray" id="cancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="modal-footer">
+      <button type="button" class="btn-danger" id="confirmYes">نعم، متأكد</button>
+      <button type="button" class="btn-gray" id="confirmNo">إلغاء</button>
     </div>
   </div>
 </div>
@@ -130,114 +306,280 @@ tr:hover td{background:var(--hover)}
 <div id="toast" role="status"></div>
 
 <script>
+const initialCars = [{"carName": "هيونداى الينترا", "plateNumber": "د ك ه 8063", "insurance": "الراجحي", "insuranceDate": "2027-01-09", "insuranceHijri": "", "registrationDate": "2028-10-21", "inspectionDate": "2027-04-26", "carValue": 35000, "yearOfManufacture": 2019, "serialNumber": 89036710, "notes": ""}, {"carName": "نيسان صني عيسوي", "plateNumber": "ا ي ح 5868", "insurance": "الراجحي", "insuranceDate": "2025-02-15", "insuranceHijri": "2025-02-15", "registrationDate": "2024-11-22", "inspectionDate": "2025-01-03", "carValue": 10000, "yearOfManufacture": 2010, "serialNumber": 171649900, "notes": ""}, {"carName": "تويوتا ياريس", "plateNumber": "ر س و 4323", "insurance": "اتحاد الخليج", "insuranceDate": "2027-09-07", "insuranceHijri": "2026-09-06", "registrationDate": "2029-07-03", "inspectionDate": "2026-12-13", "carValue": 25000, "yearOfManufacture": 2016, "serialNumber": 101619410, "notes": ""}, {"carName": "ايسوزو", "plateNumber": "ا ك م 2570", "insurance": "ليفا", "insuranceDate": "2027-06-27", "insuranceHijri": "2026-06-26", "registrationDate": "", "inspectionDate": "2026-12-17", "carValue": "", "yearOfManufacture": 2011, "serialNumber": 57760110, "notes": ""}, {"carName": "تويوتا  فان بضاعة", "plateNumber": "ا ي ن 5533", "insurance": "اسيج", "insuranceDate": "2027-08-16", "insuranceHijri": "2026-07-25", "registrationDate": "2029-09-27", "inspectionDate": "2026-12-08", "carValue": "", "yearOfManufacture": 2015, "serialNumber": 951141410, "notes": ""}, {"carName": "تويوتا رش", "plateNumber": "ب ب ب 8154", "insurance": "الراجحي", "insuranceDate": "2027-01-07", "insuranceHijri": "2026-01-09", "registrationDate": "2028-01-17", "inspectionDate": "2027-07-02", "carValue": "", "yearOfManufacture": 2019, "serialNumber": 273421710, "notes": ""}, {"carName": "nisan 1814", "plateNumber": "ر د ه 3754", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-11-14", "inspectionDate": "2026-12-03", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 215091810, "notes": ""}, {"carName": "nisan 1815", "plateNumber": "د ن ن 1815", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2029-10-12", "inspectionDate": "2026-12-14", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 464091810, "notes": ""}, {"carName": "هيونداي توسان", "plateNumber": "د ي ي 8633", "insurance": "اسيج", "insuranceDate": "2025-08-29", "insuranceHijri": "2025-08-29", "registrationDate": "2025-08-22", "inspectionDate": "", "carValue": "", "yearOfManufacture": "", "serialNumber": 879886810, "notes": ""}, {"carName": "ليكزس", "plateNumber": "د ق ن 999", "insurance": "ولاء", "insuranceDate": "2025-08-27", "insuranceHijri": "2025-08-27", "registrationDate": "2026-08-04", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": 493939910, "notes": ""}, {"carName": "نيسان باترول", "plateNumber": "د ه ر 4040", "insurance": "الراجحي", "insuranceDate": "2026-11-24", "insuranceHijri": "", "registrationDate": "2027-03-29", "inspectionDate": "2027-04-28", "carValue": "", "yearOfManufacture": 2022, "serialNumber": 485856910, "notes": ""}, {"carName": "رينو دوكر 1", "plateNumber": "ب ر ر 7979", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-11-05", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 692724710, "notes": ""}, {"carName": "رينو دوكر 2", "plateNumber": "7985 ب ر ر", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-09-28", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 504724710, "notes": ""}, {"carName": "رينو دوكر 3", "plateNumber": "ب ر ر 7944", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2027-07-02", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 351424710, "notes": ""}, {"carName": "ماهيندرا", "plateNumber": "ب ط د 4793", "insurance": "المتحدة للتامين التعاوني", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-09-14", "inspectionDate": "2026-09-11", "carValue": 50000, "yearOfManufacture": 2021, "serialNumber": 62742020, "notes": ""}, {"carName": "فورد رابتور", "plateNumber": "س س د 999", "insurance": "ولاء", "insuranceDate": "2027-01-22", "insuranceHijri": "", "registrationDate": "2027-12-28", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2018, "serialNumber": 937221020, "notes": ""}, {"carName": "رانج روفر", "plateNumber": "د ق ن 999", "insurance": "ميدغلف", "insuranceDate": "2026-09-07", "insuranceHijri": "", "registrationDate": "2028-08-12", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": "", "notes": ""}];
+const LOCAL_KEY = 'cars_crm_local_v3';
 const AUTH_KEY = 'cars_crm_auth_pin_v1';
 const GH_KEY = 'cars_crm_github_config_v1';
-const LOCAL_KEY = 'cars_crm_local_data';
 const $ = id => document.getElementById(id);
+const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const FIELDS = ['carName','plateNumber','insurance','insuranceDate','insuranceHijri','registrationDate','inspectionDate','yearOfManufacture','carValue','serialNumber','notes'];
+const DATE_FIELDS = ['insuranceDate','insuranceHijri','registrationDate','inspectionDate'];
 
-let authConfig = { pin: '', question: '', answer: '' };
+function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
+
+/* إعدادات GitHub API */
 let ghConfig = { owner: '', repo: '', path: 'cars-data.json', token: '' };
-let cars = [];
+let ghSha = '';
+let isSyncing = false;
 
-function loadAuthConfig(){
-  try { const d = localStorage.getItem(AUTH_KEY); if(d) authConfig = JSON.parse(d); } catch(e){}
+function loadGhConfig(){
+  try{ const c = JSON.parse(localStorage.getItem(GH_KEY) || '{}'); if(c.token) ghConfig = c; }catch(e){}
 }
-function saveAuthConfig(){
-  try { localStorage.setItem(AUTH_KEY, JSON.stringify(authConfig)); } catch(e){}
-}
-function loadLocalCars(){
-  try { const d = localStorage.getItem(LOCAL_KEY); if(d) cars = JSON.parse(d); } catch(e){}
-}
-function saveLocalCars(){
-  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(cars)); } catch(e){}
+function saveGhConfigStorage(){
+  try{ localStorage.setItem(GH_KEY, JSON.stringify(ghConfig)); }catch(e){}
 }
 
-function checkLoginState(){
-  loadAuthConfig();
-  if(!authConfig.pin){
-    $('pinTitle').textContent = '🔑 إنشاء رقم سري أول مرة';
-    $('viewLoginPin').style.display = 'none';
-    $('viewSetupPin').style.display = 'block';
-  } else {
-    $('pinTitle').textContent = '🔒 تسجيل الدخول';
-    $('viewLoginPin').style.display = 'block';
-    $('viewSetupPin').style.display = 'none';
-  }
-}
-
-// جلب البيانات من GitHub تلقائياً إذا كان متصلاً
 async function fetchFromGithub(){
-  if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) return;
+  if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) return false;
   try{
     const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
-    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${ghConfig.token}`, 'Accept': 'application/vnd.github+json' } });
-    if(res.ok){
-      const json = await res.json();
-      const content = decodeURIComponent(escape(atob(json.content)));
-      const parsed = JSON.parse(content);
-      cars = Array.isArray(parsed) ? parsed : (parsed.cars || []);
-      saveLocalCars();
-      render();
-      toast('☁️ تم استعادة بيانات السيارات من GitHub بنجاح');
-    }
-  }catch(e){ console.warn(e); }
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${ghConfig.token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if(!res.ok) throw new Error('تعذّر جلب البيانات من جيت هب');
+    const json = await res.json();
+    ghSha = json.sha;
+    const content = decodeURIComponent(escape(atob(json.content)));
+    cars = withIds(parseCars(content), 'gh');
+    cacheLocal(); refresh();
+    toast('☁️ تم تحديث البيانات من GitHub بنجاح');
+    return true;
+  }catch(e){
+    console.warn(e);
+    return false;
+  }
 }
 
-$('btnLoginPin').onclick = () => {
-  const val = $('inputLoginPin').value.trim();
-  if(val === authConfig.pin){
-    $('pinModal').classList.remove('active');
-    loadLocalCars();
-    render();
-    if(ghConfig.token) fetchFromGithub();
-    toast('تم تسجيل الدخول بنجاح');
-  } else {
-    toast('الرقم السري غير صحيح');
-    $('inputLoginPin').value = '';
-  }
-};
+async function pushToGithub(){
+  if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo || isSyncing) return;
+  isSyncing = true;
+  renderNote();
+  try{
+    const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
+    const payload = JSON.stringify(makePayload(), null, 2);
+    const contentB64 = btoa(unescape(encodeURIComponent(payload)));
+    
+    const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${ghConfig.token}` } });
+    if(getRes.ok){
+      const j = await getRes.json();
+      ghSha = j.sha;
+    }
 
+    const body = {
+      message: 'Update cars data via CRM app - ' + todayLocal(),
+      content: contentB64,
+      sha: ghSha || undefined
+    };
+
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${ghConfig.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('فشل الحفظ على جيت هب');
+    const json = await res.json();
+    ghSha = json.content.sha;
+    toast('🐙 تم حفظ البيانات وتحديثها على GitHub بنجاح!');
+  }catch(e){
+    toast('⚠️ تعذّر الحفظ على GitHub: ' + e.message);
+  }finally{
+    isSyncing = false;
+    renderNote();
+  }
+}
+
+/* الأمان والرقم السري */
+let authConfig = { pin: '', question: '', answer: '' };
+function loadAuthConfig(){ try{ const d = localStorage.getItem(AUTH_KEY); if(d) authConfig = JSON.parse(d); }catch(e){} }
+function saveAuthConfig(){ try{ localStorage.setItem(AUTH_KEY, JSON.stringify(authConfig)); }catch(e){} }
+
+function showPinModal(mode){
+  $('pinModal').classList.add('active');
+  $('viewLoginPin').style.display = 'none';
+  $('viewSetupPin').style.display = 'none';
+  $('viewResetPin').style.display = 'none';
+  if(mode === 'login'){
+    $('pinTitle').textContent = '🔒 الدخول إلى النظام';
+    $('viewLoginPin').style.display = 'block';
+  } else if(mode === 'setup_first') {
+    $('pinTitle').textContent = '🔑 إنشاء رقم سري';
+    $('viewSetupPin').style.display = 'block';
+  } else if(mode === 'change') {
+    $('pinTitle').textContent = '🔐 تغيير الرقم السري';
+    $('viewSetupPin').style.display = 'block';
+    $('groupOldPin').style.display = 'block';
+  } else if(mode === 'reset') {
+    $('pinTitle').textContent = '🧩 استعادة الرقم السري';
+    $('viewResetPin').style.display = 'block';
+    $('lblSecurityQuestion').textContent = authConfig.question;
+  }
+}
+function closePinModal(){ $('pinModal').classList.remove('active'); }
+
+$('btnLoginPin').onclick = () => {
+  if(authConfig.pin && authConfig.pin === latin($('inputLoginPin').value).trim()){
+    closePinModal(); initAppCore();
+  } else { toast('❌ الرقم السري غير صحيح'); }
+};
 $('inputLoginPin').onkeypress = (e) => { if(e.key === 'Enter') $('btnLoginPin').click(); };
 
 $('btnSavePinSetup').onclick = () => {
-  const newPin = $('inputNewPin').value.trim();
-  const ans = $('inputSecurityAnswer').value.trim();
-  if(!newPin || !ans){ toast('يرجى تعبئة جميع الحقول المطلوبة'); return; }
-  authConfig = { pin: newPin, question: $('selectSecurityQuestion').value, answer: ans };
-  saveAuthConfig();
-  $('pinModal').classList.remove('active');
-  loadLocalCars();
-  render();
-  toast('تم حفظ الرقم السري بنجاح');
+  const newPin = latin($('inputNewPin').value).trim();
+  if(!newPin || newPin.length < 4){ toast('أدخل 4 أرقام على الأقل'); return; }
+  authConfig = { pin: newPin, question: $('selectSecurityQuestion').value, answer: latin($('inputSecurityAnswer').value).trim() };
+  saveAuthConfig(); closePinModal(); initAppCore();
 };
-
 $('btnForgotPin').onclick = () => {
   $('viewLoginPin').style.display = 'none';
   $('viewResetPin').style.display = 'block';
   $('lblSecurityQuestion').textContent = authConfig.question || 'سؤال الأمان';
 };
-
 $('btnVerifyReset').onclick = () => {
-  const ans = $('inputResetAnswer').value.trim();
+  const ans = latin($('inputResetAnswer').value).trim();
   if(ans === authConfig.answer){
     $('viewResetPin').style.display = 'none';
     $('viewSetupPin').style.display = 'block';
     $('pinTitle').textContent = '🔑 تعيين رقم سري جديد';
   } else { toast('إجابة سؤال الأمان غير صحيحة'); }
 };
+$('changePinBtn').onclick = () => showPinModal('change');
 
-$('changePinBtn').onclick = () => {
-  $('pinModal').classList.add('active');
-  $('viewLoginPin').style.display = 'none';
-  $('viewSetupPin').style.display = 'block';
-  $('pinTitle').textContent = '🔐 تغيير الرقم السري';
-};
+/* إدارة التواريخ */
+const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
+function isoToMs(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null; }
+function msToIso(ms){ return new Date(ms).toISOString().slice(0, 10); }
+function hijriParts(ms){
+  if(!HF) return null;
+  const p = HF.formatToParts(new Date(ms));
+  const g = t => { const x = p.find(q => q.type === t); return x ? parseInt(x.value.replace(/\D/g, ''), 10) : NaN; };
+  return {y:g('year'), m:g('month'), d:g('day')};
+}
+function hijriStr(iso, sep = '/'){
+  const ms = isoToMs(iso); if(ms === null) return '';
+  const h = hijriParts(ms); return h ? h.y + sep + pad(h.m) + sep + pad(h.d) : '';
+}
+function normDate(s){
+  s = latin(s).trim().replace(/[\/.]/g, '-'); if(!s) return '';
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s); if(!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  const ms = Date.UTC(y, mo-1, d);
+  return msToIso(ms);
+}
+function daysUntil(s){
+  const ms = isoToMs(latin(s)); if(ms === null) return null;
+  const t = new Date(); return Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+}
+function level(d){ if(d === null) return 'none'; if(d < 0) return 'danger'; if(d <= 30) return 'warning'; return 'ok'; }
+function daysText(d){
+  if(d === null) return '';
+  if(d < 0) return 'منتهي منذ ' + Math.abs(d) + ' يوم';
+  if(d === 0) return 'ينتهي اليوم';
+  return 'متبقي ' + d + ' يوم';
+}
+function insEff(c){ return {iso:c.insuranceDate || c.insuranceHijri}; }
+let tableCalMode = 'g';
+function dateCell(iso){
+  const d = daysUntil(iso);
+  if(d === null) return '<span class="sub">—</span>';
+  const h = hijriStr(iso, '-');
+  const first = tableCalMode === 'g' ? (iso + ' م') : (h ? h + ' هـ' : iso + ' م');
+  const second = tableCalMode === 'g' ? (h ? h + ' هـ' : '') : (iso + ' م');
+  return '<div class="date-line">' + esc(first) + '</div>' + (second ? '<div class="sub">' + esc(second) + '</div>' : '') +
+         '<span class="days lvl-' + level(d) + '">' + daysText(d) + '</span>';
+}
+function fmtNum(v){ const n = Number(latin(v)); return (v === '' || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
 
+/* بيانات السيارات */
+function parseCars(text){
+  let d; try{ d = JSON.parse(text); }catch(e){ d = initialCars; }
+  const arr = Array.isArray(d) ? d : (d && d.cars) || initialCars;
+  return arr.map(c => {
+    const o = {};
+    FIELDS.forEach(k => o[k] = c[k] == null ? '' : latin(c[k]));
+    return o;
+  });
+}
+function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
+function makePayload(){ return {app:'cars-crm', version:3, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
+function loadLocal(){
+  try{ const s = localStorage.getItem(LOCAL_KEY); if(s) return parseCars(s); }catch(e){}
+  return parseCars(JSON.stringify(initialCars));
+}
+function cacheLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(makePayload())); }catch(e){} }
+let cars = withIds(loadLocal(), 'l');
+let editingId = null;
+
+function persist(){
+  cacheLocal();
+  if(ghConfig.token){ pushToGithub(); }
+}
+
+function renderNote(){
+  const n = $('backupNote');
+  const syncBtn = $('syncGithubBtn');
+  syncBtn.style.display = ghConfig.token ? '' : 'none';
+  if(ghConfig.token){
+    n.className = 'note note-ok';
+    n.textContent = isSyncing ? '🔄 جاري المزامنة والحفظ على GitHub...' : '🐙 متصل بـ GitHub • يتم حفظ التعديلات سحابياً تلقائياً';
+  } else {
+    n.className = 'note note-warn';
+    n.textContent = '⚠️ التخزين محلياً فقط. اضغط على «🐙 إعداد ربط GitHub» لحفظ البيانات سحابياً على مستودعك.';
+  }
+}
+
+async function initAppCore(){
+  loadGhConfig();
+  if(ghConfig.token){ await fetchFromGithub(); }
+  refresh(); renderNote();
+}
+
+/* العرض والجداول */
+function getFiltered(){
+  const q = latin($('searchInput').value).trim().toLowerCase();
+  const st = $('statusFilter').value;
+  return cars.filter(c => {
+    const hay = latin([c.carName, c.plateNumber, c.insurance].join(' ')).toLowerCase();
+    if(q && !hay.includes(q)) return false;
+    if(st && level(daysUntil(insEff(c).iso)) !== st && level(daysUntil(c.registrationDate)) !== st && level(daysUntil(c.inspectionDate)) !== st) return false;
+    return true;
+  });
+}
+function renderTable(){
+  const list = getFiltered(); const tb = $('tableBody');
+  if(!list.length){ tb.innerHTML = '<tr><td colspan="9" class="empty-state">لا توجد نتائج</td></tr>'; return; }
+  tb.innerHTML = list.map(c => '<tr>' +
+    '<td><strong>' + esc(c.carName) + '</strong></td>' +
+    '<td>' + esc(c.plateNumber) + '</td>' +
+    '<td>' + esc(c.insurance || '—') + '</td>' +
+    '<td>' + dateCell(insEff(c).iso) + '</td>' +
+    '<td>' + dateCell(c.registrationDate) + '</td>' +
+    '<td>' + dateCell(c.inspectionDate) + '</td>' +
+    '<td>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td>' + fmtNum(c.carValue) + '</td>' +
+    '<td><div class="action-buttons">' +
+      '<button class="btn-primary btn-small" data-edit="' + c.id + '">تعديل</button>' +
+      '<button class="btn-danger btn-small" data-del="' + c.id + '">حذف</button>' +
+    '</div></td></tr>').join('');
+}
+function updateStats(){
+  const n = fn => cars.filter(fn).length;
+  $('stTotal').textContent = cars.length;
+  $('stInsExpired').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'danger');
+  $('stInsSoon').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'warning');
+  $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
+  $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+}
+function refresh(){ renderTable(); updateStats(); }
+
+/* أزرار ونوافذ تفاعلية */
 $('githubConfigBtn').onclick = () => {
-  try {
-    const c = JSON.parse(localStorage.getItem(GH_KEY) || '{}');
-    if(c.token){ $('ghOwner').value = c.owner; $('ghRepo').value = c.repo; $('ghToken').value = c.token; }
-  }catch(e){}
+  $('ghOwner').value = ghConfig.owner;
+  $('ghRepo').value = ghConfig.repo;
+  $('ghPath').value = ghConfig.path || 'cars-data.json';
+  $('ghToken').value = ghConfig.token;
+  $('disconnectGithub').style.display = ghConfig.token ? '' : 'none';
   $('githubModal').classList.add('active');
 };
 $('closeGithubModal').onclick = () => $('githubModal').classList.remove('active');
@@ -245,43 +587,99 @@ $('closeGithubModal').onclick = () => $('githubModal').classList.remove('active'
 $('saveGithubConfig').onclick = async () => {
   ghConfig.owner = $('ghOwner').value.trim();
   ghConfig.repo = $('ghRepo').value.trim();
+  ghConfig.path = $('ghPath').value.trim() || 'cars-data.json';
   ghConfig.token = $('ghToken').value.trim();
-  localStorage.setItem(GH_KEY, JSON.stringify(ghConfig));
+  saveGhConfigStorage();
   $('githubModal').classList.remove('active');
-  toast('جاري جلب البيانات من GitHub...');
-  await fetchFromGithub();
+  toast('جاري الاتصال والتحقق من GitHub...');
+  const ok = await fetchFromGithub();
+  if(ok) toast('✅ تم ربط GitHub وحفظ البيانات بنجاح!');
+  renderNote();
+};
+$('disconnectGithub').onclick = () => {
+  ghConfig = { owner: '', repo: '', path: 'cars-data.json', token: '' };
+  saveGhConfigStorage();
+  $('githubModal').classList.remove('active');
+  renderNote();
+  toast('تم إلغاء ربط GitHub');
+};
+$('syncGithubBtn').onclick = fetchFromGithub;
+
+$('toggleTableCalBtn').onclick = () => {
+  tableCalMode = tableCalMode === 'g' ? 'h' : 'g';
+  $('toggleTableCalBtn').textContent = tableCalMode === 'g' ? '📅 الأساسي: ميلادي ⇄ هجري' : '📅 الأساسي: هجري ⇄ ميلادي';
+  renderTable();
 };
 
-$('addBtn').onclick = () => {
-  const name = prompt('أدخل نوع السيارة:');
-  const plate = prompt('أدخل رقم اللوحة:');
-  const ins = prompt('أدخل شركة التأمين:');
-  if(name && plate){
-    cars.push({carName: name, plateNumber: plate, insurance: ins || ''});
-    saveLocalCars();
-    render();
-    toast('تمت الإضافة بنجاح');
+let editingId = null;
+function openModal(car){
+  editingId = car ? car.id : null;
+  $('modalTitle').textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
+  $('carForm').reset();
+  if(car){ FIELDS.forEach(f => { if($(f)) $(f).value = latin(car[f]); }); }
+  $('carModal').classList.add('active');
+}
+$('addBtn').onclick = () => openModal(null);
+$('closeBtn').onclick = () => $('carModal').classList.remove('active');
+$('cancelBtn').onclick = () => $('carModal').classList.remove('active');
+
+$('carForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = {};
+  FIELDS.forEach(f => { if($(f)) data[f] = latin($(f).value).trim(); });
+  if(editingId){
+    const i = cars.findIndex(c => c.id === editingId);
+    if(i > -1) cars[i] = {...cars[i], ...data};
+  }else{
+    cars.push({id:'c_' + Date.now().toString(36), ...data});
   }
+  persist(); $('carModal').classList.remove('active'); refresh();
+});
+
+$('tableBody').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
+  if(b.dataset.del){
+    const c = cars.find(x => x.id === b.dataset.del);
+    if(confirm('هل تريد حذف السيارة؟')){
+      cars = cars.filter(x => x.id !== c.id);
+      persist(); refresh();
+    }
+  }
+});
+
+$('backupBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+  a.download = 'cars-backup-' + todayLocal() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('💾 تم تحميل النسخة الاحتياطية');
 };
+$('restoreBtn').onclick = () => $('restoreFile').click();
+$('restoreFile').onchange = e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try{
+      cars = withIds(parseCars(evt.target.result), 'r');
+      persist(); refresh();
+      toast('♻️ تم استرجاع البيانات بنجاح');
+    }catch(err){ toast('⚠️ ملف غير صالح'); }
+  };
+  reader.readAsText(f);
+};
+
+$('searchInput').addEventListener('input', renderTable);
+$('statusFilter').addEventListener('change', renderTable);
 
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-function render(){
-  $('stTotal').textContent = cars.length;
-  const tb = $('tableBody');
-  if(!cars.length){
-    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">لا توجد سيارات مسجلة. اضغط على "+ إضافة سيارة" أو اربط GitHub لجلب بياناتك.</td></tr>';
-    return;
-  }
-  tb.innerHTML = cars.map(c => `<tr><td>${c.carName || ''}</td><td>${c.plateNumber || ''}</td><td>${c.insurance || ''}</td><td>-</td></tr>`).join('');
-}
-
-checkLoginState();
-loadLocalCars();
-render();
+// بدء التطبيق
+loadAuthConfig();
+if(!authConfig.pin){ showPinModal('setup_first'); } else { showPinModal('login'); }
 </script>
 </body>
 </html>
