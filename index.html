@@ -12,6 +12,7 @@
   --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
   --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
   --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
+  --gh:#24292f;--gh-hover:#1b1f23;--sec:#8e44ad;--sec-hover:#732d91;
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
 @media (prefers-color-scheme:dark){
@@ -19,6 +20,7 @@
     color-scheme:dark;
     --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
     --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
+    --gh:#2f363d;--gh-hover:#444d56;
     --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
   }
 }
@@ -28,22 +30,23 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:linear-gradient(1
 header{background:var(--card);padding:20px;border-radius:10px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 h1{font-size:26px;flex:1;min-width:200px}
 .header-controls{display:flex;gap:8px;flex-wrap:wrap}
-button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s}
+button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s, opacity .2s}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button:disabled{opacity:.6;cursor:wait}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){background:var(--accent-hover)}
 .btn-danger{background:var(--danger);color:#fff}
-.btn-danger:hover{background:var(--danger-hover)}
+.btn-danger:hover:not(:disabled){background:var(--danger-hover)}
 .btn-gray{background:var(--gray);color:#fff}
+.btn-gh{background:var(--gh);color:#fff}
+.btn-gh:hover:not(:disabled){background:var(--gh-hover)}
+.btn-sec{background:var(--sec);color:#fff}
+.btn-sec:hover:not(:disabled){background:var(--sec-hover)}
 .btn-small{padding:6px 12px;font-size:12px}
-.btn-github{background:#24292e;color:#fff}
-.btn-github:hover:not(:disabled){background:#000}
-.btn-auth{background:#8e44ad;color:#fff}
-.btn-auth:hover:not(:disabled){background:#732d91}
-.note{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600}
+.note{padding:11px 16px;border-radius:8px;margin-bottom:10px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .note-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .note-warn{background:var(--warn-bg);color:var(--warn-fg)}
+.note-bad{background:var(--bad-bg);color:var(--bad-fg)}
 .search-bar{display:flex;gap:10px;margin-bottom:16px;background:var(--card);padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-wrap:wrap}
 input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;background:var(--input);color:var(--text)}
 .search-bar input,.search-bar select{flex:1;min-width:160px}
@@ -61,6 +64,11 @@ td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertic
 tr:hover td{background:var(--hover)}
 .date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
 .sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
+.warn-line{color:var(--warn-fg);direction:rtl;text-align:right;white-space:normal;margin-top:3px}
+.inactive td{opacity:.55}
+.badge-off{display:inline-block;margin-right:6px;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:var(--hover);color:var(--muted);border:1px solid var(--border)}
+.chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+.chk input{width:auto}
 .days{display:inline-block;margin-top:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
 .lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
@@ -69,34 +77,36 @@ tr:hover td{background:var(--hover)}
 .empty-state{text-align:center;padding:40px;color:var(--muted)}
 .modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 .modal.active{display:flex}
-#pinModal{z-index:3000;background:rgba(15,18,30,.92)}
-.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto}
+#gate{z-index:3000;background:rgba(15,18,30,.88)}
+#lockScreen{z-index:3500;background:rgba(12,14,24,.95);backdrop-filter:blur(6px)}
+.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-header h2{font-size:20px}
 .close-btn{background:none;color:var(--muted);font-size:28px;padding:0 6px}
 .form-group{margin-bottom:13px}
 .form-group label{display:block;margin-bottom:5px;font-weight:600;font-size:13px}
-.form-group input,.form-group textarea,.form-group select{width:100%}
+.form-group input,.form-group textarea{width:100%}
+.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
+.label-row label{margin-bottom:0}
+.cal-toggle{padding:3px 10px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--text);border:1px solid var(--border);cursor:pointer;font-weight:700;transition:all .15s;white-space:nowrap}
+.cal-toggle.is-h{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-fg)}
+.cal-toggle.is-g{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-fg)}
+.cal-toggle:hover{transform:scale(1.03)}
 .hint{font-size:11px;color:var(--muted);margin-top:4px;min-height:14px}
 .hint.bad{color:var(--danger)}
 .form-note{font-size:12px;color:var(--muted);background:var(--hover);padding:8px 12px;border-radius:6px;margin-bottom:13px;line-height:1.7}
 textarea{resize:vertical;min-height:70px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal-footer{display:flex;gap:10px;margin-top:18px}
+.modal-footer{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .confirm-box{max-width:420px;text-align:center}
 .confirm-box h2{font-size:20px;margin-bottom:8px}
 .confirm-box p{margin:6px 0 20px;line-height:1.8}
 .confirm-box .modal-footer{justify-content:center}
 .stack{flex-direction:column;align-items:stretch}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:4000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center}
+.link-btn{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;text-decoration:underline;padding:4px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:5000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 #toast.show{opacity:1}
 @media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
-.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
-.label-row label{margin-bottom:0 !important}
-.cal-toggle{padding:3px 9px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--accent);border:1px solid var(--accent);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:4px;transition:all .2s}
-.cal-toggle:hover{background:var(--accent);color:#fff}
-.cal-toggle.hijri-mode{background:#8e44ad;color:#fff;border-color:#8e44ad}
-.global-cal-bar{display:flex;justify-content:space-between;align-items:center;background:var(--hover);padding:9px 12px;border-radius:8px;margin-bottom:13px;border:1px solid var(--border);flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body>
@@ -105,21 +115,21 @@ textarea{resize:vertical;min-height:70px}
     <h1>🚗 نظام إدارة السيارات</h1>
     <div class="header-controls">
       <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
-      <button class="btn-gray" id="toggleTableCalBtn">📅 الأساسي: ميلادي ⇄ هجري</button>
-      <button class="btn-auth" id="changePinBtn">🔐 تغيير الرقم السري</button>
-      <button class="btn-github" id="githubConfigBtn">🐙 إعداد ربط GitHub</button>
       <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
       <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
       <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
-      <button class="btn-primary" id="syncGithubBtn" style="display:none">🔄 مزامنة GitHub</button>
+      <button class="btn-gray" id="folderBtn">📁 المجلد</button>
+      <button class="btn-gh" id="githubBtn">☁️ GitHub</button>
+      <button class="btn-sec" id="securityBtn">🔒 الحماية</button>
       <input type="file" id="restoreFile" accept=".json,application/json" hidden>
     </div>
   </header>
 
   <div id="backupNote" class="note" role="status"></div>
+  <div id="githubNote" class="note" role="status" style="display:none"></div>
 
   <div class="stats">
-    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">إجمالي السيارات</div></div>
+    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">السيارات النشطة</div></div>
     <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
     <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
     <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
@@ -127,13 +137,14 @@ textarea{resize:vertical;min-height:70px}
   </div>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين...">
-    <select id="statusFilter">
+    <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين..." aria-label="بحث">
+    <select id="statusFilter" aria-label="تصفية الحالة">
       <option value="">جميع الحالات</option>
       <option value="ok">سارية</option>
       <option value="warning">قريبة الانتهاء (30 يوم)</option>
       <option value="danger">فيها منتهي</option>
     </select>
+    <label class="chk"><input type="checkbox" id="showInactive"> <span id="showInactiveTxt">إظهار السيارات غير النشطة</span></label>
   </div>
 
   <div class="table-container">
@@ -152,102 +163,12 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- نافذة إعدادات GitHub -->
-<div id="githubModal" class="modal">
-  <div class="modal-content" style="max-width:500px">
-    <div class="modal-header">
-      <h2>🐙 ربط الحفظ المباشر مع GitHub</h2>
-      <button class="close-btn" type="button" id="closeGithubModal">&times;</button>
-    </div>
-    <div class="form-note">
-      قم بإدخال بيانات المستودع الخاص بك على جيت هب ليقوم النظام برفع وحفظ ملف البيانات <code>cars-data.json</code> تلقائياً عند كل تعديل.
-    </div>
-    <div class="form-group">
-      <label>اسم المالك / اسم المستخدم (Owner)</label>
-      <input type="text" id="ghOwner" placeholder="مثال: username" dir="ltr">
-    </div>
-    <div class="form-group">
-      <label>اسم المستودع (Repository Name)</label>
-      <input type="text" id="ghRepo" placeholder="مثال: CAR-CRM" dir="ltr">
-    </div>
-    <div class="form-group">
-      <label>مسار الملف داخل المستودع (Path)</label>
-      <input type="text" id="ghPath" value="cars-data.json" dir="ltr">
-    </div>
-    <div class="form-group">
-      <label>رمز الوصول الشخصي (Personal Access Token - PAT)</label>
-      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" dir="ltr">
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-primary" id="saveGithubConfig">حفظ وتفعيل الاتصال</button>
-      <button type="button" class="btn-danger" id="disconnectGithub" style="display:none">إلغاء الربط</button>
-    </div>
-  </div>
-</div>
-
-<!-- نافذة الأمان والرقم السري -->
-<div id="pinModal" class="modal active">
-  <div class="modal-content confirm-box">
-    <h2 id="pinTitle">🔒 الدخول إلى النظام</h2>
-    <p id="pinSubMsg">يرجى إدخال الرقم السري للمتابعة</p>
-    <div id="viewLoginPin">
-      <div class="form-group">
-        <input type="password" id="inputLoginPin" placeholder="أدخل الرقم السري" dir="ltr" style="text-align:center;font-size:18px;letter-spacing:4px;" autocomplete="off">
-      </div>
-      <div class="modal-footer stack">
-        <button type="button" class="btn-primary" id="btnLoginPin">دخول</button>
-        <button type="button" class="btn-gray btn-small" id="btnForgotPin" style="margin-top:6px;">نسيت الرقم السري؟</button>
-      </div>
-    </div>
-    <div id="viewSetupPin" style="display:none;text-align:right;">
-      <div class="form-group" id="groupOldPin" style="display:none;">
-        <label>الرقم السري الحالي *</label>
-        <input type="password" id="inputOldPin" placeholder="****" dir="ltr" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>الرقم السري الجديد *</label>
-        <input type="password" id="inputNewPin" placeholder="****" dir="ltr" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>تأكيد الرقم السري الجديد *</label>
-        <input type="password" id="inputConfirmPin" placeholder="****" dir="ltr" autocomplete="off">
-      </div>
-      <hr style="margin:15px 0;border:none;border-top:1px solid var(--border);">
-      <div class="form-group">
-        <label>سؤال الأمان *</label>
-        <select id="selectSecurityQuestion">
-          <option value="ما هو اسم أول مدرسة درست فيها؟">ما هو اسم أول مدرسة درست فيها؟</option>
-          <option value="ما هو اسم مدينتك المفضلة؟">ما هو اسم مدينتك المفضلة؟</option>
-          <option value="ما هو اسم طعامك المفضل؟">ما هو اسم طعامك المفضل؟</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>إجابة سؤال الأمان *</label>
-        <input type="text" id="inputSecurityAnswer" placeholder="الإجابة" autocomplete="off">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-primary" id="btnSavePinSetup">حفظ وتعيين</button>
-        <button type="button" class="btn-gray" id="btnCancelPinSetup" style="display:none;">إلغاء</button>
-      </div>
-    </div>
-    <div id="viewResetPin" style="display:none;text-align:right;">
-      <div class="form-group">
-        <label id="lblSecurityQuestion" style="color:var(--accent);font-size:14px;"></label>
-        <input type="text" id="inputResetAnswer" placeholder="أدخل الإجابة" autocomplete="off">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-primary" id="btnVerifyReset">التحقق وإعادة الضبط</button>
-        <button type="button" class="btn-gray" id="btnBackToLogin">رجوع</button>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- نافذة إضافة / تعديل سيارة -->
 <div id="carModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="modalTitle">إضافة سيارة جديدة</h2>
-      <button class="close-btn" type="button" id="closeBtn">&times;</button>
+      <button class="close-btn" type="button" id="closeBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="carForm">
       <div class="row2">
@@ -255,39 +176,167 @@ textarea{resize:vertical;min-height:70px}
         <div class="form-group"><label for="plateNumber">رقم اللوحة *</label><input type="text" id="plateNumber" required></div>
       </div>
       <div class="form-group"><label for="insurance">شركة التأمين</label><input type="text" id="insurance"></div>
-      <div class="global-cal-bar">
-        <span style="font-size:12px;font-weight:700">📅 نظام إدخال وعرض التواريخ:</span>
-        <button type="button" class="cal-toggle" id="toggleAllDatesBtn">🔄 تبديل الكل</button>
-      </div>
-      <input type="hidden" id="insuranceHijri">
+      <div class="form-note">اكتب التاريخ ميلادياً (مثال 2028-10-21) أو هجرياً (مثال 1450-06-03)، أو اضغط على <b>زر التبديل</b> فوق الخانة لتحويل التاريخ المكتوب وتغيير التقويم الأساسي المعروض في الجدول.</div>
       <div class="row2">
         <div class="form-group">
-          <div class="label-row"><label for="insuranceDate">انتهاء التأمين</label><button type="button" class="cal-toggle field-cal-btn" data-field="insuranceDate" id="calBtn_insuranceDate">🔄 ميلادي</button></div>
+          <div class="label-row">
+            <label for="insuranceDate">انتهاء التأمين</label>
+            <button type="button" class="cal-toggle" id="tog_insuranceDate" data-for="insuranceDate">📅 ميلادي ⇄ هجري</button>
+          </div>
           <input type="text" id="insuranceDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
           <div class="hint" id="h_insuranceDate"></div>
         </div>
         <div class="form-group">
-          <div class="label-row"><label for="registrationDate">انتهاء الاستمارة</label><button type="button" class="cal-toggle field-cal-btn" data-field="registrationDate" id="calBtn_registrationDate">🔄 ميلادي</button></div>
+          <div class="label-row">
+            <label for="registrationDate">انتهاء الاستمارة</label>
+            <button type="button" class="cal-toggle" id="tog_registrationDate" data-for="registrationDate">📅 هجري ⇄ ميلادي</button>
+          </div>
           <input type="text" id="registrationDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
           <div class="hint" id="h_registrationDate"></div>
         </div>
       </div>
       <div class="row2">
         <div class="form-group">
-          <div class="label-row"><label for="inspectionDate">انتهاء الفحص</label><button type="button" class="cal-toggle field-cal-btn" data-field="inspectionDate" id="calBtn_inspectionDate">🔄 ميلادي</button></div>
+          <div class="label-row">
+            <label for="inspectionDate">انتهاء الفحص</label>
+            <button type="button" class="cal-toggle" id="tog_inspectionDate" data-for="inspectionDate">📅 ميلادي ⇄ هجري</button>
+          </div>
           <input type="text" id="inspectionDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
           <div class="hint" id="h_inspectionDate"></div>
         </div>
-        <div class="form-group"><label for="yearOfManufacture">سنة الصنع</label><input type="text" id="yearOfManufacture" inputmode="numeric" dir="ltr" maxlength="4" autocomplete="off"></div>
+        <div class="form-group"><label class="chk" style="margin-top:26px"><input type="checkbox" id="active" checked> السيارة نشطة</label><div class="hint">غير النشطة (مباعة أو متوقفة) لا تدخل في الإحصائيات.</div></div>
       </div>
       <div class="row2">
+        <div class="form-group"><label for="yearOfManufacture">سنة الصنع</label><input type="text" id="yearOfManufacture" inputmode="numeric" dir="ltr" placeholder="2020" maxlength="4" autocomplete="off"></div>
         <div class="form-group"><label for="carValue">قيمة السيارة</label><input type="text" id="carValue" inputmode="decimal" dir="ltr" autocomplete="off"></div>
-        <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
       </div>
+      <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
       <div class="form-group"><label for="notes">ملاحظات</label><textarea id="notes"></textarea></div>
       <div class="modal-footer">
         <button type="submit" class="btn-primary">حفظ</button>
         <button type="button" class="btn-gray" id="cancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- نافذة إعدادات الحماية والرقم السري -->
+<div id="securityModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🔒 إعدادات الرقم السري والحماية</h2>
+      <button class="close-btn" type="button" id="closeSecBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <form id="securityForm">
+      <div class="form-note">اضبط رقماً سرياً لحماية النظام عند فتحه، مع سؤال أمان وإجابته لاستعادة الدخول في حال نسيان الرقم السري.</div>
+      <div class="form-group" id="curPinGroup" style="display:none">
+        <label for="secCurrentPin">الرقم السري الحالي *</label>
+        <input type="password" id="secCurrentPin" dir="ltr" autocomplete="off" placeholder="أدخل الرقم السري الحالي للتأكيد">
+      </div>
+      <div class="form-group">
+        <label for="secNewPin">الرقم السري الجديد *</label>
+        <input type="password" id="secNewPin" dir="ltr" autocomplete="off" placeholder="مثال: 1234" required>
+      </div>
+      <div class="form-group">
+        <label for="secQuestion">سؤال الأمان (في حال نسيان الرقم السري) *</label>
+        <input type="text" id="secQuestion" placeholder="مثال: ما هو اسم أول سيارة اشتريتها؟" required>
+      </div>
+      <div class="form-group">
+        <label for="secAnswer">إجابة سؤال الأمان *</label>
+        <input type="text" id="secAnswer" placeholder="اكتب الإجابة هنا..." autocomplete="off" required>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">حفظ الحماية</button>
+        <button type="button" class="btn-sec" id="lockNowBtn" style="display:none">🔒 قفل النظام الآن</button>
+        <button type="button" class="btn-danger" id="disablePinBtn" style="display:none">إلغاء الرقم السري</button>
+        <button type="button" class="btn-gray" id="cancelSecBtn">إغلاق</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- شاشة القفل بالرقم السري واستعادة كلمة المرور -->
+<div id="lockScreen" class="modal">
+  <div class="modal-content confirm-box">
+    <div id="lockVerifyBox">
+      <h2>🔒 النظام محمي برقم سري</h2>
+      <p>الرجاء إدخال الرقم السري للدخول إلى نظام إدارة السيارات</p>
+      <form id="unlockForm">
+        <div class="form-group">
+          <input type="password" id="unlockPinInput" dir="ltr" style="text-align:center;font-size:20px;letter-spacing:4px" placeholder="••••" autocomplete="off" required>
+        </div>
+        <div class="modal-footer stack">
+          <button type="submit" class="btn-primary">دخول</button>
+          <button type="button" class="link-btn" id="forgotPinBtn">هل نسيت الرقم السري؟</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="lockRecoverBox" style="display:none">
+      <h2>🔑 استعادة الرقم السري</h2>
+      <p style="margin-bottom:10px">أجب عن سؤال الأمان التالي لتعيين رقم سري جديد:</p>
+      <div class="form-note" id="recoverQuestionDisplay" style="font-weight:700;color:var(--text);font-size:14px"></div>
+      <form id="recoverForm">
+        <div class="form-group" style="text-align:right">
+          <label for="recoverAnswerInput">الإجابة *</label>
+          <input type="text" id="recoverAnswerInput" autocomplete="off" required placeholder="اكتب إجابتك هنا...">
+        </div>
+        <div class="form-group" style="text-align:right">
+          <label for="recoverNewPinInput">الرقم السري الجديد *</label>
+          <input type="password" id="recoverNewPinInput" dir="ltr" autocomplete="off" required placeholder="أدخل الرقم السري الجديد">
+        </div>
+        <div class="modal-footer stack">
+          <button type="submit" class="btn-primary">تعيين الرقم السري والدخول</button>
+          <button type="button" class="link-btn" id="backToLoginBtn">العودة لتسجيل الدخول</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة إعدادات GitHub Data Storage -->
+<div id="githubModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>☁️ التخزين السحابي عبر GitHub API</h2>
+      <button class="close-btn" type="button" id="closeGhBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <form id="githubForm">
+      <div class="form-note">
+        احفظ بياناتك وشاركها عبر مستودع GitHub باستخدام <b>GitHub REST Content API</b>. يحتاج إلى رمز وصول شخصي (Personal Access Token) بصلاحية <code>repo</code> أو <code>contents:write</code>.
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label for="ghOwner">اسم المستخدم / المنظمة (Owner) *</label>
+          <input type="text" id="ghOwner" dir="ltr" placeholder="e.g. username" required>
+        </div>
+        <div class="form-group">
+          <label for="ghRepo">اسم المستودع (Repository) *</label>
+          <input type="text" id="ghRepo" dir="ltr" placeholder="e.g. cars-data-repo" required>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label for="ghBranch">الفرع (Branch) *</label>
+          <input type="text" id="ghBranch" dir="ltr" placeholder="main" value="main" required>
+        </div>
+        <div class="form-group">
+          <label for="ghPath">مسار ملف البيانات (File Path) *</label>
+          <input type="text" id="ghPath" dir="ltr" placeholder="data/cars-data.json" value="cars-data.json" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ghToken">رمز الوصول الشخصي (Personal Access Token) *</label>
+        <input type="password" id="ghToken" dir="ltr" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" required>
+      </div>
+      <div class="form-group">
+        <label class="chk"><input type="checkbox" id="ghAutoSync" checked> مزامنة وحفظ تلقائي في GitHub عند أي تعديل</label>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">💾 حفظ الإعدادات</button>
+        <button type="button" class="btn-gh" id="ghPushNowBtn">⬆️ رفع البيانات الآن (Push)</button>
+        <button type="button" class="btn-primary" id="ghPullNowBtn">⬇️ جلب البيانات الآن (Pull)</button>
+        <button type="button" class="btn-danger" id="ghDisconnectBtn" style="display:none">إلغاء الربط</button>
       </div>
     </form>
   </div>
@@ -303,150 +352,41 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<div id="gate" class="modal">
+  <div class="modal-content confirm-box">
+    <h2 id="gateTitle"></h2>
+    <p id="gateMsg"></p>
+    <div class="modal-footer stack">
+      <button type="button" class="btn-primary" id="gatePrimary"></button>
+      <button type="button" class="btn-gh" id="gateGithub">☁️ الاتصال بمستودع GitHub</button>
+      <button type="button" class="btn-gray" id="gateSecondary"></button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" role="status"></div>
 
 <script>
-const initialCars = [{"carName": "هيونداى الينترا", "plateNumber": "د ك ه 8063", "insurance": "الراجحي", "insuranceDate": "2027-01-09", "insuranceHijri": "", "registrationDate": "2028-10-21", "inspectionDate": "2027-04-26", "carValue": 35000, "yearOfManufacture": 2019, "serialNumber": 89036710, "notes": ""}, {"carName": "نيسان صني عيسوي", "plateNumber": "ا ي ح 5868", "insurance": "الراجحي", "insuranceDate": "2025-02-15", "insuranceHijri": "2025-02-15", "registrationDate": "2024-11-22", "inspectionDate": "2025-01-03", "carValue": 10000, "yearOfManufacture": 2010, "serialNumber": 171649900, "notes": ""}, {"carName": "تويوتا ياريس", "plateNumber": "ر س و 4323", "insurance": "اتحاد الخليج", "insuranceDate": "2027-09-07", "insuranceHijri": "2026-09-06", "registrationDate": "2029-07-03", "inspectionDate": "2026-12-13", "carValue": 25000, "yearOfManufacture": 2016, "serialNumber": 101619410, "notes": ""}, {"carName": "ايسوزو", "plateNumber": "ا ك م 2570", "insurance": "ليفا", "insuranceDate": "2027-06-27", "insuranceHijri": "2026-06-26", "registrationDate": "", "inspectionDate": "2026-12-17", "carValue": "", "yearOfManufacture": 2011, "serialNumber": 57760110, "notes": ""}, {"carName": "تويوتا  فان بضاعة", "plateNumber": "ا ي ن 5533", "insurance": "اسيج", "insuranceDate": "2027-08-16", "insuranceHijri": "2026-07-25", "registrationDate": "2029-09-27", "inspectionDate": "2026-12-08", "carValue": "", "yearOfManufacture": 2015, "serialNumber": 951141410, "notes": ""}, {"carName": "تويوتا رش", "plateNumber": "ب ب ب 8154", "insurance": "الراجحي", "insuranceDate": "2027-01-07", "insuranceHijri": "2026-01-09", "registrationDate": "2028-01-17", "inspectionDate": "2027-07-02", "carValue": "", "yearOfManufacture": 2019, "serialNumber": 273421710, "notes": ""}, {"carName": "nisan 1814", "plateNumber": "ر د ه 3754", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-11-14", "inspectionDate": "2026-12-03", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 215091810, "notes": ""}, {"carName": "nisan 1815", "plateNumber": "د ن ن 1815", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2029-10-12", "inspectionDate": "2026-12-14", "carValue": "", "yearOfManufacture": 2020, "serialNumber": 464091810, "notes": ""}, {"carName": "هيونداي توسان", "plateNumber": "د ي ي 8633", "insurance": "اسيج", "insuranceDate": "2025-08-29", "insuranceHijri": "2025-08-29", "registrationDate": "2025-08-22", "inspectionDate": "", "carValue": "", "yearOfManufacture": "", "serialNumber": 879886810, "notes": ""}, {"carName": "ليكزس", "plateNumber": "د ق ن 999", "insurance": "ولاء", "insuranceDate": "2025-08-27", "insuranceHijri": "2025-08-27", "registrationDate": "2026-08-04", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": 493939910, "notes": ""}, {"carName": "نيسان باترول", "plateNumber": "د ه ر 4040", "insurance": "الراجحي", "insuranceDate": "2026-11-24", "insuranceHijri": "", "registrationDate": "2027-03-29", "inspectionDate": "2027-04-28", "carValue": "", "yearOfManufacture": 2022, "serialNumber": 485856910, "notes": ""}, {"carName": "رينو دوكر 1", "plateNumber": "ب ر ر 7979", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-11-05", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 692724710, "notes": ""}, {"carName": "رينو دوكر 2", "plateNumber": "7985 ب ر ر", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2026-09-28", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 504724710, "notes": ""}, {"carName": "رينو دوكر 3", "plateNumber": "ب ر ر 7944", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceHijri": "", "registrationDate": "2028-07-11", "inspectionDate": "2027-07-02", "carValue": 20000, "yearOfManufacture": 2020, "serialNumber": 351424710, "notes": ""}, {"carName": "ماهيندرا", "plateNumber": "ب ط د 4793", "insurance": "المتحدة للتامين التعاوني", "insuranceDate": "2027-01-05", "insuranceHijri": "", "registrationDate": "2026-09-14", "inspectionDate": "2026-09-11", "carValue": 50000, "yearOfManufacture": 2021, "serialNumber": 62742020, "notes": ""}, {"carName": "فورد رابتور", "plateNumber": "س س د 999", "insurance": "ولاء", "insuranceDate": "2027-01-22", "insuranceHijri": "", "registrationDate": "2027-12-28", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2018, "serialNumber": 937221020, "notes": ""}, {"carName": "رانج روفر", "plateNumber": "د ق ن 999", "insurance": "ميدغلف", "insuranceDate": "2026-09-07", "insuranceHijri": "", "registrationDate": "2028-08-12", "inspectionDate": "", "carValue": "", "yearOfManufacture": 2023, "serialNumber": "", "notes": ""}];
-const LOCAL_KEY = 'cars_crm_local_v3';
-const AUTH_KEY = 'cars_crm_auth_pin_v1';
-const GH_KEY = 'cars_crm_github_config_v1';
+const initialCars = [{"carName": "هيونداى الينترا", "plateNumber": "د ك ه 8063", "insurance": "الراجحي", "insuranceDate": "2027-01-09", "insuranceCal": "g", "registrationDate": "2028-10-21", "registrationCal": "h", "inspectionDate": "2027-04-26", "inspectionCal": "g", "yearOfManufacture": 2019, "carValue": 35000, "serialNumber": 89036710, "active": true, "notes": ""}, {"carName": "نيسان صني عيسوي", "plateNumber": "ا ي ح 5868", "insurance": "الراجحي", "insuranceDate": "2025-02-15", "insuranceCal": "g", "registrationDate": "2024-11-22", "registrationCal": "h", "inspectionDate": "2025-01-03", "inspectionCal": "h", "yearOfManufacture": 2010, "carValue": 10000, "serialNumber": 171649900, "active": false, "notes": ""}, {"carName": "تويوتا ياريس", "plateNumber": "ر س و 4323", "insurance": "اتحاد الخليج", "insuranceDate": "2027-09-07", "insuranceCal": "g", "registrationDate": "2029-07-03", "registrationCal": "h", "inspectionDate": "2026-12-13", "inspectionCal": "g", "yearOfManufacture": 2016, "carValue": 25000, "serialNumber": 101619410, "active": true, "notes": ""}, {"carName": "ايسوزو", "plateNumber": "ا ك م 2570", "insurance": "ليفا", "insuranceDate": "2027-06-27", "insuranceCal": "g", "registrationDate": "", "registrationCal": "h", "inspectionDate": "2026-12-17", "inspectionCal": "g", "yearOfManufacture": 2011, "carValue": "", "serialNumber": 57760110, "active": true, "notes": ""}, {"carName": "تويوتا فان بضاعة", "plateNumber": "ا ي ن 5533", "insurance": "اسيج", "insuranceDate": "2027-08-16", "insuranceCal": "g", "registrationDate": "2029-09-27", "registrationCal": "h", "inspectionDate": "2026-12-08", "inspectionCal": "g", "yearOfManufacture": 2015, "carValue": "", "serialNumber": 951141410, "active": true, "notes": ""}, {"carName": "تويوتا رش", "plateNumber": "ب ب ب 8154", "insurance": "الراجحي", "insuranceDate": "2027-01-07", "insuranceCal": "g", "registrationDate": "2028-01-17", "registrationCal": "h", "inspectionDate": "2027-07-02", "inspectionCal": "h", "yearOfManufacture": 2019, "carValue": "", "serialNumber": 273421710, "active": true, "notes": ""}, {"carName": "nisan 1814", "plateNumber": "ر د ه 3754", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2026-11-14", "registrationCal": "h", "inspectionDate": "2026-12-03", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": "", "serialNumber": 215091810, "active": true, "notes": ""}, {"carName": "nisan 1815", "plateNumber": "د ن ن 1815", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2029-10-12", "registrationCal": "h", "inspectionDate": "2026-12-14", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": "", "serialNumber": 464091810, "active": true, "notes": ""}, {"carName": "هيونداي توسان", "plateNumber": "د ي ي 8633", "insurance": "اسيج", "insuranceDate": "2025-08-29", "insuranceCal": "g", "registrationDate": "2025-08-22", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": "", "carValue": "", "serialNumber": 879886810, "active": false, "notes": ""}, {"carName": "ليكزس", "plateNumber": "د ق ن 999", "insurance": "ولاء", "insuranceDate": "2025-08-27", "insuranceCal": "g", "registrationDate": "2026-08-04", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2023, "carValue": "", "serialNumber": 493939910, "active": false, "notes": ""}, {"carName": "نيسان باترول", "plateNumber": "د ه ر 4040", "insurance": "الراجحي", "insuranceDate": "2026-11-24", "insuranceCal": "g", "registrationDate": "2027-03-29", "registrationCal": "g", "inspectionDate": "2027-04-28", "inspectionCal": "g", "yearOfManufacture": 2022, "carValue": "", "serialNumber": 485856910, "active": true, "notes": ""}, {"carName": "رينو دوكر 1", "plateNumber": "ب ر ر 7979", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2026-11-05", "inspectionCal": "h", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 692724710, "active": true, "notes": ""}, {"carName": "رينو دوكر 2", "plateNumber": "7985 ب ر ر", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2026-09-28", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 504724710, "active": true, "notes": ""}, {"carName": "رينو دوكر 3", "plateNumber": "ب ر ر 7944", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2027-07-02", "inspectionCal": "h", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 351424710, "active": true, "notes": ""}, {"carName": "ماهيندرا", "plateNumber": "ب ط د 4793", "insurance": "المتحدة للتامين التعاوني", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2026-09-14", "registrationCal": "h", "inspectionDate": "2026-09-11", "inspectionCal": "g", "yearOfManufacture": 2021, "carValue": 50000, "serialNumber": 62742020, "active": true, "notes": ""}, {"carName": "فورد رابتور", "plateNumber": "س س د 999", "insurance": "ولاء", "insuranceDate": "2027-01-22", "insuranceCal": "g", "registrationDate": "2027-12-28", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2018, "carValue": "", "serialNumber": 937221020, "active": true, "notes": ""}, {"carName": "رانج روفر", "plateNumber": "د ق ن 999", "insurance": "ميدغلف", "insuranceDate": "2026-09-07", "insuranceCal": "g", "registrationDate": "2028-08-12", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2023, "carValue": "", "serialNumber": "", "active": true, "notes": ""}];
+const LOCAL_KEY = 'cars_crm_local_v4';
+const SEC_KEY = 'cars_crm_security_v1';
+const GH_KEY = 'cars_crm_github_v1';
+const DATA_FILE = 'cars-data.json';
 const $ = id => document.getElementById(id);
-const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
-const FIELDS = ['carName','plateNumber','insurance','insuranceDate','insuranceHijri','registrationDate','inspectionDate','yearOfManufacture','carValue','serialNumber','notes'];
-const DATE_FIELDS = ['insuranceDate','insuranceHijri','registrationDate','inspectionDate'];
+const FIELDS = ['carName','plateNumber','insurance','insuranceDate','insuranceCal','registrationDate','registrationCal','inspectionDate','inspectionCal','yearOfManufacture','carValue','serialNumber','active','notes'];
+const FORM_FIELDS = ['carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue','serialNumber','notes'];
+const DATE_FIELDS = ['insuranceDate','registrationDate','inspectionDate'];
+const CAL_OF = {insuranceDate:'insuranceCal', registrationDate:'registrationCal', inspectionDate:'inspectionCal'};
+const CAL_DEFAULT = {insuranceCal:'g', registrationCal:'h', inspectionCal:'g'};
+const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توسان', 'ليكزس'];
 
 function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
+function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
 
-/* إعدادات GitHub API */
-let ghConfig = { owner: '', repo: '', path: 'cars-data.json', token: '' };
-let ghSha = '';
-let isSyncing = false;
-
-function loadGhConfig(){
-  try{ const c = JSON.parse(localStorage.getItem(GH_KEY) || '{}'); if(c.token) ghConfig = c; }catch(e){}
-}
-function saveGhConfigStorage(){
-  try{ localStorage.setItem(GH_KEY, JSON.stringify(ghConfig)); }catch(e){}
-}
-
-async function fetchFromGithub(){
-  if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) return false;
-  try{
-    const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
-    const res = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${ghConfig.token}`, 'Accept': 'application/vnd.github+json' }
-    });
-    if(!res.ok) throw new Error('تعذّر جلب البيانات من جيت هب');
-    const json = await res.json();
-    ghSha = json.sha;
-    const content = decodeURIComponent(escape(atob(json.content)));
-    cars = withIds(parseCars(content), 'gh');
-    cacheLocal(); refresh();
-    toast('☁️ تم تحديث البيانات من GitHub بنجاح');
-    return true;
-  }catch(e){
-    console.warn(e);
-    return false;
-  }
-}
-
-async function pushToGithub(){
-  if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo || isSyncing) return;
-  isSyncing = true;
-  renderNote();
-  try{
-    const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
-    const payload = JSON.stringify(makePayload(), null, 2);
-    const contentB64 = btoa(unescape(encodeURIComponent(payload)));
-    
-    const getRes = await fetch(url, { headers: { 'Authorization': `Bearer ${ghConfig.token}` } });
-    if(getRes.ok){
-      const j = await getRes.json();
-      ghSha = j.sha;
-    }
-
-    const body = {
-      message: 'Update cars data via CRM app - ' + todayLocal(),
-      content: contentB64,
-      sha: ghSha || undefined
-    };
-
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${ghConfig.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if(!res.ok) throw new Error('فشل الحفظ على جيت هب');
-    const json = await res.json();
-    ghSha = json.content.sha;
-    toast('🐙 تم حفظ البيانات وتحديثها على GitHub بنجاح!');
-  }catch(e){
-    toast('⚠️ تعذّر الحفظ على GitHub: ' + e.message);
-  }finally{
-    isSyncing = false;
-    renderNote();
-  }
-}
-
-/* الأمان والرقم السري */
-let authConfig = { pin: '', question: '', answer: '' };
-function loadAuthConfig(){ try{ const d = localStorage.getItem(AUTH_KEY); if(d) authConfig = JSON.parse(d); }catch(e){} }
-function saveAuthConfig(){ try{ localStorage.setItem(AUTH_KEY, JSON.stringify(authConfig)); }catch(e){} }
-
-function showPinModal(mode){
-  $('pinModal').classList.add('active');
-  $('viewLoginPin').style.display = 'none';
-  $('viewSetupPin').style.display = 'none';
-  $('viewResetPin').style.display = 'none';
-  if(mode === 'login'){
-    $('pinTitle').textContent = '🔒 الدخول إلى النظام';
-    $('viewLoginPin').style.display = 'block';
-  } else if(mode === 'setup_first') {
-    $('pinTitle').textContent = '🔑 إنشاء رقم سري';
-    $('viewSetupPin').style.display = 'block';
-  } else if(mode === 'change') {
-    $('pinTitle').textContent = '🔐 تغيير الرقم السري';
-    $('viewSetupPin').style.display = 'block';
-    $('groupOldPin').style.display = 'block';
-  } else if(mode === 'reset') {
-    $('pinTitle').textContent = '🧩 استعادة الرقم السري';
-    $('viewResetPin').style.display = 'block';
-    $('lblSecurityQuestion').textContent = authConfig.question;
-  }
-}
-function closePinModal(){ $('pinModal').classList.remove('active'); }
-
-$('btnLoginPin').onclick = () => {
-  if(authConfig.pin && authConfig.pin === latin($('inputLoginPin').value).trim()){
-    closePinModal(); initAppCore();
-  } else { toast('❌ الرقم السري غير صحيح'); }
-};
-$('inputLoginPin').onkeypress = (e) => { if(e.key === 'Enter') $('btnLoginPin').click(); };
-
-$('btnSavePinSetup').onclick = () => {
-  const newPin = latin($('inputNewPin').value).trim();
-  if(!newPin || newPin.length < 4){ toast('أدخل 4 أرقام على الأقل'); return; }
-  authConfig = { pin: newPin, question: $('selectSecurityQuestion').value, answer: latin($('inputSecurityAnswer').value).trim() };
-  saveAuthConfig(); closePinModal(); initAppCore();
-};
-$('btnForgotPin').onclick = () => {
-  $('viewLoginPin').style.display = 'none';
-  $('viewResetPin').style.display = 'block';
-  $('lblSecurityQuestion').textContent = authConfig.question || 'سؤال الأمان';
-};
-$('btnVerifyReset').onclick = () => {
-  const ans = latin($('inputResetAnswer').value).trim();
-  if(ans === authConfig.answer){
-    $('viewResetPin').style.display = 'none';
-    $('viewSetupPin').style.display = 'block';
-    $('pinTitle').textContent = '🔑 تعيين رقم سري جديد';
-  } else { toast('إجابة سؤال الأمان غير صحيحة'); }
-};
-$('changePinBtn').onclick = () => showPinModal('change');
-
-/* إدارة التواريخ */
+/* ---------- التواريخ: ميلادي وهجري + أزرار التبديل ---------- */
 const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
 function isoToMs(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null; }
 function msToIso(ms){ return new Date(ms).toISOString().slice(0, 10); }
@@ -460,13 +400,56 @@ function hijriStr(iso, sep = '/'){
   const ms = isoToMs(iso); if(ms === null) return '';
   const h = hijriParts(ms); return h ? h.y + sep + pad(h.m) + sep + pad(h.d) : '';
 }
+function fromHijri(y, m, d){
+  if(!HF || m < 1 || m > 12 || d < 1 || d > 30) return null;
+  const approx = Date.UTC(622, 6, 16) + ((y-1)*354.3671 + (m-1)*29.5306 + (d-1)) * 86400000;
+  for(let k = 0; k <= 60; k++){
+    for(const s of (k ? [k, -k] : [0])){
+      const ms = approx + s*86400000; const h = hijriParts(ms);
+      if(h && h.y === y && h.m === m && h.d === d) return msToIso(ms);
+    }
+  }
+  return null;
+}
 function normDate(s){
   s = latin(s).trim().replace(/[\/.]/g, '-'); if(!s) return '';
   const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s); if(!m) return null;
   const y = +m[1], mo = +m[2], d = +m[3];
-  const ms = Date.UTC(y, mo-1, d);
+  if(y >= 1300 && y <= 1600) return fromHijri(y, mo, d);
+  const ms = Date.UTC(y, mo-1, d), dt = new Date(ms);
+  if(dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo-1 || dt.getUTCDate() !== d) return null;
   return msToIso(ms);
 }
+function updateCalToggleUI(f){
+  const cal = $(f).dataset.cal || CAL_DEFAULT[CAL_OF[f]];
+  const btn = $('tog_' + f);
+  if(!btn) return;
+  if(cal === 'h'){
+    btn.textContent = '🌙 هجري ⇄ ميلادي';
+    btn.className = 'cal-toggle is-h';
+    btn.title = 'التقويم الحالي: هجري (اضغط للتبديل إلى ميلادي)';
+  }else{
+    btn.textContent = '☀️ ميلادي ⇄ هجري';
+    btn.className = 'cal-toggle is-g';
+    btn.title = 'التقويم الحالي: ميلادي (اضغط للتبديل إلى هجري)';
+  }
+}
+function toggleDateFieldCal(f){
+  const inp = $(f);
+  const currentCal = inp.dataset.cal || CAL_DEFAULT[CAL_OF[f]];
+  const nextCal = currentCal === 'h' ? 'g' : 'h';
+  inp.dataset.cal = nextCal;
+  const raw = latin(inp.value).trim();
+  if(raw){
+    const iso = normDate(raw);
+    if(iso){
+      inp.value = nextCal === 'h' ? (hijriStr(iso, '-') || iso) : iso;
+    }
+  }
+  updateCalToggleUI(f);
+  updateHint(f);
+}
+
 function daysUntil(s){
   const ms = isoToMs(latin(s)); if(ms === null) return null;
   const t = new Date(); return Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
@@ -478,31 +461,42 @@ function daysText(d){
   if(d === 0) return 'ينتهي اليوم';
   return 'متبقي ' + d + ' يوم';
 }
-function insEff(c){ return {iso:c.insuranceDate || c.insuranceHijri}; }
-let tableCalMode = 'g';
-function dateCell(iso){
+function worst(car){
+  const ls = [car.insuranceDate, car.registrationDate, car.inspectionDate].map(x => level(daysUntil(x)));
+  if(ls.includes('danger')) return 'danger';
+  if(ls.includes('warning')) return 'warning';
+  if(ls.includes('ok')) return 'ok';
+  return 'none';
+}
+function dateCell(iso, main){
   const d = daysUntil(iso);
   if(d === null) return '<span class="sub">—</span>';
-  const h = hijriStr(iso, '-');
-  const first = tableCalMode === 'g' ? (iso + ' م') : (h ? h + ' هـ' : iso + ' م');
-  const second = tableCalMode === 'g' ? (h ? h + ' هـ' : '') : (iso + ' م');
+  const h = hijriStr(iso);
+  const first = main === 'h' ? (h ? h + ' هـ' : iso) : iso + ' م';
+  const second = main === 'h' ? iso + ' م' : (h ? h + ' هـ' : '');
   return '<div class="date-line">' + esc(first) + '</div>' + (second ? '<div class="sub">' + esc(second) + '</div>' : '') +
          '<span class="days lvl-' + level(d) + '">' + daysText(d) + '</span>';
 }
-function fmtNum(v){ const n = Number(latin(v)); return (v === '' || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
+function fmtNum(v){ const n = Number(latin(v)); return (v === '' || v == null || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
 
-/* بيانات السيارات */
+/* ---------- البيانات ---------- */
 function parseCars(text){
-  let d; try{ d = JSON.parse(text); }catch(e){ d = initialCars; }
-  const arr = Array.isArray(d) ? d : (d && d.cars) || initialCars;
+  let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)'); }
+  const arr = Array.isArray(d) ? d : (d && d.cars);
+  if(!Array.isArray(arr) || !arr.every(c => c && typeof c === 'object' && 'carName' in c)) throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)');
   return arr.map(c => {
     const o = {};
-    FIELDS.forEach(k => o[k] = c[k] == null ? '' : latin(c[k]));
+    FIELDS.forEach(k => {
+      if(DATE_FIELDS.includes(k)){ const n = normDate(c[k]); o[k] = n === null ? '' : n; }
+      else if(k in CAL_DEFAULT){ o[k] = (c[k] === 'h' || c[k] === 'g') ? c[k] : CAL_DEFAULT[k]; }
+      else if(k === 'active'){ o[k] = !(c.active === false || c.active === 'false' || (c.active === undefined && LEGACY_INACTIVE.includes(String(c.carName).trim()))); }
+      else o[k] = c[k] == null ? '' : latin(c[k]);
+    });
     return o;
   });
 }
 function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
-function makePayload(){ return {app:'cars-crm', version:3, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
+function makePayload(){ return {app:'cars-crm', version:4, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
 function loadLocal(){
   try{ const s = localStorage.getItem(LOCAL_KEY); if(s) return parseCars(s); }catch(e){}
   return parseCars(JSON.stringify(initialCars));
@@ -511,51 +505,560 @@ function cacheLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(makeP
 let cars = withIds(loadLocal(), 'l');
 let editingId = null;
 
-function persist(){
-  cacheLocal();
-  if(ghConfig.token){ pushToGithub(); }
+/* ---------- الحماية والرقم السري (PIN + سؤال أمان) ---------- */
+function getSecurityConfig(){
+  try{
+    const s = localStorage.getItem(SEC_KEY);
+    return s ? JSON.parse(s) : null;
+  }catch(e){ return null; }
 }
-
-function renderNote(){
-  const n = $('backupNote');
-  const syncBtn = $('syncGithubBtn');
-  syncBtn.style.display = ghConfig.token ? '' : 'none';
-  if(ghConfig.token){
-    n.className = 'note note-ok';
-    n.textContent = isSyncing ? '🔄 جاري المزامنة والحفظ على GitHub...' : '🐙 متصل بـ GitHub • يتم حفظ التعديلات سحابياً تلقائياً';
-  } else {
-    n.className = 'note note-warn';
-    n.textContent = '⚠️ التخزين محلياً فقط. اضغط على «🐙 إعداد ربط GitHub» لحفظ البيانات سحابياً على مستودعك.';
+function saveSecurityConfig(cfg){
+  if(!cfg) localStorage.removeItem(SEC_KEY);
+  else localStorage.setItem(SEC_KEY, JSON.stringify(cfg));
+  updateSecurityBtnUI();
+}
+function normAnswer(a){
+  return latin(a).trim().toLowerCase().replace(/\s+/g, ' ');
+}
+function updateSecurityBtnUI(){
+  const cfg = getSecurityConfig();
+  $('securityBtn').textContent = cfg && cfg.pin ? '🔒 الحماية (مفعّلة)' : '🔓 الحماية';
+}
+function checkLockOnStartup(){
+  const cfg = getSecurityConfig();
+  updateSecurityBtnUI();
+  if(cfg && cfg.pin){
+    showLockScreen();
   }
 }
+function showLockScreen(){
+  $('lockVerifyBox').style.display = '';
+  $('lockRecoverBox').style.display = 'none';
+  $('unlockPinInput').value = '';
+  $('lockScreen').classList.add('active');
+  setTimeout(() => $('unlockPinInput').focus(), 100);
+}
+$('unlockForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const cfg = getSecurityConfig();
+  const entered = latin($('unlockPinInput').value).trim();
+  if(!cfg || entered === cfg.pin){
+    $('lockScreen').classList.remove('active');
+    toast('مرحباً بك! تم فتح القفل بنجاح');
+  }else{
+    toast('❌ الرقم السري غير صحيح');
+    $('unlockPinInput').select();
+  }
+});
+$('forgotPinBtn').onclick = () => {
+  const cfg = getSecurityConfig();
+  if(!cfg || !cfg.question){
+    toast('لم يتم إعداد سؤال أمان مسبقاً');
+    return;
+  }
+  $('recoverQuestionDisplay').textContent = 'سؤال الأمان: ' + cfg.question;
+  $('recoverAnswerInput').value = '';
+  $('recoverNewPinInput').value = '';
+  $('lockVerifyBox').style.display = 'none';
+  $('lockRecoverBox').style.display = '';
+  setTimeout(() => $('recoverAnswerInput').focus(), 100);
+};
+$('backToLoginBtn').onclick = () => {
+  $('lockRecoverBox').style.display = 'none';
+  $('lockVerifyBox').style.display = '';
+};
+$('recoverForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const cfg = getSecurityConfig();
+  if(!cfg) return;
+  const ans = normAnswer($('recoverAnswerInput').value);
+  const newPin = latin($('recoverNewPinInput').value).trim();
+  if(ans !== cfg.answerHash){
+    toast('❌ إجابة سؤال الأمان غير صحيحة');
+    $('recoverAnswerInput').select();
+    return;
+  }
+  if(!newPin){
+    toast('الرجاء إدخال رقم سري جديد');
+    return;
+  }
+  cfg.pin = newPin;
+  saveSecurityConfig(cfg);
+  $('lockScreen').classList.remove('active');
+  toast('✅ تم تغيير الرقم السري وفتح النظام بنجاح');
+});
 
-async function initAppCore(){
-  loadGhConfig();
-  if(ghConfig.token){ await fetchFromGithub(); }
-  refresh(); renderNote();
+$('securityBtn').onclick = () => {
+  const cfg = getSecurityConfig();
+  $('securityForm').reset();
+  if(cfg && cfg.pin){
+    $('curPinGroup').style.display = '';
+    $('secQuestion').value = cfg.question || '';
+    $('disablePinBtn').style.display = '';
+    $('lockNowBtn').style.display = '';
+  }else{
+    $('curPinGroup').style.display = 'none';
+    $('disablePinBtn').style.display = 'none';
+    $('lockNowBtn').style.display = 'none';
+  }
+  $('securityModal').classList.add('active');
+};
+$('closeSecBtn').onclick = () => $('securityModal').classList.remove('active');
+$('cancelSecBtn').onclick = () => $('securityModal').classList.remove('active');
+$('lockNowBtn').onclick = () => {
+  $('securityModal').classList.remove('active');
+  showLockScreen();
+};
+$('securityForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const cfg = getSecurityConfig();
+  if(cfg && cfg.pin){
+    const cur = latin($('secCurrentPin').value).trim();
+    if(cur !== cfg.pin){
+      toast('❌ الرقم السري الحالي غير صحيح');
+      $('secCurrentPin').focus();
+      return;
+    }
+  }
+  const newPin = latin($('secNewPin').value).trim();
+  const q = $('secQuestion').value.trim();
+  const a = normAnswer($('secAnswer').value);
+  if(!newPin || !q || !a){
+    toast('الرجاء ملء جميع الحقول المطلوبة');
+    return;
+  }
+  saveSecurityConfig({pin: newPin, question: q, answerHash: a});
+  $('securityModal').classList.remove('active');
+  toast('✅ تم حفظ الرقم السري وسؤال الأمان بنجاح');
+});
+$('disablePinBtn').onclick = () => {
+  const cfg = getSecurityConfig();
+  if(!cfg) return;
+  const cur = latin($('secCurrentPin').value).trim();
+  if(cur !== cfg.pin){
+    toast('الرجاء إدخال الرقم السري الحالي أولاً لإلغاء الحماية');
+    $('secCurrentPin').focus();
+    return;
+  }
+  saveSecurityConfig(null);
+  $('securityModal').classList.remove('active');
+  toast('تم إلغاء الرقم السري');
+};
+
+/* ---------- GitHub Repository Storage (GitHub REST Content API) ---------- */
+let ghState = 'none', ghLastSync = null, ghSha = null, ghTimer = null;
+function getGhConfig(){
+  try{
+    const s = localStorage.getItem(GH_KEY);
+    return s ? JSON.parse(s) : null;
+  }catch(e){ return null; }
+}
+function saveGhConfig(cfg){
+  if(!cfg) localStorage.removeItem(GH_KEY);
+  else localStorage.setItem(GH_KEY, JSON.stringify(cfg));
+}
+function utf8ToBase64(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for(let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function base64ToUtf8(b64){
+  const bin = atob(b64.replace(/\s/g, ''));
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function encodeGhPath(path){
+  return path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+}
+async function githubPull(silent = false){
+  const cfg = getGhConfig();
+  if(!cfg || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  ghState = 'syncing'; renderGhNote();
+  try{
+    const branch = cfg.branch || 'main';
+    const path = encodeGhPath(cfg.path || DATA_FILE);
+    const url = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${cfg.token}`,
+        'X-GitHub-Api-Version': '2022-11-28'
+      },
+      cache: 'no-store'
+    });
+    if(res.status === 404){
+      ghState = 'ready'; renderGhNote();
+      if(!silent) toast('الملف غير موجود بعد في المستودع، سيتم إنشاؤه عند أول رفع (Push)');
+      return false;
+    }
+    if(!res.ok){
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    ghSha = data.sha;
+    const text = base64ToUtf8(data.content || '');
+    cars = withIds(parseCars(text), 'gh');
+    cacheLocal();
+    if(dataDir) scheduleSave();
+    ghLastSync = new Date();
+    ghState = 'ready';
+    refresh(); renderGhNote();
+    if(!silent) toast('☁️ تم جلب البيانات من GitHub بنجاح (' + cars.length + ' سيارة)');
+    return true;
+  }catch(e){
+    ghState = 'error'; renderGhNote();
+    if(!silent) toast('تعذّر الجلب من GitHub: ' + (e.message || e));
+    return false;
+  }
+}
+async function githubPush(silent = false){
+  const cfg = getGhConfig();
+  if(!cfg || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  ghState = 'syncing'; renderGhNote();
+  try{
+    const branch = cfg.branch || 'main';
+    const path = encodeGhPath(cfg.path || DATA_FILE);
+    const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
+    const headers = {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': `Bearer ${cfg.token}`,
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+    if(!ghSha){
+      const getRes = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
+      if(getRes.ok){
+        const getJson = await getRes.json();
+        ghSha = getJson.sha;
+      }
+    }
+    const contentStr = JSON.stringify(makePayload(), null, 2);
+    const body = {
+      message: `تحديث بيانات السيارات (${todayLocal()})`,
+      content: utf8ToBase64(contentStr),
+      branch
+    };
+    if(ghSha) body.sha = ghSha;
+    let putRes = await fetch(baseUrl, {
+      method: 'PUT',
+      headers: {...headers, 'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(putRes.status === 409 || putRes.status === 422){
+      const getRes2 = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
+      if(getRes2.ok){
+        const getJson2 = await getRes2.json();
+        ghSha = getJson2.sha;
+        body.sha = ghSha;
+        putRes = await fetch(baseUrl, {
+          method: 'PUT',
+          headers: {...headers, 'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        });
+      }
+    }
+    if(!putRes.ok){
+      const errData = await putRes.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP ${putRes.status}`);
+    }
+    const putData = await putRes.json();
+    if(putData && putData.content && putData.content.sha) ghSha = putData.content.sha;
+    ghLastSync = new Date();
+    ghState = 'ready';
+    renderGhNote();
+    if(!silent) toast('☁️ تم رفع وحفظ البيانات في GitHub بنجاح');
+    return true;
+  }catch(e){
+    ghState = 'error'; renderGhNote();
+    if(!silent) toast('تعذّر الحفظ في GitHub: ' + (e.message || e));
+    return false;
+  }
+}
+function scheduleGhSync(){
+  const cfg = getGhConfig();
+  if(!cfg || !cfg.autoSync) return;
+  clearTimeout(ghTimer);
+  ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 600);
+}
+function renderGhNote(){
+  const n = $('githubNote');
+  const cfg = getGhConfig();
+  if(!cfg || !cfg.token){
+    n.style.display = 'none';
+    return;
+  }
+  n.style.display = 'flex';
+  const repoLabel = `${cfg.owner}/${cfg.repo}:${cfg.branch || 'main'}`;
+  let cls = 'note-ok', txt = '';
+  if(ghState === 'syncing'){
+    cls = 'note-warn';
+    txt = `⏳ جاري المزامنة مع مستودع GitHub «${repoLabel}»...`;
+  }else if(ghState === 'error'){
+    cls = 'note-bad';
+    txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من صلاحية الـ Token أو اسم المستودع.`;
+  }else{
+    txt = `☁️ متصل بمستودع GitHub «${repoLabel}» (${cfg.path || DATA_FILE})` + (ghLastSync ? ` • آخر مزامنة ${pad(ghLastSync.getHours())}:${pad(ghLastSync.getMinutes())}` : '');
+  }
+  n.className = 'note ' + cls;
+  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب</button><button type="button" class="btn-small btn-gh" onclick="githubPush(false)">⬆️ رفع</button></div>`;
 }
 
-/* العرض والجداول */
+$('githubBtn').onclick = () => {
+  const cfg = getGhConfig() || {};
+  $('ghOwner').value = cfg.owner || '';
+  $('ghRepo').value = cfg.repo || '';
+  $('ghBranch').value = cfg.branch || 'main';
+  $('ghPath').value = cfg.path || DATA_FILE;
+  $('ghToken').value = cfg.token || '';
+  $('ghAutoSync').checked = cfg.autoSync !== false;
+  $('ghDisconnectBtn').style.display = cfg.token ? '' : 'none';
+  $('githubModal').classList.add('active');
+};
+$('closeGhBtn').onclick = () => $('githubModal').classList.remove('active');
+function readGhFormConfig(){
+  return {
+    owner: $('ghOwner').value.trim(),
+    repo: $('ghRepo').value.trim(),
+    branch: $('ghBranch').value.trim() || 'main',
+    path: $('ghPath').value.trim() || DATA_FILE,
+    token: $('ghToken').value.trim(),
+    autoSync: $('ghAutoSync').checked
+  };
+}
+$('githubForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cfg = readGhFormConfig();
+  if(!cfg.owner || !cfg.repo || !cfg.token){
+    toast('الرجاء إدخال بيانات المستودع والـ Token');
+    return;
+  }
+  saveGhConfig(cfg);
+  ghState = 'ready';
+  hideGate();
+  renderGhNote();
+  $('githubModal').classList.remove('active');
+  toast('تم حفظ إعدادات GitHub، جاري فحص المستودع...');
+  const pulled = await githubPull(true);
+  if(!pulled) await githubPush(false);
+});
+$('ghPushNowBtn').onclick = async () => {
+  const cfg = readGhFormConfig();
+  if(!cfg.owner || !cfg.repo || !cfg.token){ toast('أكمل حقول GitHub أولاً'); return; }
+  saveGhConfig(cfg); hideGate();
+  await githubPush(false);
+};
+$('ghPullNowBtn').onclick = async () => {
+  const cfg = readGhFormConfig();
+  if(!cfg.owner || !cfg.repo || !cfg.token){ toast('أكمل حقول GitHub أولاً'); return; }
+  saveGhConfig(cfg); hideGate();
+  await githubPull(false);
+};
+$('ghDisconnectBtn').onclick = () => {
+  saveGhConfig(null);
+  ghSha = null; ghState = 'none';
+  renderGhNote();
+  $('githubModal').classList.remove('active');
+  toast('تم إلغاء الربط بمستودع GitHub');
+};
+
+/* ---------- التخزين في مجلد ---------- */
+const FSA = typeof window.showDirectoryPicker === 'function';
+let dataDir = null, fileStamp = 0, folderState = 'none', lastSaveAt = null, backupFailed = false;
+let saveTimer = null, saving = Promise.resolve(), pendingHandle = null, folderName = '';
+
+function idb(){ return new Promise((res, rej) => { const r = indexedDB.open('cars-crm-db', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbGet(k){ const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+async function idbSet(k, v){ const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+
+async function resolveDataDir(root){
+  try{ await root.getFileHandle(DATA_FILE); return root; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  return root.getDirectoryHandle('data', {create:true});
+}
+async function connect(root){
+  try{
+    folderName = root.name;
+    dataDir = await resolveDataDir(root);
+    let fh = null;
+    try{ fh = await dataDir.getFileHandle(DATA_FILE); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+    if(fh){
+      const f = await fh.getFile();
+      cars = withIds(parseCars(await f.text()), 'f');
+      fileStamp = f.lastModified;
+      folderState = 'ready';
+    }else{
+      folderState = 'ready';
+      await writeFolder();
+    }
+    cacheLocal(); hideGate(); refresh(); renderNote();
+    toast('تم الاتصال بالمجلد: ' + folderName);
+  }catch(e){
+    dataDir = null; folderState = 'error';
+    showGate('error', e && e.message ? e.message : String(e));
+  }
+}
+async function pickFolder(){
+  if(!FSA){ toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); return; }
+  try{
+    const h = await window.showDirectoryPicker({id:'cars-crm', mode:'readwrite'});
+    try{ await idbSet('dir', h); }catch(e){}
+    await connect(h);
+  }catch(e){ if(!(e && e.name === 'AbortError')) toast('تعذّر فتح المجلد: ' + (e && e.message ? e.message : e)); }
+}
+async function reconnect(){
+  try{
+    const p = await pendingHandle.requestPermission({mode:'readwrite'});
+    if(p === 'granted') await connect(pendingHandle); else toast('لم يتم السماح بالوصول للمجلد');
+  }catch(e){ toast('تعذّر الاتصال: ' + (e && e.message ? e.message : e)); }
+}
+function useLocal(){ folderState = 'local'; hideGate(); renderNote(); }
+
+async function dailyBackup(){
+  const name = 'cars-' + todayLocal() + '.json';
+  const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
+  try{ await bdir.getFileHandle(name); return; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  let text = null;
+  try{ text = await (await (await dataDir.getFileHandle(DATA_FILE)).getFile()).text(); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
+  if(!text) return;
+  const bf = await bdir.getFileHandle(name, {create:true});
+  const w = await bf.createWritable(); await w.write(text); await w.close();
+  const names = [];
+  for await (const [n, h] of bdir.entries()){ if(h.kind === 'file' && /^cars-\d{4}-\d{2}-\d{2}\.json$/.test(n)) names.push(n); }
+  names.sort();
+  while(names.length > 30){ await bdir.removeEntry(names.shift()); }
+}
+async function manualBackup(label){
+  if(!dataDir) return false;
+  try{
+    const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
+    const bf = await bdir.getFileHandle('cars-' + label + '-' + nowStamp() + '.json', {create:true});
+    const w = await bf.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
+    return true;
+  }catch(e){ return false; }
+}
+async function writeFolder(){
+  if(!dataDir) return;
+  try{
+    try{ await dailyBackup(); backupFailed = false; }catch(e){ backupFailed = true; console.warn(e); }
+    const fh = await dataDir.getFileHandle(DATA_FILE, {create:true});
+    const w = await fh.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
+    fileStamp = (await fh.getFile()).lastModified; lastSaveAt = new Date(); folderState = 'ready'; renderNote();
+  }catch(e){
+    folderState = 'error'; renderNote(); toast('تعذّر الحفظ في المجلد: ' + (e && e.message ? e.message : e));
+  }
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveTimer = null; saving = saving.then(writeFolder).catch(() => {}); }, 300);
+}
+function persist(){
+  cacheLocal();
+  if(dataDir) scheduleSave();
+  scheduleGhSync();
+}
+
+async function checkExternal(){
+  if(!dataDir || folderState !== 'ready' || saveTimer) return;
+  try{
+    const f = await (await dataDir.getFileHandle(DATA_FILE)).getFile();
+    if(f.lastModified !== fileStamp){
+      cars = withIds(parseCars(await f.text()), 'f'); fileStamp = f.lastModified;
+      cacheLocal(); refresh(); toast('تم تحديث البيانات من المجلد');
+    }
+  }catch(e){}
+}
+window.addEventListener('focus', checkExternal);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) checkExternal(); });
+
+function renderNote(){
+  const n = $('backupNote'); let cls = 'note-ok', msg;
+  if(folderState === 'ready'){
+    msg = '✅ تُحفظ البيانات تلقائياً في المجلد «' + folderName + '»' + (lastSaveAt ? ' • آخر حفظ ' + pad(lastSaveAt.getHours()) + ':' + pad(lastSaveAt.getMinutes()) : '') + ' • نسخة احتياطية يومية داخل backups';
+    if(backupFailed){ cls = 'note-warn'; msg = '⚠️ البيانات محفوظة في المجلد لكن تعذّر إنشاء النسخة الاحتياطية اليومية.'; }
+  }else if(folderState === 'error'){
+    cls = 'note-warn'; msg = '⚠️ تعذّر الحفظ في المجلد. تأكد من الصلاحية أو أعد اختيار المجلد بزر «📁 المجلد».';
+  }else{
+    cls = 'note-warn'; msg = '⚠️ التخزين المحلي: المتصفح فقط (بدون مجلد). يمكنك اختيار «📁 المجلد» أو الربط مع «☁️ GitHub».';
+  }
+  n.className = 'note ' + cls; n.textContent = msg;
+}
+
+/* ---------- نافذة الاتصال بالمجلد أو GitHub ---------- */
+function hideGate(){ $('gate').classList.remove('active'); }
+function showGate(mode, msg){
+  $('gate').classList.add('active');
+  const T = $('gateTitle'), M = $('gateMsg'), P = $('gatePrimary'), S = $('gateSecondary'), G = $('gateGithub');
+  S.style.display = '';
+  G.onclick = () => { hideGate(); $('githubBtn').click(); };
+  if(mode === 'first'){
+    T.textContent = '📁 اختيار مكان حفظ البيانات';
+    M.textContent = 'اختر مجلد البرنامج (cars-crm) للحفظ التلقائي على جهازك، أو اربط النظام بمستودع GitHub للتخزين السحابي.';
+    P.textContent = '📁 اختيار مجلد محلي'; P.onclick = pickFolder;
+    S.textContent = 'متابعة بتخزين المتصفح فقط'; S.onclick = useLocal;
+  }else if(mode === 'reconnect'){
+    T.textContent = '📁 الاتصال بمجلد البيانات';
+    M.textContent = 'اضغط للسماح للمتصفح بالوصول إلى المجلد «' + folderName + '». يطلب المتصفح ذلك مرة في كل جلسة.';
+    P.textContent = 'فتح المجلد'; P.onclick = reconnect;
+    S.textContent = 'اختيار مجلد آخر'; S.onclick = pickFolder;
+  }else if(mode === 'unsupported'){
+    T.textContent = 'خيارات حفظ البيانات';
+    M.textContent = 'هذا المتصفح لا يدعم الحفظ المباشر في مجلد محلي، لكن يمكنك الربط بمستودع GitHub أو المتابعة بتخزين المتصفح.';
+    P.textContent = 'متابعة بتخزين المتصفح'; P.onclick = useLocal;
+    S.style.display = 'none';
+  }else{
+    T.textContent = 'تعذّر فتح مجلد البيانات';
+    M.textContent = msg || 'حدث خطأ غير متوقع.';
+    P.textContent = 'اختيار مجلد آخر'; P.onclick = pickFolder;
+    S.textContent = 'متابعة بتخزين المتصفح'; S.onclick = useLocal;
+  }
+}
+async function init(){
+  checkLockOnStartup();
+  refresh(); renderNote(); renderGhNote();
+  const ghCfg = getGhConfig();
+  if(ghCfg && ghCfg.token){
+    folderState = 'local';
+    renderNote();
+    githubPull(true);
+    return;
+  }
+  if(!FSA){ showGate('unsupported'); return; }
+  let h = null; try{ h = await idbGet('dir'); }catch(e){}
+  if(h){
+    folderName = h.name;
+    let perm = 'prompt'; try{ perm = await h.queryPermission({mode:'readwrite'}); }catch(e){}
+    if(perm === 'granted'){ await connect(h); return; }
+    pendingHandle = h; showGate('reconnect'); return;
+  }
+  showGate('first');
+}
+
+/* ---------- العرض ---------- */
 function getFiltered(){
   const q = latin($('searchInput').value).trim().toLowerCase();
   const st = $('statusFilter').value;
   return cars.filter(c => {
-    const hay = latin([c.carName, c.plateNumber, c.insurance].join(' ')).toLowerCase();
+    const hay = latin([c.carName, c.plateNumber, c.insurance, c.serialNumber].join(' ')).toLowerCase();
+    if(!c.active && !$('showInactive').checked) return false;
     if(q && !hay.includes(q)) return false;
-    if(st && level(daysUntil(insEff(c).iso)) !== st && level(daysUntil(c.registrationDate)) !== st && level(daysUntil(c.inspectionDate)) !== st) return false;
+    if(st && worst(c) !== st) return false;
     return true;
   });
 }
 function renderTable(){
   const list = getFiltered(); const tb = $('tableBody');
-  if(!list.length){ tb.innerHTML = '<tr><td colspan="9" class="empty-state">لا توجد نتائج</td></tr>'; return; }
-  tb.innerHTML = list.map(c => '<tr>' +
-    '<td><strong>' + esc(c.carName) + '</strong></td>' +
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات. اضغط «إضافة سيارة» للبدء') + '</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(c => '<tr' + (c.active ? '' : ' class="inactive"') + '>' +
+    '<td><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>') + '</td>' +
     '<td>' + esc(c.plateNumber) + '</td>' +
     '<td>' + esc(c.insurance || '—') + '</td>' +
-    '<td>' + dateCell(insEff(c).iso) + '</td>' +
-    '<td>' + dateCell(c.registrationDate) + '</td>' +
-    '<td>' + dateCell(c.inspectionDate) + '</td>' +
+    '<td>' + dateCell(c.insuranceDate, c.insuranceCal) + '</td>' +
+    '<td>' + dateCell(c.registrationDate, c.registrationCal) + '</td>' +
+    '<td>' + dateCell(c.inspectionDate, c.inspectionCal) + '</td>' +
     '<td>' + esc(c.yearOfManufacture || '—') + '</td>' +
     '<td>' + fmtNum(c.carValue) + '</td>' +
     '<td><div class="action-buttons">' +
@@ -564,122 +1067,227 @@ function renderTable(){
     '</div></td></tr>').join('');
 }
 function updateStats(){
-  const n = fn => cars.filter(fn).length;
-  $('stTotal').textContent = cars.length;
-  $('stInsExpired').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'danger');
-  $('stInsSoon').textContent = n(c => level(daysUntil(insEff(c).iso)) === 'warning');
+  const act = cars.filter(c => c.active), n = f => act.filter(f).length;
+  $('stTotal').textContent = act.length;
+  $('stInsExpired').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'danger');
+  $('stInsSoon').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'warning');
   $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
   $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+  $('showInactiveTxt').textContent = 'إظهار السيارات غير النشطة (' + (cars.length - act.length) + ')';
 }
 function refresh(){ renderTable(); updateStats(); }
 
-/* أزرار ونوافذ تفاعلية */
-$('githubConfigBtn').onclick = () => {
-  $('ghOwner').value = ghConfig.owner;
-  $('ghRepo').value = ghConfig.repo;
-  $('ghPath').value = ghConfig.path || 'cars-data.json';
-  $('ghToken').value = ghConfig.token;
-  $('disconnectGithub').style.display = ghConfig.token ? '' : 'none';
-  $('githubModal').classList.add('active');
-};
-$('closeGithubModal').onclick = () => $('githubModal').classList.remove('active');
+/* ---------- النماذج ---------- */
+function updateHint(f){
+  const v = latin($(f).value).trim(), h = $('h_' + f);
+  h.className = 'hint';
+  if(!v){ h.textContent = ''; return; }
+  const n = normDate(v);
+  if(n === null){ h.textContent = 'تاريخ غير صالح'; h.className = 'hint bad'; return; }
+  const cal = $(f).dataset.cal || 'g';
+  const hs = hijriStr(n);
+  if(cal === 'h') h.textContent = 'الموافق ميلادياً: ' + n + ' م (يُعرض الهجري أولاً)';
+  else h.textContent = hs ? 'الموافق هجرياً: ' + hs + ' هـ (يُعرض الميلادي أولاً)' : '';
+}
+DATE_FIELDS.forEach(f => {
+  $('tog_' + f).addEventListener('click', () => toggleDateFieldCal(f));
+  $(f).addEventListener('input', e => {
+    const d = latin(e.target.value).replace(/\D/g, '').slice(0, 8);
+    let out = d;
+    if(d.length > 6) out = d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6);
+    else if(d.length > 4) out = d.slice(0,4) + '-' + d.slice(4);
+    e.target.value = out;
+    if(d.length >= 4){
+      const y = parseInt(d.slice(0, 4), 10);
+      e.target.dataset.cal = (y >= 1300 && y <= 1600) ? 'h' : 'g';
+      updateCalToggleUI(f);
+    }
+    updateHint(f);
+  });
+  $(f).addEventListener('change', e => {
+    const n = normDate(e.target.value);
+    if(n){
+      const cal = e.target.dataset.cal || 'g';
+      e.target.value = cal === 'h' ? (hijriStr(n, '-') || n) : n;
+    }
+    updateHint(f);
+  });
+});
+$('yearOfManufacture').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/\D/g, '').slice(0, 4); });
+$('carValue').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/[^\d.]/g, ''); });
+['plateNumber','serialNumber'].forEach(f => $(f).addEventListener('input', e => { e.target.value = latin(e.target.value); }));
 
-$('saveGithubConfig').onclick = async () => {
-  ghConfig.owner = $('ghOwner').value.trim();
-  ghConfig.repo = $('ghRepo').value.trim();
-  ghConfig.path = $('ghPath').value.trim() || 'cars-data.json';
-  ghConfig.token = $('ghToken').value.trim();
-  saveGhConfigStorage();
-  $('githubModal').classList.remove('active');
-  toast('جاري الاتصال والتحقق من GitHub...');
-  const ok = await fetchFromGithub();
-  if(ok) toast('✅ تم ربط GitHub وحفظ البيانات بنجاح!');
-  renderNote();
-};
-$('disconnectGithub').onclick = () => {
-  ghConfig = { owner: '', repo: '', path: 'cars-data.json', token: '' };
-  saveGhConfigStorage();
-  $('githubModal').classList.remove('active');
-  renderNote();
-  toast('تم إلغاء ربط GitHub');
-};
-$('syncGithubBtn').onclick = fetchFromGithub;
-
-$('toggleTableCalBtn').onclick = () => {
-  tableCalMode = tableCalMode === 'g' ? 'h' : 'g';
-  $('toggleTableCalBtn').textContent = tableCalMode === 'g' ? '📅 الأساسي: ميلادي ⇄ هجري' : '📅 الأساسي: هجري ⇄ ميلادي';
-  renderTable();
-};
-
-let editingId = null;
 function openModal(car){
   editingId = car ? car.id : null;
   $('modalTitle').textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
   $('carForm').reset();
-  if(car){ FIELDS.forEach(f => { if($(f)) $(f).value = latin(car[f]); }); }
+  if(car){
+    FORM_FIELDS.forEach(f => { $(f).value = latin(car[f]); });
+  }
+  DATE_FIELDS.forEach(f => {
+    const cal = (car && car[CAL_OF[f]]) || CAL_DEFAULT[CAL_OF[f]];
+    $(f).dataset.cal = cal;
+    if(car && car[f]){
+      $(f).value = cal === 'h' ? (hijriStr(car[f], '-') || car[f]) : car[f];
+    }
+    updateCalToggleUI(f);
+    updateHint(f);
+  });
+  $('active').checked = car ? car.active !== false : true;
   $('carModal').classList.add('active');
 }
+function closeModal(){ $('carModal').classList.remove('active'); }
+let confirmCb = null;
+function askConfirm(msg, cb){ $('confirmMsg').textContent = msg; confirmCb = cb; $('confirmModal').classList.add('active'); }
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; }
+let toastT;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4000); }
+
 $('addBtn').onclick = () => openModal(null);
-$('closeBtn').onclick = () => $('carModal').classList.remove('active');
-$('cancelBtn').onclick = () => $('carModal').classList.remove('active');
+$('closeBtn').onclick = closeModal;
+$('cancelBtn').onclick = closeModal;
+$('carModal').addEventListener('click', e => { if(e.target === $('carModal')) closeModal(); });
+$('securityModal').addEventListener('click', e => { if(e.target === $('securityModal')) $('securityModal').classList.remove('active'); });
+$('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
+$('confirmNo').onclick = closeConfirm;
+$('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
+$('searchInput').addEventListener('input', renderTable);
+$('statusFilter').addEventListener('change', renderTable);
+$('showInactive').addEventListener('change', renderTable);
+$('folderBtn').onclick = () => { if(FSA) pickFolder(); else toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); };
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    closeModal(); closeConfirm();
+    $('securityModal').classList.remove('active');
+    $('githubModal').classList.remove('active');
+  }
+});
 
 $('carForm').addEventListener('submit', e => {
   e.preventDefault();
   const data = {};
-  FIELDS.forEach(f => { if($(f)) data[f] = latin($(f).value).trim(); });
+  FORM_FIELDS.forEach(f => { data[f] = latin($(f).value).trim(); });
+  DATE_FIELDS.forEach(f => { data[CAL_OF[f]] = $(f).dataset.cal || CAL_DEFAULT[CAL_OF[f]]; });
+  data.active = $('active').checked;
+  for(const f of DATE_FIELDS){
+    const n = normDate(data[f]);
+    if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
+    data[f] = n;
+  }
   if(editingId){
     const i = cars.findIndex(c => c.id === editingId);
     if(i > -1) cars[i] = {...cars[i], ...data};
   }else{
     cars.push({id:'c_' + Date.now().toString(36), ...data});
   }
-  persist(); $('carModal').classList.remove('active'); refresh();
+  persist(); closeModal(); refresh();
 });
-
 $('tableBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
   if(b.dataset.del){
-    const c = cars.find(x => x.id === b.dataset.del);
-    if(confirm('هل تريد حذف السيارة؟')){
-      cars = cars.filter(x => x.id !== c.id);
-      persist(); refresh();
-    }
+    const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
+    askConfirm('هل تريد حذف «' + c.carName + '»؟', () => { cars = cars.filter(x => x.id !== c.id); persist(); refresh(); });
   }
 });
 
-$('backupBtn').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
-  a.download = 'cars-backup-' + todayLocal() + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  toast('💾 تم تحميل النسخة الاحتياطية');
+/* ---------- نسخة احتياطية واسترجاع ---------- */
+function saveBlob(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+$('backupBtn').onclick = async () => {
+  if(dataDir){
+    const ok = await manualBackup('manual');
+    toast(ok ? 'تم حفظ نسخة احتياطية داخل مجلد backups' : 'تعذّر حفظ النسخة الاحتياطية في المجلد');
+  }else{
+    saveBlob('cars-backup-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+    toast('تم تحميل ملف النسخة الاحتياطية');
+  }
 };
 $('restoreBtn').onclick = () => $('restoreFile').click();
-$('restoreFile').onchange = e => {
+$('restoreFile').addEventListener('change', async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = evt => {
-    try{
-      cars = withIds(parseCars(evt.target.result), 'r');
-      persist(); refresh();
-      toast('♻️ تم استرجاع البيانات بنجاح');
-    }catch(err){ toast('⚠️ ملف غير صالح'); }
-  };
-  reader.readAsText(f);
-};
+  try{
+    const clean = parseCars(await f.text());
+    if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
+    askConfirm('سيتم استبدال البيانات الحالية (' + cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
+      await manualBackup('before-restore');
+      cars = withIds(clean, 'r'); persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة');
+    });
+  }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
+});
 
-$('searchInput').addEventListener('input', renderTable);
-$('statusFilter').addEventListener('change', renderTable);
-
-function toast(msg){
-  const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4000);
+/* ---------- تصدير PDF ---------- */
+const LV = {ok:['#d4edda','#155724'], warning:['#fff3cd','#856404'], danger:['#f8d7da','#721c24']};
+function pdfDate(iso, main){
+  const d = daysUntil(iso);
+  if(d === null) return '<span style="color:#999">—</span>';
+  const c = LV[level(d)], h = hijriStr(iso);
+  const first = main === 'h' ? (h ? h + ' هـ' : iso) : iso + ' م';
+  const second = main === 'h' ? iso + ' م' : (h ? h + ' هـ' : '');
+  return '<div style="direction:ltr;text-align:right;font-weight:700">' + esc(first) + '</div>' +
+    (second ? '<div style="direction:ltr;text-align:right;font-size:10px;color:#777">' + esc(second) + '</div>' : '') +
+    '<span style="display:inline-block;margin-top:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' + c[0] + ';color:' + c[1] + '">' + daysText(d) + '</span>';
 }
+function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
+  const th = 'style="background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const body = rows.map((c, i) => '<tr>' +
+    '<td ' + td + '>' + (startIdx + i + 1) + '</td>' +
+    '<td ' + td + '><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : ' <span style="font-size:10px;color:#888">(غير نشطة)</span>') + '</td>' +
+    '<td ' + td + '>' + esc(c.plateNumber) + '</td>' +
+    '<td ' + td + '>' + esc(c.insurance || '—') + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.insuranceDate, c.insuranceCal) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.registrationDate, c.registrationCal) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.inspectionDate, c.inspectionCal) + '</td>' +
+    '<td ' + td + '>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>').join('');
+  return '<div style="width:1123px;height:794px;background:#fff;color:#1f2937;padding:26px 30px;box-sizing:border-box;direction:rtl;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;position:relative">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
+      '<div><div style="font-size:24px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
+      '<div style="font-size:12px;color:#666;margin-top:4px">' + (filtered ? 'نتائج التصفية: ' : 'الإجمالي: ') + total + ' سيارة</div></div>' +
+      '<div style="font-size:12px;color:#666;direction:ltr">' + todayStr + ' • ' + hijriStr(todayStr) + ' H</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse"><thead><tr>' +
+      '<th ' + th + '>#</th><th ' + th + '>السيارة</th><th ' + th + '>اللوحة</th><th ' + th + '>شركة التأمين</th>' +
+      '<th ' + th + '>التأمين</th><th ' + th + '>الاستمارة</th><th ' + th + '>الفحص</th>' +
+      '<th ' + th + '>سنة الصنع</th><th ' + th + '>القيمة</th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table>' +
+    '<div style="position:absolute;bottom:16px;left:30px;right:30px;display:flex;justify-content:space-between;font-size:11px;color:#888">' +
+      '<span>أخضر: ساري • أصفر: ينتهي خلال 30 يوم • أحمر: منتهي</span><span>صفحة ' + pageNo + ' من ' + pages + '</span>' +
+    '</div></div>';
+}
+async function exportPDF(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
+  if(!window.html2canvas || !window.jspdf){ toast('تعذّر تحميل مكتبة الـ PDF. تحتاج اتصال إنترنت لتصدير PDF'); return; }
+  const btn = $('pdfBtn'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = 'جاري التجهيز...';
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-99999px;top:0;';
+  document.body.appendChild(holder);
+  try{
+    const PER = 10, pages = Math.ceil(list.length / PER), todayStr = todayLocal();
+    const doc = new window.jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    for(let p = 0; p < pages; p++){
+      holder.innerHTML = pageHtml(list.slice(p*PER, (p+1)*PER), p*PER, p+1, pages, list.length, list.length !== cars.length, todayStr);
+      const canvas = await html2canvas(holder.firstChild, {scale:2, backgroundColor:'#ffffff', logging:false});
+      if(p > 0) doc.addPage();
+      doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
+    }
+    saveBlob('cars-report-' + todayStr + '.pdf', doc.output('blob'));
+    toast('تم تجهيز ملف PDF');
+  }catch(err){
+    toast('تعذّر إنشاء الـ PDF' + (err && err.message ? ': ' + err.message : ''));
+  }finally{
+    holder.remove(); btn.disabled = false; btn.textContent = old;
+  }
+}
+$('pdfBtn').onclick = exportPDF;
 
-// بدء التطبيق
-loadAuthConfig();
-if(!authConfig.pin){ showPinModal('setup_first'); } else { showPinModal('login'); }
+init();
 </script>
 </body>
 </html>
