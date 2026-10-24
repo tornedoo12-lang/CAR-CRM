@@ -32,7 +32,7 @@ h1{font-size:26px;flex:1;min-width:200px}
 .header-controls{display:flex;gap:8px;flex-wrap:wrap}
 button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s, opacity .2s}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-button:disabled{opacity:.6;cursor:wait}
+button:disabled{opacity:.6;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){background:var(--accent-hover)}
 .btn-danger{background:var(--danger);color:#fff}
@@ -43,7 +43,7 @@ button:disabled{opacity:.6;cursor:wait}
 .btn-sec{background:var(--sec);color:#fff}
 .btn-sec:hover:not(:disabled){background:var(--sec-hover)}
 .btn-small{padding:6px 12px;font-size:12px}
-.note{padding:11px 16px;border-radius:8px;margin-bottom:10px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.note{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .note-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .note-warn{background:var(--warn-bg);color:var(--warn-fg)}
 .note-bad{background:var(--bad-bg);color:var(--bad-fg)}
@@ -64,11 +64,10 @@ td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertic
 tr:hover td{background:var(--hover)}
 .date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
 .sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
-.warn-line{color:var(--warn-fg);direction:rtl;text-align:right;white-space:normal;margin-top:3px}
 .inactive td{opacity:.55}
 .badge-off{display:inline-block;margin-right:6px;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:var(--hover);color:var(--muted);border:1px solid var(--border)}
-.chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
-.chk input{width:auto}
+.chk{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;cursor:pointer}
+.chk input{width:auto;margin:0}
 .days{display:inline-block;margin-top:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
 .lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
@@ -77,17 +76,16 @@ tr:hover td{background:var(--hover)}
 .empty-state{text-align:center;padding:40px;color:var(--muted)}
 .modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 .modal.active{display:flex}
-#gate{z-index:3000;background:rgba(15,18,30,.88)}
-#lockScreen{z-index:3500;background:rgba(12,14,24,.95);backdrop-filter:blur(6px)}
+#lockScreen{z-index:3500;background:rgba(12,14,24,.98);backdrop-filter:blur(14px)}
 .modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-header h2{font-size:20px}
 .close-btn{background:none;color:var(--muted);font-size:28px;padding:0 6px}
 .form-group{margin-bottom:13px}
-.form-group label{display:block;margin-bottom:5px;font-weight:600;font-size:13px}
-.form-group input,.form-group textarea{width:100%}
+.form-group label:not(.chk){display:block;margin-bottom:5px;font-weight:600;font-size:13px}
+.form-group input:not([type="checkbox"]),.form-group textarea{width:100%}
 .label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
-.label-row label{margin-bottom:0}
+.label-row label{margin-bottom:0 !important}
 .cal-toggle{padding:3px 10px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--text);border:1px solid var(--border);cursor:pointer;font-weight:700;transition:all .15s;white-space:nowrap}
 .cal-toggle.is-h{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-fg)}
 .cal-toggle.is-g{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-fg)}
@@ -98,19 +96,20 @@ tr:hover td{background:var(--hover)}
 textarea{resize:vertical;min-height:70px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-footer{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-.confirm-box{max-width:420px;text-align:center}
+.confirm-box{max-width:430px;text-align:center}
 .confirm-box h2{font-size:20px;margin-bottom:8px}
-.confirm-box p{margin:6px 0 20px;line-height:1.8}
+.confirm-box p{margin:6px 0 18px;line-height:1.8;font-size:14px}
 .confirm-box .modal-footer{justify-content:center}
 .stack{flex-direction:column;align-items:stretch}
 .link-btn{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;text-decoration:underline;padding:4px}
+.app-locked #appContainer{display:none !important}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:5000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 #toast.show{opacity:1}
 @media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
-<div class="container">
+<body class="app-locked">
+<div class="container" id="appContainer">
   <header>
     <h1>🚗 نظام إدارة السيارات</h1>
     <div class="header-controls">
@@ -118,15 +117,14 @@ textarea{resize:vertical;min-height:70px}
       <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
       <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
       <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
-      <button class="btn-gray" id="folderBtn">📁 المجلد</button>
       <button class="btn-gh" id="githubBtn">☁️ GitHub</button>
-      <button class="btn-sec" id="securityBtn">🔒 الحماية</button>
+      <button class="btn-sec" id="securityBtn">🔒 إعدادات الحماية</button>
+      <button class="btn-danger" id="quickLockBtn">🔐 قفل النظام</button>
       <input type="file" id="restoreFile" accept=".json,application/json" hidden>
     </div>
   </header>
 
-  <div id="backupNote" class="note" role="status"></div>
-  <div id="githubNote" class="note" role="status" style="display:none"></div>
+  <div id="githubNote" class="note" role="status"></div>
 
   <div class="stats">
     <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">السيارات النشطة</div></div>
@@ -220,25 +218,25 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- نافذة إعدادات الحماية والرقم السري -->
+<!-- نافذة تغيير الرقم السري وسؤال الأمان -->
 <div id="securityModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>🔒 إعدادات الرقم السري والحماية</h2>
+      <h2>🔒 إعدادات الحماية والتشفير</h2>
       <button class="close-btn" type="button" id="closeSecBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="securityForm">
-      <div class="form-note">اضبط رقماً سرياً لحماية النظام عند فتحه، مع سؤال أمان وإجابته لاستعادة الدخول في حال نسيان الرقم السري.</div>
-      <div class="form-group" id="curPinGroup" style="display:none">
+      <div class="form-note">يتم تشفير جميع بياناتك وتوكين GitHub بالكامل بواسطة الرقم السري الخاص بك. لا يتم حفظ الرقم السري أو أي بيانات كنص صريح أبداً.</div>
+      <div class="form-group">
         <label for="secCurrentPin">الرقم السري الحالي *</label>
-        <input type="password" id="secCurrentPin" dir="ltr" autocomplete="off" placeholder="أدخل الرقم السري الحالي للتأكيد">
+        <input type="password" id="secCurrentPin" dir="ltr" autocomplete="off" placeholder="أدخل الرقم السري الحالي للتأكيد" required>
       </div>
       <div class="form-group">
-        <label for="secNewPin">الرقم السري الجديد *</label>
-        <input type="password" id="secNewPin" dir="ltr" autocomplete="off" placeholder="مثال: 1234" required>
+        <label for="secNewPin">الرقم السري الجديد (4 رموز على الأقل) *</label>
+        <input type="password" id="secNewPin" dir="ltr" minlength="4" autocomplete="off" placeholder="أدخل الرقم السري الجديد" required>
       </div>
       <div class="form-group">
-        <label for="secQuestion">سؤال الأمان (في حال نسيان الرقم السري) *</label>
+        <label for="secQuestion">سؤال الأمان (لاستعادة الدخول عند النسيان) *</label>
         <input type="text" id="secQuestion" placeholder="مثال: ما هو اسم أول سيارة اشتريتها؟" required>
       </div>
       <div class="form-group">
@@ -246,35 +244,67 @@ textarea{resize:vertical;min-height:70px}
         <input type="text" id="secAnswer" placeholder="اكتب الإجابة هنا..." autocomplete="off" required>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn-primary">حفظ الحماية</button>
-        <button type="button" class="btn-sec" id="lockNowBtn" style="display:none">🔒 قفل النظام الآن</button>
-        <button type="button" class="btn-danger" id="disablePinBtn" style="display:none">إلغاء الرقم السري</button>
+        <button type="submit" class="btn-primary">💾 تحديث التشفير والرقم السري</button>
         <button type="button" class="btn-gray" id="cancelSecBtn">إغلاق</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- شاشة القفل بالرقم السري واستعادة كلمة المرور -->
-<div id="lockScreen" class="modal">
+<!-- شاشة القفل المشفرة -->
+<div id="lockScreen" class="modal active">
   <div class="modal-content confirm-box">
-    <div id="lockVerifyBox">
-      <h2>🔒 النظام محمي برقم سري</h2>
-      <p>الرجاء إدخال الرقم السري للدخول إلى نظام إدارة السيارات</p>
-      <form id="unlockForm">
-        <div class="form-group">
-          <input type="password" id="unlockPinInput" dir="ltr" style="text-align:center;font-size:20px;letter-spacing:4px" placeholder="••••" autocomplete="off" required>
+    <!-- 1. إعداد لأول مرة (ظاهر افتراضياً لمنع الشاشة الفارغة) -->
+    <div id="lockSetupBox">
+      <h2>🛡️ إعداد الحماية المشفرة لأول مرة</h2>
+      <p>قم بتعيين رقم سري قوي لتشفير بيانات النظام وتوكين GitHub بالكامل.</p>
+      <form id="setupPinForm">
+        <div class="form-group" style="text-align:right">
+          <label for="setupNewPin">الرقم السري الجديد (4 خانات على الأقل) *</label>
+          <input type="password" id="setupNewPin" dir="ltr" minlength="4" style="text-align:center;font-size:20px;letter-spacing:4px;font-weight:700" placeholder="••••" autocomplete="off" required>
+        </div>
+        <div class="form-group" style="text-align:right">
+          <label for="setupConfirmPin">تأكيد الرقم السري *</label>
+          <input type="password" id="setupConfirmPin" dir="ltr" minlength="4" style="text-align:center;font-size:20px;letter-spacing:4px;font-weight:700" placeholder="••••" autocomplete="off" required>
+        </div>
+        <div class="form-group" style="text-align:right">
+          <label for="setupQuestion">سؤال الأمان (في حال نسيان الرقم السري) *</label>
+          <input type="text" id="setupQuestion" placeholder="مثال: ما هو رقم هاتفي القديم؟" required>
+        </div>
+        <div class="form-group" style="text-align:right">
+          <label for="setupAnswer">إجابة سؤال الأمان *</label>
+          <input type="text" id="setupAnswer" autocomplete="off" placeholder="اكتب الإجابة هنا..." required>
+        </div>
+        <div class="form-group" style="text-align:right">
+          <label for="setupGhToken">توكين GitHub (اختياري الآن - لجلب السيارات فوراً)</label>
+          <input type="password" id="setupGhToken" dir="ltr" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
         </div>
         <div class="modal-footer stack">
-          <button type="submit" class="btn-primary">دخول</button>
-          <button type="button" class="link-btn" id="forgotPinBtn">هل نسيت الرقم السري؟</button>
+          <button type="submit" class="btn-primary">🔐 تشفير وتفعيل الحماية</button>
         </div>
       </form>
     </div>
 
+    <!-- 2. تسجيل الدخول وفك التشفير -->
+    <div id="lockVerifyBox" style="display:none">
+      <h2>🔒 النظام محمي ومشفر</h2>
+      <p>أدخل الرقم السري لفك تشفير البيانات والدخول إلى النظام</p>
+      <form id="unlockForm">
+        <div class="form-group">
+          <input type="password" id="unlockPinInput" dir="ltr" style="text-align:center;font-size:22px;letter-spacing:6px;font-weight:700" placeholder="••••" autocomplete="off" required>
+          <div class="hint bad" id="lockoutHint" style="margin-top:8px;font-weight:700"></div>
+        </div>
+        <div class="modal-footer stack">
+          <button type="submit" class="btn-primary" id="unlockSubmitBtn">🔓 فك التشفير والدخول</button>
+          <button type="button" class="link-btn" id="forgotPinBtn">هل نسيت الرقم السري؟ (استعادة بسؤال الأمان)</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 3. استعادة الرقم السري بسؤال الأمان -->
     <div id="lockRecoverBox" style="display:none">
       <h2>🔑 استعادة الرقم السري</h2>
-      <p style="margin-bottom:10px">أجب عن سؤال الأمان التالي لتعيين رقم سري جديد:</p>
+      <p style="margin-bottom:10px">أجب عن سؤال الأمان لفك القفل وتعيين رقم سري جديد:</p>
       <div class="form-note" id="recoverQuestionDisplay" style="font-weight:700;color:var(--text);font-size:14px"></div>
       <form id="recoverForm">
         <div class="form-group" style="text-align:right">
@@ -282,8 +312,8 @@ textarea{resize:vertical;min-height:70px}
           <input type="text" id="recoverAnswerInput" autocomplete="off" required placeholder="اكتب إجابتك هنا...">
         </div>
         <div class="form-group" style="text-align:right">
-          <label for="recoverNewPinInput">الرقم السري الجديد *</label>
-          <input type="password" id="recoverNewPinInput" dir="ltr" autocomplete="off" required placeholder="أدخل الرقم السري الجديد">
+          <label for="recoverNewPinInput">الرقم السري الجديد (4 خانات على الأقل) *</label>
+          <input type="password" id="recoverNewPinInput" dir="ltr" minlength="4" autocomplete="off" required placeholder="أدخل الرقم السري الجديد">
         </div>
         <div class="modal-footer stack">
           <button type="submit" class="btn-primary">تعيين الرقم السري والدخول</button>
@@ -303,40 +333,41 @@ textarea{resize:vertical;min-height:70px}
     </div>
     <form id="githubForm">
       <div class="form-note">
-        احفظ بياناتك وشاركها عبر مستودع GitHub باستخدام <b>GitHub REST Content API</b>. يحتاج إلى رمز وصول شخصي (Personal Access Token) بصلاحية <code>repo</code> أو <code>contents:write</code>.
+        بيانات المستودع الافتراضية محفوظة وجاهزة، ما عليك سوى إدخال <b>رمز الوصول الشخصي (Token)</b> وسيتم حفظه مشفراً بالرقم السري على جهازك.
       </div>
       <div class="row2">
         <div class="form-group">
           <label for="ghOwner">اسم المستخدم / المنظمة (Owner) *</label>
-          <input type="text" id="ghOwner" dir="ltr" placeholder="e.g. username" required>
+          <input type="text" id="ghOwner" dir="ltr" placeholder="tornedoo12-lang" required>
         </div>
         <div class="form-group">
           <label for="ghRepo">اسم المستودع (Repository) *</label>
-          <input type="text" id="ghRepo" dir="ltr" placeholder="e.g. cars-data-repo" required>
+          <input type="text" id="ghRepo" dir="ltr" placeholder="CAR-CRM" required>
         </div>
       </div>
       <div class="row2">
         <div class="form-group">
           <label for="ghBranch">الفرع (Branch) *</label>
-          <input type="text" id="ghBranch" dir="ltr" placeholder="main" value="main" required>
+          <input type="text" id="ghBranch" dir="ltr" placeholder="main" required>
         </div>
         <div class="form-group">
           <label for="ghPath">مسار ملف البيانات (File Path) *</label>
-          <input type="text" id="ghPath" dir="ltr" placeholder="data/cars-data.json" value="cars-data.json" required>
+          <input type="text" id="ghPath" dir="ltr" placeholder="cars-data.json" required>
         </div>
       </div>
       <div class="form-group">
-        <label for="ghToken">رمز الوصول الشخصي (Personal Access Token) *</label>
-        <input type="password" id="ghToken" dir="ltr" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" required>
+        <label for="ghToken">رمز الوصول الشخصي (Personal Access Token)</label>
+        <input type="password" id="ghToken" dir="ltr" placeholder="أدخل التوكين هنا (ghp_xxxx...)" autocomplete="off">
+        <div class="hint">يُحفظ التوكين مشفراً داخل متصفحك ولا يُكتب في الكود أبداً.</div>
       </div>
       <div class="form-group">
-        <label class="chk"><input type="checkbox" id="ghAutoSync" checked> مزامنة وحفظ تلقائي في GitHub عند أي تعديل</label>
+        <label class="chk"><input type="checkbox" id="ghAutoSync" checked> <span>مزامنة وحفظ تلقائي في GitHub عند أي تعديل</span></label>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn-primary">💾 حفظ الإعدادات</button>
+        <button type="submit" class="btn-primary">💾 حفظ الإعدادات والجلب</button>
         <button type="button" class="btn-gh" id="ghPushNowBtn">⬆️ رفع البيانات الآن (Push)</button>
         <button type="button" class="btn-primary" id="ghPullNowBtn">⬇️ جلب البيانات الآن (Pull)</button>
-        <button type="button" class="btn-danger" id="ghDisconnectBtn" style="display:none">إلغاء الربط</button>
+        <button type="button" class="btn-gray" id="ghResetDefaultBtn">🔄 استعادة الافتراضي</button>
       </div>
     </form>
   </div>
@@ -352,26 +383,24 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div id="gate" class="modal">
-  <div class="modal-content confirm-box">
-    <h2 id="gateTitle"></h2>
-    <p id="gateMsg"></p>
-    <div class="modal-footer stack">
-      <button type="button" class="btn-primary" id="gatePrimary"></button>
-      <button type="button" class="btn-gh" id="gateGithub">☁️ الاتصال بمستودع GitHub</button>
-      <button type="button" class="btn-gray" id="gateSecondary"></button>
-    </div>
-  </div>
-</div>
-
 <div id="toast" role="status"></div>
 
 <script>
-const initialCars = [{"carName": "هيونداى الينترا", "plateNumber": "د ك ه 8063", "insurance": "الراجحي", "insuranceDate": "2027-01-09", "insuranceCal": "g", "registrationDate": "2028-10-21", "registrationCal": "h", "inspectionDate": "2027-04-26", "inspectionCal": "g", "yearOfManufacture": 2019, "carValue": 35000, "serialNumber": 89036710, "active": true, "notes": ""}, {"carName": "نيسان صني عيسوي", "plateNumber": "ا ي ح 5868", "insurance": "الراجحي", "insuranceDate": "2025-02-15", "insuranceCal": "g", "registrationDate": "2024-11-22", "registrationCal": "h", "inspectionDate": "2025-01-03", "inspectionCal": "h", "yearOfManufacture": 2010, "carValue": 10000, "serialNumber": 171649900, "active": false, "notes": ""}, {"carName": "تويوتا ياريس", "plateNumber": "ر س و 4323", "insurance": "اتحاد الخليج", "insuranceDate": "2027-09-07", "insuranceCal": "g", "registrationDate": "2029-07-03", "registrationCal": "h", "inspectionDate": "2026-12-13", "inspectionCal": "g", "yearOfManufacture": 2016, "carValue": 25000, "serialNumber": 101619410, "active": true, "notes": ""}, {"carName": "ايسوزو", "plateNumber": "ا ك م 2570", "insurance": "ليفا", "insuranceDate": "2027-06-27", "insuranceCal": "g", "registrationDate": "", "registrationCal": "h", "inspectionDate": "2026-12-17", "inspectionCal": "g", "yearOfManufacture": 2011, "carValue": "", "serialNumber": 57760110, "active": true, "notes": ""}, {"carName": "تويوتا فان بضاعة", "plateNumber": "ا ي ن 5533", "insurance": "اسيج", "insuranceDate": "2027-08-16", "insuranceCal": "g", "registrationDate": "2029-09-27", "registrationCal": "h", "inspectionDate": "2026-12-08", "inspectionCal": "g", "yearOfManufacture": 2015, "carValue": "", "serialNumber": 951141410, "active": true, "notes": ""}, {"carName": "تويوتا رش", "plateNumber": "ب ب ب 8154", "insurance": "الراجحي", "insuranceDate": "2027-01-07", "insuranceCal": "g", "registrationDate": "2028-01-17", "registrationCal": "h", "inspectionDate": "2027-07-02", "inspectionCal": "h", "yearOfManufacture": 2019, "carValue": "", "serialNumber": 273421710, "active": true, "notes": ""}, {"carName": "nisan 1814", "plateNumber": "ر د ه 3754", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2026-11-14", "registrationCal": "h", "inspectionDate": "2026-12-03", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": "", "serialNumber": 215091810, "active": true, "notes": ""}, {"carName": "nisan 1815", "plateNumber": "د ن ن 1815", "insurance": "اتحاد الخليج الاهلية", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2029-10-12", "registrationCal": "h", "inspectionDate": "2026-12-14", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": "", "serialNumber": 464091810, "active": true, "notes": ""}, {"carName": "هيونداي توسان", "plateNumber": "د ي ي 8633", "insurance": "اسيج", "insuranceDate": "2025-08-29", "insuranceCal": "g", "registrationDate": "2025-08-22", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": "", "carValue": "", "serialNumber": 879886810, "active": false, "notes": ""}, {"carName": "ليكزس", "plateNumber": "د ق ن 999", "insurance": "ولاء", "insuranceDate": "2025-08-27", "insuranceCal": "g", "registrationDate": "2026-08-04", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2023, "carValue": "", "serialNumber": 493939910, "active": false, "notes": ""}, {"carName": "نيسان باترول", "plateNumber": "د ه ر 4040", "insurance": "الراجحي", "insuranceDate": "2026-11-24", "insuranceCal": "g", "registrationDate": "2027-03-29", "registrationCal": "g", "inspectionDate": "2027-04-28", "inspectionCal": "g", "yearOfManufacture": 2022, "carValue": "", "serialNumber": 485856910, "active": true, "notes": ""}, {"carName": "رينو دوكر 1", "plateNumber": "ب ر ر 7979", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2026-11-05", "inspectionCal": "h", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 692724710, "active": true, "notes": ""}, {"carName": "رينو دوكر 2", "plateNumber": "7985 ب ر ر", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2026-09-28", "inspectionCal": "g", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 504724710, "active": true, "notes": ""}, {"carName": "رينو دوكر 3", "plateNumber": "ب ر ر 7944", "insurance": "ولاء", "insuranceDate": "2026-11-25", "insuranceCal": "g", "registrationDate": "2028-07-11", "registrationCal": "h", "inspectionDate": "2027-07-02", "inspectionCal": "h", "yearOfManufacture": 2020, "carValue": 20000, "serialNumber": 351424710, "active": true, "notes": ""}, {"carName": "ماهيندرا", "plateNumber": "ب ط د 4793", "insurance": "المتحدة للتامين التعاوني", "insuranceDate": "2027-01-05", "insuranceCal": "g", "registrationDate": "2026-09-14", "registrationCal": "h", "inspectionDate": "2026-09-11", "inspectionCal": "g", "yearOfManufacture": 2021, "carValue": 50000, "serialNumber": 62742020, "active": true, "notes": ""}, {"carName": "فورد رابتور", "plateNumber": "س س د 999", "insurance": "ولاء", "insuranceDate": "2027-01-22", "insuranceCal": "g", "registrationDate": "2027-12-28", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2018, "carValue": "", "serialNumber": 937221020, "active": true, "notes": ""}, {"carName": "رانج روفر", "plateNumber": "د ق ن 999", "insurance": "ميدغلف", "insuranceDate": "2026-09-07", "insuranceCal": "g", "registrationDate": "2028-08-12", "registrationCal": "h", "inspectionDate": "", "inspectionCal": "g", "yearOfManufacture": 2023, "carValue": "", "serialNumber": "", "active": true, "notes": ""}];
-const LOCAL_KEY = 'cars_crm_local_v4';
-const SEC_KEY = 'cars_crm_security_v1';
-const GH_KEY = 'cars_crm_github_v1';
+/* لا توجد أي بيانات سيارات مدمجة في الكود نهائياً - يتم جلبها من GitHub بعد فك القفل */
+const VAULT_KEY = 'cars_crm_vault_v5';
+const GH_KEY = 'cars_crm_github_v5';
 const DATA_FILE = 'cars-data.json';
+
+/* إعدادات GitHub الافتراضية محفوظة بالكامل ما عدا الـ Token */
+const DEFAULT_GH = {
+  owner: 'tornedoo12-lang',
+  repo: 'CAR-CRM',
+  branch: 'main',
+  path: 'cars-data.json',
+  token: '',
+  autoSync: true
+};
+
 const $ = id => document.getElementById(id);
 const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -383,8 +412,166 @@ const CAL_OF = {insuranceDate:'insuranceCal', registrationDate:'registrationCal'
 const CAL_DEFAULT = {insuranceCal:'g', registrationCal:'h', inspectionCal:'g'};
 const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توسان', 'ليكزس'];
 
+let cars = [];
+let editingId = null;
+let sessionPin = null;
+let sessionGhToken = '';
+let failedAttempts = 0;
+let lockoutUntil = 0;
+
 function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
 function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
+
+/* ---------- محرك التشفير المزدوج (يعمل على HTTPS وعلى file:// المحلي بكفاءة) ---------- */
+function bufToB64(buf){
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for(let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64ToBuf(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function jsHashHex(str, rounds = 5000){
+  let h1 = 0xdeadbeef ^ str.length, h2 = 0x41c6ce57 ^ str.length, h3 = 0x9e3779b9, h4 = 0x85ebca6b;
+  for(let r = 0; r < rounds; r++){
+    for(let i = 0; i < str.length; i++){
+      const ch = str.charCodeAt(i) ^ r;
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+      h3 = Math.imul(h3 ^ (ch << 3), 2246822507);
+      h4 = Math.imul(h4 ^ (ch << 5), 3266489909);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  }
+  return [h1, h2, h3, h4].map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+function jsStreamTransform(bytes, secret, saltB64){
+  const seedStr = secret + '::' + saltB64 + '::' + jsHashHex(secret + saltB64, 2000);
+  let s0 = parseInt(seedStr.slice(-32, -24), 16) || 0x12345678;
+  let s1 = parseInt(seedStr.slice(-24, -16), 16) || 0x9abcdef0;
+  let s2 = parseInt(seedStr.slice(-16, -8), 16) || 0x0fedcba9;
+  let s3 = parseInt(seedStr.slice(-8), 16) || 0x87654321;
+  const out = new Uint8Array(bytes.length);
+  for(let i = 0; i < bytes.length; i++){
+    let t = s3;
+    const s = s0;
+    s3 = s2; s2 = s1; s1 = s;
+    t ^= t << 11; t ^= t >>> 8;
+    s0 = (t ^ s ^ (s >>> 19)) >>> 0;
+    out[i] = bytes[i] ^ (s0 & 0xff);
+  }
+  return out;
+}
+const hasSubtle = !!(window.crypto && window.crypto.subtle);
+
+async function sha256Hex(str){
+  if(hasSubtle){
+    try{
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }catch(e){}
+  }
+  return jsHashHex(str, 6000);
+}
+async function deriveAesKey(secret, saltBytes){
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256'},
+    baseKey,
+    {name: 'AES-GCM', length: 256},
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+async function encryptText(plainText, secret){
+  const salt = new Uint8Array(16);
+  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(salt);
+  else for(let i=0;i<16;i++) salt[i] = Math.floor(Math.random()*256);
+
+  if(hasSubtle){
+    try{
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveAesKey(secret, salt);
+      const cipher = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, new TextEncoder().encode(plainText));
+      return {m: 'aes', s: bufToB64(salt), iv: bufToB64(iv), c: bufToB64(cipher)};
+    }catch(e){}
+  }
+  const sB64 = bufToB64(salt);
+  const plainBytes = new TextEncoder().encode(plainText);
+  const encBytes = jsStreamTransform(plainBytes, secret, sB64);
+  const mac = jsHashHex(secret + '::' + sB64 + '::' + plainText, 1500);
+  return {m: 'js', s: sB64, mac, c: bufToB64(encBytes)};
+}
+async function decryptText(pkg, secret){
+  if(!pkg || !pkg.s || !pkg.c) throw new Error('Invalid cipher package');
+  if(pkg.m === 'aes' && hasSubtle){
+    const key = await deriveAesKey(secret, b64ToBuf(pkg.s));
+    const plainBuf = await crypto.subtle.decrypt({name: 'AES-GCM', iv: b64ToBuf(pkg.iv)}, key, b64ToBuf(pkg.c));
+    return new TextDecoder().decode(plainBuf);
+  }
+  const decBytes = jsStreamTransform(b64ToBuf(pkg.c), secret, pkg.s);
+  const plainText = new TextDecoder().decode(decBytes);
+  const expectedMac = jsHashHex(secret + '::' + pkg.s + '::' + plainText, 1500);
+  if(expectedMac !== pkg.mac) throw new Error('Wrong key or corrupted data');
+  return plainText;
+}
+function normAnswer(a){
+  return latin(a).trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/* ---------- إدارة الخزنة المشفرة (Vault) ---------- */
+function getVault(){
+  try{
+    const v = JSON.parse(localStorage.getItem(VAULT_KEY));
+    if(v && v.pinVerifier && v.question) return v;
+  }catch(e){}
+  return null;
+}
+async function buildAndSaveVault(pin, question, answerPlain){
+  const existingVault = getVault();
+  const currentQuestion = question || (existingVault ? existingVault.question : '');
+  let answerHash = existingVault ? existingVault.answerHash : '';
+  let recoveryData = existingVault ? existingVault.recoveryData : null;
+
+  const verifier = await encryptText('VAULT_OK_V5', pin);
+  const dataJson = JSON.stringify(makePayload());
+  const encryptedData = await encryptText(dataJson, pin);
+  const ghCfg = getGhConfig();
+  const encryptedToken = sessionGhToken ? await encryptText(sessionGhToken, pin) : null;
+
+  if(answerPlain !== null && answerPlain !== undefined){
+    const cleanAns = normAnswer(answerPlain);
+    answerHash = await sha256Hex('SEC_ANS_SALT_V5::' + cleanAns);
+    recoveryData = await encryptText(JSON.stringify({payload: makePayload(), ghToken: sessionGhToken || ''}), cleanAns);
+  }
+
+  const vaultObj = {
+    version: 5,
+    pinVerifier: verifier,
+    encryptedData,
+    encryptedToken,
+    question: currentQuestion,
+    answerHash,
+    recoveryData
+  };
+  localStorage.setItem(VAULT_KEY, JSON.stringify(vaultObj));
+  saveGhConfig({...ghCfg, token: ''});
+}
+
+async function saveEncryptedSessionState(){
+  if(!sessionPin) return;
+  const v = getVault();
+  if(!v) return;
+  v.encryptedData = await encryptText(JSON.stringify(makePayload()), sessionPin);
+  v.encryptedToken = sessionGhToken ? await encryptText(sessionGhToken, sessionPin) : null;
+  localStorage.setItem(VAULT_KEY, JSON.stringify(v));
+}
 
 /* ---------- التواريخ: ميلادي وهجري + أزرار التبديل ---------- */
 const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
@@ -479,11 +666,11 @@ function dateCell(iso, main){
 }
 function fmtNum(v){ const n = Number(latin(v)); return (v === '' || v == null || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
 
-/* ---------- البيانات ---------- */
+/* ---------- معالجة البيانات ---------- */
 function parseCars(text){
-  let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)'); }
+  let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف'); }
   const arr = Array.isArray(d) ? d : (d && d.cars);
-  if(!Array.isArray(arr) || !arr.every(c => c && typeof c === 'object' && 'carName' in c)) throw new Error('ملف البيانات غير صالح أو تالف (لم يتم تعديله)');
+  if(!Array.isArray(arr) || !arr.every(c => c && typeof c === 'object' && 'carName' in c)) throw new Error('ملف البيانات غير صالح أو تالف');
   return arr.map(c => {
     const o = {};
     FIELDS.forEach(k => {
@@ -496,67 +683,111 @@ function parseCars(text){
   });
 }
 function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
-function makePayload(){ return {app:'cars-crm', version:4, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
-function loadLocal(){
-  try{ const s = localStorage.getItem(LOCAL_KEY); if(s) return parseCars(s); }catch(e){}
-  return parseCars(JSON.stringify(initialCars));
-}
-function cacheLocal(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(makePayload())); }catch(e){} }
-let cars = withIds(loadLocal(), 'l');
-let editingId = null;
+function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
 
-/* ---------- الحماية والرقم السري (PIN + سؤال أمان) ---------- */
-function getSecurityConfig(){
-  try{
-    const s = localStorage.getItem(SEC_KEY);
-    return s ? JSON.parse(s) : null;
-  }catch(e){ return null; }
-}
-function saveSecurityConfig(cfg){
-  if(!cfg) localStorage.removeItem(SEC_KEY);
-  else localStorage.setItem(SEC_KEY, JSON.stringify(cfg));
-  updateSecurityBtnUI();
-}
-function normAnswer(a){
-  return latin(a).trim().toLowerCase().replace(/\s+/g, ' ');
-}
-function updateSecurityBtnUI(){
-  const cfg = getSecurityConfig();
-  $('securityBtn').textContent = cfg && cfg.pin ? '🔒 الحماية (مفعّلة)' : '🔓 الحماية';
-}
-function checkLockOnStartup(){
-  const cfg = getSecurityConfig();
-  updateSecurityBtnUI();
-  if(cfg && cfg.pin){
-    showLockScreen();
+/* ---------- شاشة القفل، إعداد أول مرة، وفك التشفير ---------- */
+function showLockScreen(){
+  sessionPin = null;
+  cars = [];
+  refresh();
+  document.body.classList.add('app-locked');
+  const vault = getVault();
+  $('lockScreen').classList.add('active');
+  $('lockRecoverBox').style.display = 'none';
+  if(!vault){
+    $('lockSetupBox').style.display = '';
+    $('lockVerifyBox').style.display = 'none';
+    setTimeout(() => $('setupNewPin').focus(), 100);
+  }else{
+    $('lockSetupBox').style.display = 'none';
+    $('lockVerifyBox').style.display = '';
+    $('unlockPinInput').value = '';
+    setTimeout(() => $('unlockPinInput').focus(), 100);
   }
 }
-function showLockScreen(){
-  $('lockVerifyBox').style.display = '';
-  $('lockRecoverBox').style.display = 'none';
-  $('unlockPinInput').value = '';
-  $('lockScreen').classList.add('active');
-  setTimeout(() => $('unlockPinInput').focus(), 100);
+
+async function onUnlockSuccess(pin, loadedCars, loadedToken){
+  sessionPin = pin;
+  sessionGhToken = loadedToken || '';
+  cars = withIds(loadedCars || [], 'v');
+  document.body.classList.remove('app-locked');
+  $('lockScreen').classList.remove('active');
+  refresh();
+  renderGhNote();
+  if(sessionGhToken){
+    await githubPull(true);
+  }
 }
-$('unlockForm').addEventListener('submit', e => {
+
+$('setupPinForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const cfg = getSecurityConfig();
+  const p1 = latin($('setupNewPin').value).trim();
+  const p2 = latin($('setupConfirmPin').value).trim();
+  const q = $('setupQuestion').value.trim();
+  const a = $('setupAnswer').value.trim();
+  const tok = $('setupGhToken').value.trim();
+  if(p1.length < 4){ toast('الرقم السري يجب أن يكون 4 خانات على الأقل'); return; }
+  if(p1 !== p2){ toast('❌ الرقم السري وتأكيده غير متطابقين'); return; }
+  if(!q || !a){ toast('الرجاء إدخال سؤال الأمان وإجابته'); return; }
+
+  cars = [];
+  sessionPin = p1;
+  sessionGhToken = tok;
+  await buildAndSaveVault(p1, q, a);
+  await onUnlockSuccess(p1, [], sessionGhToken);
+  toast('✅ تم تشفير النظام وتفعيل الحماية بنجاح');
+});
+
+$('unlockForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const now = Date.now();
+  if(now < lockoutUntil){
+    const sec = Math.ceil((lockoutUntil - now) / 1000);
+    $('lockoutHint').textContent = `محاولات خاطئة كثيرة. انتظر ${sec} ثانية.`;
+    return;
+  }
   const entered = latin($('unlockPinInput').value).trim();
-  if(!cfg || entered === cfg.pin){
-    $('lockScreen').classList.remove('active');
-    toast('مرحباً بك! تم فتح القفل بنجاح');
-  }else{
+  const vault = getVault();
+  if(!vault) return;
+
+  try{
+    const check = await decryptText(vault.pinVerifier, entered);
+    if(check !== 'VAULT_OK_V5') throw new Error('Mismatch');
+    let loadedCars = [];
+    if(vault.encryptedData){
+      const jsonStr = await decryptText(vault.encryptedData, entered);
+      loadedCars = parseCars(jsonStr);
+    }
+    let tok = '';
+    if(vault.encryptedToken){
+      tok = await decryptText(vault.encryptedToken, entered).catch(() => '');
+    }
+    failedAttempts = 0;
+    $('lockoutHint').textContent = '';
+    await onUnlockSuccess(entered, loadedCars, tok);
+    toast('✅ تم فك التشفير والدخول بنجاح');
+  }catch(err){
+    failedAttempts++;
+    if(failedAttempts >= 5){
+      lockoutUntil = Date.now() + 30000;
+      $('lockoutHint').textContent = 'تم قفل المحاولات مؤقتاً لمدة 30 ثانية لحماية النظام!';
+    }else{
+      $('lockoutHint').textContent = `الرقم السري غير صحيح (المحاولة ${failedAttempts} من 5)`;
+    }
     toast('❌ الرقم السري غير صحيح');
     $('unlockPinInput').select();
   }
 });
+
+$('quickLockBtn').onclick = () => {
+  showLockScreen();
+  toast('🔐 تم قفل النظام وتأمين البيانات');
+};
+
 $('forgotPinBtn').onclick = () => {
-  const cfg = getSecurityConfig();
-  if(!cfg || !cfg.question){
-    toast('لم يتم إعداد سؤال أمان مسبقاً');
-    return;
-  }
-  $('recoverQuestionDisplay').textContent = 'سؤال الأمان: ' + cfg.question;
+  const vault = getVault();
+  if(!vault) return;
+  $('recoverQuestionDisplay').textContent = 'سؤال الأمان: ' + vault.question;
   $('recoverAnswerInput').value = '';
   $('recoverNewPinInput').value = '';
   $('lockVerifyBox').style.display = 'none';
@@ -567,95 +798,100 @@ $('backToLoginBtn').onclick = () => {
   $('lockRecoverBox').style.display = 'none';
   $('lockVerifyBox').style.display = '';
 };
-$('recoverForm').addEventListener('submit', e => {
+
+$('recoverForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const cfg = getSecurityConfig();
-  if(!cfg) return;
-  const ans = normAnswer($('recoverAnswerInput').value);
+  const vault = getVault();
+  if(!vault) return;
+  const cleanAns = normAnswer($('recoverAnswerInput').value);
   const newPin = latin($('recoverNewPinInput').value).trim();
-  if(ans !== cfg.answerHash){
+  if(newPin.length < 4){ toast('الرقم السري الجديد يجب أن يكون 4 خانات على الأقل'); return; }
+
+  const ansHash = await sha256Hex('SEC_ANS_SALT_V5::' + cleanAns);
+  if(ansHash !== vault.answerHash){
     toast('❌ إجابة سؤال الأمان غير صحيحة');
     $('recoverAnswerInput').select();
     return;
   }
-  if(!newPin){
-    toast('الرجاء إدخال رقم سري جديد');
-    return;
+  try{
+    let loadedCars = [];
+    let tok = '';
+    if(vault.recoveryData){
+      const recJson = JSON.parse(await decryptText(vault.recoveryData, cleanAns));
+      if(recJson.payload) loadedCars = parseCars(JSON.stringify(recJson.payload));
+      if(recJson.ghToken) tok = recJson.ghToken;
+    }
+    cars = withIds(loadedCars, 'rec');
+    sessionGhToken = tok;
+    await buildAndSaveVault(newPin, vault.question, cleanAns);
+    await onUnlockSuccess(newPin, loadedCars, tok);
+    toast('✅ تم استعادة النظام وتعيين الرقم السري الجديد');
+  }catch(err){
+    toast('❌ تعذر استعادة البيانات');
   }
-  cfg.pin = newPin;
-  saveSecurityConfig(cfg);
-  $('lockScreen').classList.remove('active');
-  toast('✅ تم تغيير الرقم السري وفتح النظام بنجاح');
 });
 
 $('securityBtn').onclick = () => {
-  const cfg = getSecurityConfig();
+  const vault = getVault();
   $('securityForm').reset();
-  if(cfg && cfg.pin){
-    $('curPinGroup').style.display = '';
-    $('secQuestion').value = cfg.question || '';
-    $('disablePinBtn').style.display = '';
-    $('lockNowBtn').style.display = '';
-  }else{
-    $('curPinGroup').style.display = 'none';
-    $('disablePinBtn').style.display = 'none';
-    $('lockNowBtn').style.display = 'none';
-  }
+  if(vault) $('secQuestion').value = vault.question || '';
   $('securityModal').classList.add('active');
 };
 $('closeSecBtn').onclick = () => $('securityModal').classList.remove('active');
 $('cancelSecBtn').onclick = () => $('securityModal').classList.remove('active');
-$('lockNowBtn').onclick = () => {
-  $('securityModal').classList.remove('active');
-  showLockScreen();
-};
-$('securityForm').addEventListener('submit', e => {
+$('securityForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const cfg = getSecurityConfig();
-  if(cfg && cfg.pin){
-    const cur = latin($('secCurrentPin').value).trim();
-    if(cur !== cfg.pin){
-      toast('❌ الرقم السري الحالي غير صحيح');
-      $('secCurrentPin').focus();
-      return;
-    }
-  }
+  const cur = latin($('secCurrentPin').value).trim();
   const newPin = latin($('secNewPin').value).trim();
   const q = $('secQuestion').value.trim();
-  const a = normAnswer($('secAnswer').value);
-  if(!newPin || !q || !a){
-    toast('الرجاء ملء جميع الحقول المطلوبة');
-    return;
-  }
-  saveSecurityConfig({pin: newPin, question: q, answerHash: a});
-  $('securityModal').classList.remove('active');
-  toast('✅ تم حفظ الرقم السري وسؤال الأمان بنجاح');
-});
-$('disablePinBtn').onclick = () => {
-  const cfg = getSecurityConfig();
-  if(!cfg) return;
-  const cur = latin($('secCurrentPin').value).trim();
-  if(cur !== cfg.pin){
-    toast('الرجاء إدخال الرقم السري الحالي أولاً لإلغاء الحماية');
+  const a = $('secAnswer').value.trim();
+
+  if(cur !== sessionPin){
+    toast('❌ الرقم السري الحالي غير صحيح');
     $('secCurrentPin').focus();
     return;
   }
-  saveSecurityConfig(null);
+  if(newPin.length < 4 || !q || !a){
+    toast('الرجاء ملء جميع الحقول (الرقم السري 4 خانات على الأقل)');
+    return;
+  }
+  sessionPin = newPin;
+  await buildAndSaveVault(newPin, q, a);
   $('securityModal').classList.remove('active');
-  toast('تم إلغاء الرقم السري');
-};
+  toast('✅ تم تحديث الرقم السري وإعادة تشفير البيانات بنجاح');
+});
 
-/* ---------- GitHub Repository Storage (GitHub REST Content API) ---------- */
-let ghState = 'none', ghLastSync = null, ghSha = null, ghTimer = null;
+/* ---------- GitHub Repository Storage (الإعدادات محفوظة افتراضياً بدون التوكين) ---------- */
+let ghState = 'ready', ghLastSync = null, ghSha = null, ghTimer = null;
+
 function getGhConfig(){
   try{
     const s = localStorage.getItem(GH_KEY);
-    return s ? JSON.parse(s) : null;
-  }catch(e){ return null; }
+    if(s){
+      const parsed = JSON.parse(s);
+      return {
+        owner: parsed.owner || DEFAULT_GH.owner,
+        repo: parsed.repo || DEFAULT_GH.repo,
+        branch: parsed.branch || DEFAULT_GH.branch,
+        path: parsed.path || DEFAULT_GH.path,
+        token: '',
+        autoSync: parsed.autoSync !== false
+      };
+    }
+  }catch(e){}
+  localStorage.setItem(GH_KEY, JSON.stringify(DEFAULT_GH));
+  return {...DEFAULT_GH};
 }
 function saveGhConfig(cfg){
-  if(!cfg) localStorage.removeItem(GH_KEY);
-  else localStorage.setItem(GH_KEY, JSON.stringify(cfg));
+  const safeCfg = {
+    owner: cfg.owner || DEFAULT_GH.owner,
+    repo: cfg.repo || DEFAULT_GH.repo,
+    branch: cfg.branch || DEFAULT_GH.branch,
+    path: cfg.path || DEFAULT_GH.path,
+    token: '',
+    autoSync: cfg.autoSync !== false
+  };
+  localStorage.setItem(GH_KEY, JSON.stringify(safeCfg));
 }
 function utf8ToBase64(str){
   const bytes = new TextEncoder().encode(str);
@@ -674,7 +910,11 @@ function encodeGhPath(path){
 }
 async function githubPull(silent = false){
   const cfg = getGhConfig();
-  if(!cfg || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  if(!sessionGhToken){
+    ghState = 'notoken'; renderGhNote();
+    if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
+    return false;
+  }
   ghState = 'syncing'; renderGhNote();
   try{
     const branch = cfg.branch || 'main';
@@ -683,15 +923,15 @@ async function githubPull(silent = false){
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github+json',
-        'Authorization': `Bearer ${cfg.token}`,
+        'Authorization': `Bearer ${sessionGhToken}`,
         'X-GitHub-Api-Version': '2022-11-28'
       },
       cache: 'no-store'
     });
     if(res.status === 404){
       ghState = 'ready'; renderGhNote();
-      if(!silent) toast('الملف غير موجود بعد في المستودع، سيتم إنشاؤه عند أول رفع (Push)');
-      return false;
+      if(!silent) toast('الملف غير موجود بعد في المستودع.');
+      return true;
     }
     if(!res.ok){
       const errData = await res.json().catch(() => ({}));
@@ -701,8 +941,7 @@ async function githubPull(silent = false){
     ghSha = data.sha;
     const text = base64ToUtf8(data.content || '');
     cars = withIds(parseCars(text), 'gh');
-    cacheLocal();
-    if(dataDir) scheduleSave();
+    await saveEncryptedSessionState();
     ghLastSync = new Date();
     ghState = 'ready';
     refresh(); renderGhNote();
@@ -716,7 +955,11 @@ async function githubPull(silent = false){
 }
 async function githubPush(silent = false){
   const cfg = getGhConfig();
-  if(!cfg || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  if(!sessionGhToken){
+    ghState = 'notoken'; renderGhNote();
+    if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
+    return false;
+  }
   ghState = 'syncing'; renderGhNote();
   try{
     const branch = cfg.branch || 'main';
@@ -724,7 +967,7 @@ async function githubPush(silent = false){
     const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
     const headers = {
       'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${cfg.token}`,
+      'Authorization': `Bearer ${sessionGhToken}`,
       'X-GitHub-Api-Version': '2022-11-28'
     };
     if(!ghSha){
@@ -778,51 +1021,54 @@ async function githubPush(silent = false){
 }
 function scheduleGhSync(){
   const cfg = getGhConfig();
-  if(!cfg || !cfg.autoSync) return;
+  if(!cfg || !cfg.autoSync || !sessionGhToken) return;
   clearTimeout(ghTimer);
-  ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 600);
+  ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 500);
+}
+async function persist(){
+  await saveEncryptedSessionState();
+  scheduleGhSync();
 }
 function renderGhNote(){
   const n = $('githubNote');
   const cfg = getGhConfig();
-  if(!cfg || !cfg.token){
-    n.style.display = 'none';
-    return;
-  }
-  n.style.display = 'flex';
   const repoLabel = `${cfg.owner}/${cfg.repo}:${cfg.branch || 'main'}`;
   let cls = 'note-ok', txt = '';
-  if(ghState === 'syncing'){
+  if(!sessionGhToken){
     cls = 'note-warn';
-    txt = `⏳ جاري المزامنة مع مستودع GitHub «${repoLabel}»...`;
+    txt = `☁️ مستودع GitHub «${repoLabel}» جاهز • اضغط على زر GitHub لإدخال الـ Token وجلب السيارات تلقائياً.`;
+  }else if(ghState === 'syncing'){
+    cls = 'note-warn';
+    txt = `⏳ جاري المزامنة التلقائية مع مستودع GitHub «${repoLabel}»...`;
   }else if(ghState === 'error'){
     cls = 'note-bad';
-    txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من صلاحية الـ Token أو اسم المستودع.`;
+    txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من اتصال الإنترنت أو صلاحية الـ Token.`;
   }else{
     txt = `☁️ متصل بمستودع GitHub «${repoLabel}» (${cfg.path || DATA_FILE})` + (ghLastSync ? ` • آخر مزامنة ${pad(ghLastSync.getHours())}:${pad(ghLastSync.getMinutes())}` : '');
   }
   n.className = 'note ' + cls;
-  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب</button><button type="button" class="btn-small btn-gh" onclick="githubPush(false)">⬆️ رفع</button></div>`;
+  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب الآن</button><button type="button" class="btn-small btn-gh" onclick="githubPush(false)">⬆️ رفع الآن</button></div>`;
 }
 
-$('githubBtn').onclick = () => {
-  const cfg = getGhConfig() || {};
-  $('ghOwner').value = cfg.owner || '';
-  $('ghRepo').value = cfg.repo || '';
-  $('ghBranch').value = cfg.branch || 'main';
-  $('ghPath').value = cfg.path || DATA_FILE;
-  $('ghToken').value = cfg.token || '';
+function fillGhForm(cfg){
+  $('ghOwner').value = cfg.owner || DEFAULT_GH.owner;
+  $('ghRepo').value = cfg.repo || DEFAULT_GH.repo;
+  $('ghBranch').value = cfg.branch || DEFAULT_GH.branch;
+  $('ghPath').value = cfg.path || DEFAULT_GH.path;
+  $('ghToken').value = sessionGhToken || '';
   $('ghAutoSync').checked = cfg.autoSync !== false;
-  $('ghDisconnectBtn').style.display = cfg.token ? '' : 'none';
+}
+$('githubBtn').onclick = () => {
+  fillGhForm(getGhConfig());
   $('githubModal').classList.add('active');
 };
 $('closeGhBtn').onclick = () => $('githubModal').classList.remove('active');
 function readGhFormConfig(){
   return {
-    owner: $('ghOwner').value.trim(),
-    repo: $('ghRepo').value.trim(),
-    branch: $('ghBranch').value.trim() || 'main',
-    path: $('ghPath').value.trim() || DATA_FILE,
+    owner: $('ghOwner').value.trim() || DEFAULT_GH.owner,
+    repo: $('ghRepo').value.trim() || DEFAULT_GH.repo,
+    branch: $('ghBranch').value.trim() || DEFAULT_GH.branch,
+    path: $('ghPath').value.trim() || DEFAULT_GH.path,
     token: $('ghToken').value.trim(),
     autoSync: $('ghAutoSync').checked
   };
@@ -830,209 +1076,41 @@ function readGhFormConfig(){
 $('githubForm').addEventListener('submit', async e => {
   e.preventDefault();
   const cfg = readGhFormConfig();
-  if(!cfg.owner || !cfg.repo || !cfg.token){
-    toast('الرجاء إدخال بيانات المستودع والـ Token');
-    return;
-  }
+  sessionGhToken = cfg.token;
   saveGhConfig(cfg);
-  ghState = 'ready';
-  hideGate();
+  await saveEncryptedSessionState();
+  ghState = sessionGhToken ? 'ready' : 'notoken';
   renderGhNote();
   $('githubModal').classList.remove('active');
-  toast('تم حفظ إعدادات GitHub، جاري فحص المستودع...');
-  const pulled = await githubPull(true);
-  if(!pulled) await githubPush(false);
+  if(sessionGhToken){
+    toast('تم تشفير وحفظ التوكين وإعدادات GitHub، جاري جلب السيارات...');
+    await githubPull(false);
+  }else{
+    toast('تم حفظ إعدادات GitHub (بدون توكين)');
+  }
 });
 $('ghPushNowBtn').onclick = async () => {
   const cfg = readGhFormConfig();
-  if(!cfg.owner || !cfg.repo || !cfg.token){ toast('أكمل حقول GitHub أولاً'); return; }
-  saveGhConfig(cfg); hideGate();
+  sessionGhToken = cfg.token;
+  saveGhConfig(cfg);
+  await saveEncryptedSessionState();
   await githubPush(false);
 };
 $('ghPullNowBtn').onclick = async () => {
   const cfg = readGhFormConfig();
-  if(!cfg.owner || !cfg.repo || !cfg.token){ toast('أكمل حقول GitHub أولاً'); return; }
-  saveGhConfig(cfg); hideGate();
+  sessionGhToken = cfg.token;
+  saveGhConfig(cfg);
+  await saveEncryptedSessionState();
   await githubPull(false);
 };
-$('ghDisconnectBtn').onclick = () => {
-  saveGhConfig(null);
-  ghSha = null; ghState = 'none';
+$('ghResetDefaultBtn').onclick = async () => {
+  sessionGhToken = '';
+  saveGhConfig({...DEFAULT_GH});
+  await saveEncryptedSessionState();
+  fillGhForm(DEFAULT_GH);
   renderGhNote();
-  $('githubModal').classList.remove('active');
-  toast('تم إلغاء الربط بمستودع GitHub');
+  toast('تمت استعادة إعدادات GitHub الافتراضية ومسح التوكين');
 };
-
-/* ---------- التخزين في مجلد ---------- */
-const FSA = typeof window.showDirectoryPicker === 'function';
-let dataDir = null, fileStamp = 0, folderState = 'none', lastSaveAt = null, backupFailed = false;
-let saveTimer = null, saving = Promise.resolve(), pendingHandle = null, folderName = '';
-
-function idb(){ return new Promise((res, rej) => { const r = indexedDB.open('cars-crm-db', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
-async function idbGet(k){ const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
-async function idbSet(k, v){ const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
-
-async function resolveDataDir(root){
-  try{ await root.getFileHandle(DATA_FILE); return root; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
-  return root.getDirectoryHandle('data', {create:true});
-}
-async function connect(root){
-  try{
-    folderName = root.name;
-    dataDir = await resolveDataDir(root);
-    let fh = null;
-    try{ fh = await dataDir.getFileHandle(DATA_FILE); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
-    if(fh){
-      const f = await fh.getFile();
-      cars = withIds(parseCars(await f.text()), 'f');
-      fileStamp = f.lastModified;
-      folderState = 'ready';
-    }else{
-      folderState = 'ready';
-      await writeFolder();
-    }
-    cacheLocal(); hideGate(); refresh(); renderNote();
-    toast('تم الاتصال بالمجلد: ' + folderName);
-  }catch(e){
-    dataDir = null; folderState = 'error';
-    showGate('error', e && e.message ? e.message : String(e));
-  }
-}
-async function pickFolder(){
-  if(!FSA){ toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); return; }
-  try{
-    const h = await window.showDirectoryPicker({id:'cars-crm', mode:'readwrite'});
-    try{ await idbSet('dir', h); }catch(e){}
-    await connect(h);
-  }catch(e){ if(!(e && e.name === 'AbortError')) toast('تعذّر فتح المجلد: ' + (e && e.message ? e.message : e)); }
-}
-async function reconnect(){
-  try{
-    const p = await pendingHandle.requestPermission({mode:'readwrite'});
-    if(p === 'granted') await connect(pendingHandle); else toast('لم يتم السماح بالوصول للمجلد');
-  }catch(e){ toast('تعذّر الاتصال: ' + (e && e.message ? e.message : e)); }
-}
-function useLocal(){ folderState = 'local'; hideGate(); renderNote(); }
-
-async function dailyBackup(){
-  const name = 'cars-' + todayLocal() + '.json';
-  const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
-  try{ await bdir.getFileHandle(name); return; }catch(e){ if(e.name !== 'NotFoundError') throw e; }
-  let text = null;
-  try{ text = await (await (await dataDir.getFileHandle(DATA_FILE)).getFile()).text(); }catch(e){ if(e.name !== 'NotFoundError') throw e; }
-  if(!text) return;
-  const bf = await bdir.getFileHandle(name, {create:true});
-  const w = await bf.createWritable(); await w.write(text); await w.close();
-  const names = [];
-  for await (const [n, h] of bdir.entries()){ if(h.kind === 'file' && /^cars-\d{4}-\d{2}-\d{2}\.json$/.test(n)) names.push(n); }
-  names.sort();
-  while(names.length > 30){ await bdir.removeEntry(names.shift()); }
-}
-async function manualBackup(label){
-  if(!dataDir) return false;
-  try{
-    const bdir = await dataDir.getDirectoryHandle('backups', {create:true});
-    const bf = await bdir.getFileHandle('cars-' + label + '-' + nowStamp() + '.json', {create:true});
-    const w = await bf.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
-    return true;
-  }catch(e){ return false; }
-}
-async function writeFolder(){
-  if(!dataDir) return;
-  try{
-    try{ await dailyBackup(); backupFailed = false; }catch(e){ backupFailed = true; console.warn(e); }
-    const fh = await dataDir.getFileHandle(DATA_FILE, {create:true});
-    const w = await fh.createWritable(); await w.write(JSON.stringify(makePayload(), null, 2)); await w.close();
-    fileStamp = (await fh.getFile()).lastModified; lastSaveAt = new Date(); folderState = 'ready'; renderNote();
-  }catch(e){
-    folderState = 'error'; renderNote(); toast('تعذّر الحفظ في المجلد: ' + (e && e.message ? e.message : e));
-  }
-}
-function scheduleSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { saveTimer = null; saving = saving.then(writeFolder).catch(() => {}); }, 300);
-}
-function persist(){
-  cacheLocal();
-  if(dataDir) scheduleSave();
-  scheduleGhSync();
-}
-
-async function checkExternal(){
-  if(!dataDir || folderState !== 'ready' || saveTimer) return;
-  try{
-    const f = await (await dataDir.getFileHandle(DATA_FILE)).getFile();
-    if(f.lastModified !== fileStamp){
-      cars = withIds(parseCars(await f.text()), 'f'); fileStamp = f.lastModified;
-      cacheLocal(); refresh(); toast('تم تحديث البيانات من المجلد');
-    }
-  }catch(e){}
-}
-window.addEventListener('focus', checkExternal);
-document.addEventListener('visibilitychange', () => { if(!document.hidden) checkExternal(); });
-
-function renderNote(){
-  const n = $('backupNote'); let cls = 'note-ok', msg;
-  if(folderState === 'ready'){
-    msg = '✅ تُحفظ البيانات تلقائياً في المجلد «' + folderName + '»' + (lastSaveAt ? ' • آخر حفظ ' + pad(lastSaveAt.getHours()) + ':' + pad(lastSaveAt.getMinutes()) : '') + ' • نسخة احتياطية يومية داخل backups';
-    if(backupFailed){ cls = 'note-warn'; msg = '⚠️ البيانات محفوظة في المجلد لكن تعذّر إنشاء النسخة الاحتياطية اليومية.'; }
-  }else if(folderState === 'error'){
-    cls = 'note-warn'; msg = '⚠️ تعذّر الحفظ في المجلد. تأكد من الصلاحية أو أعد اختيار المجلد بزر «📁 المجلد».';
-  }else{
-    cls = 'note-warn'; msg = '⚠️ التخزين المحلي: المتصفح فقط (بدون مجلد). يمكنك اختيار «📁 المجلد» أو الربط مع «☁️ GitHub».';
-  }
-  n.className = 'note ' + cls; n.textContent = msg;
-}
-
-/* ---------- نافذة الاتصال بالمجلد أو GitHub ---------- */
-function hideGate(){ $('gate').classList.remove('active'); }
-function showGate(mode, msg){
-  $('gate').classList.add('active');
-  const T = $('gateTitle'), M = $('gateMsg'), P = $('gatePrimary'), S = $('gateSecondary'), G = $('gateGithub');
-  S.style.display = '';
-  G.onclick = () => { hideGate(); $('githubBtn').click(); };
-  if(mode === 'first'){
-    T.textContent = '📁 اختيار مكان حفظ البيانات';
-    M.textContent = 'اختر مجلد البرنامج (cars-crm) للحفظ التلقائي على جهازك، أو اربط النظام بمستودع GitHub للتخزين السحابي.';
-    P.textContent = '📁 اختيار مجلد محلي'; P.onclick = pickFolder;
-    S.textContent = 'متابعة بتخزين المتصفح فقط'; S.onclick = useLocal;
-  }else if(mode === 'reconnect'){
-    T.textContent = '📁 الاتصال بمجلد البيانات';
-    M.textContent = 'اضغط للسماح للمتصفح بالوصول إلى المجلد «' + folderName + '». يطلب المتصفح ذلك مرة في كل جلسة.';
-    P.textContent = 'فتح المجلد'; P.onclick = reconnect;
-    S.textContent = 'اختيار مجلد آخر'; S.onclick = pickFolder;
-  }else if(mode === 'unsupported'){
-    T.textContent = 'خيارات حفظ البيانات';
-    M.textContent = 'هذا المتصفح لا يدعم الحفظ المباشر في مجلد محلي، لكن يمكنك الربط بمستودع GitHub أو المتابعة بتخزين المتصفح.';
-    P.textContent = 'متابعة بتخزين المتصفح'; P.onclick = useLocal;
-    S.style.display = 'none';
-  }else{
-    T.textContent = 'تعذّر فتح مجلد البيانات';
-    M.textContent = msg || 'حدث خطأ غير متوقع.';
-    P.textContent = 'اختيار مجلد آخر'; P.onclick = pickFolder;
-    S.textContent = 'متابعة بتخزين المتصفح'; S.onclick = useLocal;
-  }
-}
-async function init(){
-  checkLockOnStartup();
-  refresh(); renderNote(); renderGhNote();
-  const ghCfg = getGhConfig();
-  if(ghCfg && ghCfg.token){
-    folderState = 'local';
-    renderNote();
-    githubPull(true);
-    return;
-  }
-  if(!FSA){ showGate('unsupported'); return; }
-  let h = null; try{ h = await idbGet('dir'); }catch(e){}
-  if(h){
-    folderName = h.name;
-    let perm = 'prompt'; try{ perm = await h.queryPermission({mode:'readwrite'}); }catch(e){}
-    if(perm === 'granted'){ await connect(h); return; }
-    pendingHandle = h; showGate('reconnect'); return;
-  }
-  showGate('first');
-}
 
 /* ---------- العرض ---------- */
 function getFiltered(){
@@ -1049,7 +1127,7 @@ function getFiltered(){
 function renderTable(){
   const list = getFiltered(); const tb = $('tableBody');
   if(!list.length){
-    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات. اضغط «إضافة سيارة» للبدء') + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. أدخل توكين GitHub لجلب البيانات تلقائياً أو اضغط «إضافة سيارة»') + '</td></tr>';
     return;
   }
   tb.innerHTML = list.map(c => '<tr' + (c.active ? '' : ' class="inactive"') + '>' +
@@ -1154,7 +1232,6 @@ $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) c
 $('searchInput').addEventListener('input', renderTable);
 $('statusFilter').addEventListener('change', renderTable);
 $('showInactive').addEventListener('change', renderTable);
-$('folderBtn').onclick = () => { if(FSA) pickFolder(); else toast('هذا المتصفح لا يدعم الحفظ في مجلد، استخدم Chrome أو Edge'); };
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
     closeModal(); closeConfirm();
@@ -1163,7 +1240,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-$('carForm').addEventListener('submit', e => {
+$('carForm').addEventListener('submit', async e => {
   e.preventDefault();
   const data = {};
   FORM_FIELDS.forEach(f => { data[f] = latin($(f).value).trim(); });
@@ -1180,14 +1257,14 @@ $('carForm').addEventListener('submit', e => {
   }else{
     cars.push({id:'c_' + Date.now().toString(36), ...data});
   }
-  persist(); closeModal(); refresh();
+  await persist(); closeModal(); refresh();
 });
 $('tableBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
   if(b.dataset.del){
     const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
-    askConfirm('هل تريد حذف «' + c.carName + '»؟', () => { cars = cars.filter(x => x.id !== c.id); persist(); refresh(); });
+    askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => { cars = cars.filter(x => x.id !== c.id); await persist(); refresh(); });
   }
 });
 
@@ -1196,14 +1273,9 @@ function saveBlob(name, blob){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
-$('backupBtn').onclick = async () => {
-  if(dataDir){
-    const ok = await manualBackup('manual');
-    toast(ok ? 'تم حفظ نسخة احتياطية داخل مجلد backups' : 'تعذّر حفظ النسخة الاحتياطية في المجلد');
-  }else{
-    saveBlob('cars-backup-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
-    toast('تم تحميل ملف النسخة الاحتياطية');
-  }
+$('backupBtn').onclick = () => {
+  saveBlob('cars-backup-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+  toast('تم تحميل ملف النسخة الاحتياطية');
 };
 $('restoreBtn').onclick = () => $('restoreFile').click();
 $('restoreFile').addEventListener('change', async e => {
@@ -1212,8 +1284,7 @@ $('restoreFile').addEventListener('change', async e => {
     const clean = parseCars(await f.text());
     if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
     askConfirm('سيتم استبدال البيانات الحالية (' + cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
-      await manualBackup('before-restore');
-      cars = withIds(clean, 'r'); persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة');
+      cars = withIds(clean, 'r'); await persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة بنجاح');
     });
   }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
 });
@@ -1286,6 +1357,11 @@ async function exportPDF(){
   }
 }
 $('pdfBtn').onclick = exportPDF;
+
+function init(){
+  getGhConfig();
+  showLockScreen();
+}
 
 init();
 </script>
