@@ -1,7 +1,7 @@
 {
   "app": "cars-crm",
   "version": 5,
-  "updatedAt": "2026-10-25T17:47:11.776Z",
+  "updatedAt": "2026-10-25T17:48:24.374Z",
   "cars": [
     {
       "carName": "هيونداى الينترا",
@@ -176,22 +176,6 @@
       "yearOfManufacture": "2022",
       "carValue": "",
       "serialNumber": "485856910",
-      "active": true,
-      "notes": ""
-    },
-    {
-      "carName": "رينو دوكر 1",
-      "plateNumber": "ب ر ر 7979",
-      "insurance": "ولاء",
-      "insuranceDate": "2026-11-25",
-      "insuranceCal": "g",
-      "registrationDate": "2028-07-11",
-      "registrationCal": "h",
-      "inspectionDate": "2026-11-05",
-      "inspectionCal": "h",
-      "yearOfManufacture": "2020",
-      "carValue": "20000",
-      "serialNumber": "692724710",
       "active": true,
       "notes": ""
     },
