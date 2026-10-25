@@ -1,7 +1,7 @@
 {
   "app": "cars-crm",
   "version": 5,
-  "updatedAt": "2026-10-24T22:36:48.241Z",
+  "updatedAt": "2026-10-25T17:47:11.776Z",
   "cars": [
     {
       "carName": "هيونداى الينترا",
@@ -104,8 +104,8 @@
       "plateNumber": "ر د ه 3754",
       "insurance": "اتحاد الخليج الاهلية",
       "insuranceDate": "2027-01-05",
-      "insuranceCal": "g",
-      "registrationDate": "2026-11-14",
+      "insuranceCal": "h",
+      "registrationDate": "2029-10-12",
       "registrationCal": "h",
       "inspectionDate": "2026-12-03",
       "inspectionCal": "g",
