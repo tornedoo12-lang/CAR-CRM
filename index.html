@@ -13,7 +13,7 @@
   --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
   --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
   --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
-  --gh:#24292f;--gh-hover:#1b1f23;--excel:#1d6f42;--excel-hover:#155732;
+  --gh:#24292f;--gh-hover:#1b1f23;--excel:#1d6f42;--excel-hover:#155732;--row-bad:rgba(231,76,60,.07);
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
 @media (prefers-color-scheme:dark){
@@ -21,7 +21,7 @@
     color-scheme:dark;
     --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
     --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
-    --gh:#2f363d;--gh-hover:#444d56;--excel:#21884f;--excel-hover:#196c3e;
+    --gh:#2f363d;--gh-hover:#444d56;--excel:#21884f;--excel-hover:#196c3e;--row-bad:rgba(231,76,60,.14);
     --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
   }
 }
@@ -48,24 +48,29 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .note-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .note-warn{background:var(--warn-bg);color:var(--warn-fg)}
 .note-bad{background:var(--bad-bg);color:var(--bad-fg)}
-.sticky-top{margin-bottom:16px}
-.stats{margin-bottom:14px}
-.search-bar{display:flex;gap:10px;background:var(--card);padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-wrap:wrap}
+.search-bar{display:flex;gap:10px;margin-bottom:16px;background:var(--card);padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);flex-wrap:wrap}
 input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;background:var(--input);color:var(--text)}
 .search-bar input,.search-bar select{flex:1;min-width:160px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
 .stat-card{background:var(--card);padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .stat-number{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-number.bad{color:var(--danger)}
 .stat-number.warn{color:#f39c12}
 .stat-label{color:var(--muted);font-size:12px;margin-top:5px}
 .table-container{background:var(--card);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);overflow-x:clip}
-@media(max-width:1150px){.table-container{overflow-x:auto}}
+@media(max-width:1150px){.table-container{overflow:auto;max-height:80vh}}
 table{width:100%;border-collapse:collapse;min-width:1100px}
-thead th{position:sticky;top:0;z-index:98;background:var(--thead);color:var(--thead-text);padding:13px 12px;text-align:right;font-weight:600;font-size:13px;white-space:nowrap}
 th{background:var(--thead);color:var(--thead-text);padding:13px 12px;text-align:right;font-weight:600;font-size:13px;white-space:nowrap}
+thead th{position:sticky;top:0;z-index:98}
+thead th:first-child{border-top-right-radius:10px}
+thead th:last-child{border-top-left-radius:10px}
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{filter:brightness(1.3)}
+th .arr{display:inline-block;min-width:12px;margin-right:4px;font-size:10px}
 th small{font-weight:400;opacity:.75;font-size:11px}
 td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr.row-danger td{background:var(--row-bad)}
+tr.row-danger td:first-child{box-shadow:inset -4px 0 0 var(--danger)}
 tr:hover td{background:var(--hover)}
 .date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
 .sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
@@ -77,6 +82,7 @@ tr:hover td{background:var(--hover)}
 .lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
 .lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
 .lvl-danger{background:var(--bad-bg);color:var(--bad-fg)}
+.lvl-none{background:var(--hover);color:var(--muted);border:1px dashed var(--border);font-weight:600}
 .action-buttons{display:flex;gap:6px}
 .empty-state{text-align:center;padding:40px;color:var(--muted)}
 .modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
@@ -102,10 +108,23 @@ textarea{resize:vertical;min-height:70px}
 .modal-footer{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .confirm-box{max-width:430px;text-align:center}
 .confirm-box h2{font-size:20px;margin-bottom:8px}
-.confirm-box p{margin:6px 0 18px;line-height:1.8;font-size:14px}
+.confirm-box p{margin:6px 0 18px;line-height:1.8;font-size:14px;white-space:pre-line}
 .confirm-box .modal-footer{justify-content:center}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:5000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 #toast.show{opacity:1}
+#toast.act{pointer-events:auto}
+#toast button{margin-right:14px;padding:4px 14px;font-size:13px;background:rgba(255,255,255,.2);color:#fff}
+#toast button:hover{background:rgba(255,255,255,.32)}
+#printArea{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  :root{color-scheme:light}
+  body{background:#fff !important;padding:0 !important;min-height:0}
+  body > *:not(#printArea){display:none !important}
+  #printArea{display:block !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea tr{page-break-inside:avoid}
+  #printArea thead{display:table-header-group}
+}
 @media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -117,6 +136,7 @@ textarea{resize:vertical;min-height:70px}
       <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
       <button class="btn-excel" id="excelBtn">📊 تصدير Excel</button>
       <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
+      <button class="btn-gray" id="printBtn">🖨️ طباعة</button>
       <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
       <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
       <button class="btn-gh" id="githubBtn">☁️ GitHub</button>
@@ -126,36 +146,53 @@ textarea{resize:vertical;min-height:70px}
 
   <div id="githubNote" class="note" role="status"></div>
 
-  <div class="sticky-top">
-    <div class="stats">
-      <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">السيارات النشطة</div></div>
-      <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
-      <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
-      <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
-      <div class="stat-card"><div class="stat-number bad" id="stInspExpired">0</div><div class="stat-label">فحص منتهي</div></div>
-    </div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">السيارات النشطة</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stRegSoon">0</div><div class="stat-label">استمارة تنتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInspExpired">0</div><div class="stat-label">فحص منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInspSoon">0</div><div class="stat-label">فحص ينتهي خلال 30 يوم</div></div>
+  </div>
 
-    <div class="search-bar">
+  <div class="search-bar">
     <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين..." aria-label="بحث">
     <select id="statusFilter" aria-label="تصفية الحالة">
       <option value="">جميع الحالات</option>
       <option value="ok">سارية</option>
       <option value="warning">قريبة الانتهاء (30 يوم)</option>
       <option value="danger">فيها منتهي</option>
+      <option value="missing">ناقص تواريخ (غير مسجّلة)</option>
+    </select>
+    <select id="sortSelect" aria-label="الترتيب">
+      <option value="urgency">ترتيب: الأقرب انتهاءً أولاً</option>
+      <option value="original">ترتيب: الأصلي (كما في الملف)</option>
+      <option value="carName">ترتيب: اسم السيارة</option>
+      <option value="plateNumber">ترتيب: رقم اللوحة</option>
+      <option value="insurance">ترتيب: شركة التأمين</option>
+      <option value="insuranceDate">ترتيب: انتهاء التأمين</option>
+      <option value="registrationDate">ترتيب: انتهاء الاستمارة</option>
+      <option value="inspectionDate">ترتيب: انتهاء الفحص</option>
+      <option value="yearOfManufacture">ترتيب: سنة الصنع</option>
+      <option value="carValue">ترتيب: القيمة</option>
     </select>
     <label class="chk"><input type="checkbox" id="showInactive"> <span id="showInactiveTxt">إظهار السيارات غير النشطة</span></label>
-    </div>
   </div>
 
   <div class="table-container">
     <table>
       <thead>
         <tr>
-          <th>السيارة</th><th>رقم اللوحة</th><th>شركة التأمين</th>
-          <th>التأمين <small>(ميلادي / هجري)</small></th>
-          <th>الاستمارة <small>(ميلادي / هجري)</small></th>
-          <th>الفحص <small>(ميلادي / هجري)</small></th>
-          <th>سنة الصنع</th><th>القيمة</th><th>الإجراءات</th>
+          <th data-sort="carName">السيارة<span class="arr"></span></th>
+          <th data-sort="plateNumber">رقم اللوحة<span class="arr"></span></th>
+          <th data-sort="insurance">شركة التأمين<span class="arr"></span></th>
+          <th data-sort="insuranceDate">التأمين <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="registrationDate">الاستمارة <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="inspectionDate">الفحص <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="yearOfManufacture">سنة الصنع<span class="arr"></span></th>
+          <th data-sort="carValue">القيمة<span class="arr"></span></th>
+          <th>الإجراءات</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -168,7 +205,6 @@ textarea{resize:vertical;min-height:70px}
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="modalTitle">إضافة سيارة جديدة</h2>
-      <button class="close-btn" type="button" id="closeBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="carForm">
       <div class="row2">
@@ -279,12 +315,16 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<div id="printArea"></div>
 <div id="toast" role="status"></div>
 
 <script>
 const STORAGE_KEY = 'cars_crm_data_v5';
 const GH_KEY = 'cars_crm_github_v5';
 const DATA_FILE = 'cars-data.json';
+const GH_SHA_KEY = 'cars_crm_ghsha_v5';   /* آخر نسخة من GitHub جلبناها أو رفعناها */
+const DIRTY_KEY = 'cars_crm_dirty_v5';    /* 1 = فيه تعديلات محلية لم تُرفع بعد */
+const SORT_PREF_KEY = 'cars_crm_sort_v5';
 
 /* إعدادات GitHub الافتراضية محفوظة بالكامل ما عدا الـ Token */
 const DEFAULT_GH = {
@@ -297,6 +337,8 @@ const DEFAULT_GH = {
 };
 
 const $ = id => document.getElementById(id);
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ if(v === null || v === undefined) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
 const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
@@ -397,7 +439,7 @@ function worst(car){
 }
 function dateCell(iso, main){
   const d = daysUntil(iso);
-  if(d === null) return '<span class="sub">—</span>';
+  if(d === null) return '<span class="days lvl-none">غير مسجّل</span>';
   const h = hijriStr(iso);
   const first = main === 'h' ? (h ? h + ' هـ' : iso) : iso + ' م';
   const second = main === 'h' ? iso + ' م' : (h ? h + ' هـ' : '');
@@ -442,7 +484,12 @@ function saveLocalData(){
 }
 
 /* ---------- GitHub Repository Storage ---------- */
-let ghState = 'ready', ghLastSync = null, ghSha = null, ghTimer = null;
+let ghState = 'ready', ghLastSync = null, ghTimer = null;
+let ghConflictOpen = false, ghBusy = false, ghQueued = false, editSeq = 0;
+let ghSha = lsGet(GH_SHA_KEY) || null;
+let dirty = lsGet(DIRTY_KEY) === '1';
+function setSha(v){ ghSha = v || null; lsSet(GH_SHA_KEY, ghSha); }
+function setDirty(v){ dirty = !!v; lsSet(DIRTY_KEY, dirty ? '1' : null); }
 
 function getGhConfig(){
   try{
@@ -471,6 +518,10 @@ function saveGhConfig(cfg){
     token: cfg.token || '',
     autoSync: cfg.autoSync !== false
   };
+  try{
+    const prev = JSON.parse(localStorage.getItem(GH_KEY) || 'null');
+    if(prev && (prev.owner !== safeCfg.owner || prev.repo !== safeCfg.repo || prev.branch !== safeCfg.branch || prev.path !== safeCfg.path)) setSha(null);
+  }catch(e){}
   localStorage.setItem(GH_KEY, JSON.stringify(safeCfg));
 }
 function utf8ToBase64(str){
@@ -488,7 +539,39 @@ function base64ToUtf8(b64){
 function encodeGhPath(path){
   return path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
 }
-async function githubPull(silent = false){
+async function ghGetRemote(cfg){
+  const branch = cfg.branch || 'main';
+  const path = encodeGhPath(cfg.path || DATA_FILE);
+  const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
+  const headers = {
+    'Accept': 'application/vnd.github+json',
+    'Authorization': `Bearer ${cfg.token}`,
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  const res = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
+  if(res.status === 404) return {exists:false, baseUrl, headers, branch};
+  if(!res.ok){
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return {exists:true, sha:data.sha, content:data.content, baseUrl, headers, branch};
+}
+function backupLocalFile(tag){
+  saveBlob('cars-local-' + tag + '-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+}
+function askGhConflict(){
+  if(ghConflictOpen) return;
+  ghConflictOpen = true;
+  askConfirm(
+    'تعارض في البيانات: عندك تعديلات لم تُرفع إلى GitHub، ونسخة GitHub اتغيّرت عن آخر نسخة جلبتها.\n\n' +
+    '• «استبدال GitHub بنسختي»: يرفع نسختك ويحل محل نسخة GitHub.\n' +
+    '• «جلب من GitHub»: يستبدل نسختك بنسخة GitHub، وبننزّل لك نسخة احتياطية من نسختك قبلها.',
+    async () => { await githubPush(false, true); },
+    {yes:'استبدال GitHub بنسختي', no:'جلب من GitHub', onNo: async () => { backupLocalFile('before-pull'); await githubPull(false, true); }}
+  );
+}
+async function githubPull(silent = false, force = false){
   const cfg = getGhConfig();
   if(!cfg.token){
     ghState = 'notoken'; renderGhNote();
@@ -497,31 +580,26 @@ async function githubPull(silent = false){
   }
   ghState = 'syncing'; renderGhNote();
   try{
-    const branch = cfg.branch || 'main';
-    const path = encodeGhPath(cfg.path || DATA_FILE);
-    const url = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
-    const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'Authorization': `Bearer ${cfg.token}`,
-        'X-GitHub-Api-Version': '2022-11-28'
-      },
-      cache: 'no-store'
-    });
-    if(res.status === 404){
+    const r = await ghGetRemote(cfg);
+    if(!r.exists){
       ghState = 'ready'; renderGhNote();
       if(!silent) toast('الملف غير موجود بعد في المستودع.');
       return true;
     }
-    if(!res.ok){
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `HTTP ${res.status}`);
+    if(dirty && !force){
+      if(r.sha === ghSha){
+        /* GitHub لم يتغيّر، وعندنا تعديلات لم تُرفع: نرفعها بدل ما نضيعها */
+        ghState = 'ready';
+        return await githubPush(silent);
+      }
+      ghState = 'ready'; renderGhNote();
+      askGhConflict();
+      return false;
     }
-    const data = await res.json();
-    ghSha = data.sha;
-    const text = base64ToUtf8(data.content || '');
+    const text = base64ToUtf8(r.content || '');
     cars = withIds(parseCars(text), 'gh');
     saveLocalData();
+    setSha(r.sha); setDirty(false);
     ghLastSync = new Date();
     ghState = 'ready';
     refresh(); renderGhNote();
@@ -533,61 +611,51 @@ async function githubPull(silent = false){
     return false;
   }
 }
-async function githubPush(silent = false){
+async function githubPush(silent = false, force = false){
   const cfg = getGhConfig();
   if(!cfg.token){
     ghState = 'notoken'; renderGhNote();
     if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
     return false;
   }
+  if(ghBusy){ ghQueued = true; return false; }
+  ghBusy = true;
   ghState = 'syncing'; renderGhNote();
   try{
-    const branch = cfg.branch || 'main';
-    const path = encodeGhPath(cfg.path || DATA_FILE);
-    const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
-    const headers = {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${cfg.token}`,
-      'X-GitHub-Api-Version': '2022-11-28'
-    };
-    if(!ghSha){
-      const getRes = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
-      if(getRes.ok){
-        const getJson = await getRes.json();
-        ghSha = getJson.sha;
-      }
+    const r = await ghGetRemote(cfg);
+    if(r.exists && !force && r.sha !== ghSha){
+      ghState = 'ready'; renderGhNote();
+      askGhConflict();
+      return false;
     }
+    const seq = editSeq;
     const contentStr = JSON.stringify(makePayload(), null, 2);
-    const body = {
-      message: `تحديث بيانات السيارات (${todayLocal()})`,
-      content: utf8ToBase64(contentStr),
-      branch
-    };
-    if(ghSha) body.sha = ghSha;
-    let putRes = await fetch(baseUrl, {
+    const put = remote => fetch(remote.baseUrl, {
       method: 'PUT',
-      headers: {...headers, 'Content-Type': 'application/json'},
-      body: JSON.stringify(body)
+      headers: {...remote.headers, 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: `تحديث بيانات السيارات (${todayLocal()})`,
+        content: utf8ToBase64(contentStr),
+        branch: remote.branch,
+        ...(remote.exists ? {sha: remote.sha} : {})
+      })
     });
-    if(putRes.status === 409 || putRes.status === 422){
-      const getRes2 = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
-      if(getRes2.ok){
-        const getJson2 = await getRes2.json();
-        ghSha = getJson2.sha;
-        body.sha = ghSha;
-        putRes = await fetch(baseUrl, {
-          method: 'PUT',
-          headers: {...headers, 'Content-Type': 'application/json'},
-          body: JSON.stringify(body)
-        });
+    let putRes = await put(r);
+    if(!putRes.ok && (putRes.status === 409 || putRes.status === 422)){
+      if(!force){
+        ghState = 'ready'; renderGhNote();
+        askGhConflict();
+        return false;
       }
+      putRes = await put(await ghGetRemote(cfg));
     }
     if(!putRes.ok){
       const errData = await putRes.json().catch(() => ({}));
       throw new Error(errData.message || `HTTP ${putRes.status}`);
     }
     const putData = await putRes.json();
-    if(putData && putData.content && putData.content.sha) ghSha = putData.content.sha;
+    if(putData && putData.content && putData.content.sha) setSha(putData.content.sha);
+    if(seq === editSeq) setDirty(false);   /* لو اتعدّل شيء أثناء الرفع نخلي العلامة مرفوعة */
     ghLastSync = new Date();
     ghState = 'ready';
     renderGhNote();
@@ -595,8 +663,11 @@ async function githubPush(silent = false){
     return true;
   }catch(e){
     ghState = 'error'; renderGhNote();
-    if(!silent) toast('تعذّر الحفظ في GitHub: ' + (e.message || e));
+    toast(silent ? '⚠️ تعذّر رفع التعديلات إلى GitHub. التعديلات محفوظة على جهازك وهيتعاد رفعها.' : 'تعذّر الحفظ في GitHub: ' + (e.message || e));
     return false;
+  }finally{
+    ghBusy = false;
+    if(ghQueued){ ghQueued = false; scheduleGhSync(); }
   }
 }
 function scheduleGhSync(){
@@ -606,6 +677,8 @@ function scheduleGhSync(){
   ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 500);
 }
 async function persist(){
+  editSeq++;
+  setDirty(true);
   saveLocalData();
   scheduleGhSync();
 }
@@ -626,6 +699,7 @@ function renderGhNote(){
   }else{
     txt = `☁️ متصل بمستودع GitHub «${repoLabel}» (${cfg.path || DATA_FILE})` + (ghLastSync ? ` • آخر مزامنة ${pad(ghLastSync.getHours())}:${pad(ghLastSync.getMinutes())}` : '');
   }
+  if(dirty && cfg.token && ghState === 'ready'){ cls = 'note-warn'; txt += ' • ⚠️ فيه تعديلات لم تُرفع بعد'; }
   n.className = 'note ' + cls;
   n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب الآن</button><button type="button" class="btn-small btn-gh" onclick="githubPush(false)">⬆️ رفع الآن</button></div>`;
 }
@@ -685,16 +759,65 @@ $('ghResetDefaultBtn').onclick = async () => {
 };
 
 /* ---------- العرض ---------- */
+const SORT_KEYS = ['urgency','original','carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue'];
+let sortKey = 'urgency', sortDir = 1;
+try{
+  const sp = JSON.parse(lsGet(SORT_PREF_KEY) || 'null');
+  if(sp && SORT_KEYS.includes(sp.key)){ sortKey = sp.key; sortDir = sp.dir === -1 ? -1 : 1; }
+}catch(e){}
+function minDays(c){
+  const ds = [c.insuranceDate, c.registrationDate, c.inspectionDate].map(daysUntil).filter(d => d !== null);
+  return ds.length ? Math.min(...ds) : Infinity;
+}
+function sortList(list){
+  if(sortKey === 'original') return list;
+  const empty = v => v === '' || v == null;
+  return list.slice().sort((a, b) => {
+    if(sortKey === 'urgency'){
+      if(a.active !== b.active) return a.active ? -1 : 1;
+      const x = minDays(a), y = minDays(b);
+      if(x !== y) return (x < y ? -1 : 1) * sortDir;
+      return String(a.carName).localeCompare(String(b.carName), 'ar');
+    }
+    const va = a[sortKey], vb = b[sortKey];
+    if(empty(va) && empty(vb)) return 0;
+    if(empty(va)) return 1;
+    if(empty(vb)) return -1;
+    let r;
+    if(sortKey === 'yearOfManufacture' || sortKey === 'carValue') r = (Number(va) || 0) - (Number(vb) || 0);
+    else if(DATE_FIELDS.includes(sortKey)) r = va < vb ? -1 : (va > vb ? 1 : 0);
+    else r = String(va).localeCompare(String(vb), 'ar', {numeric:true});
+    return r * sortDir;
+  });
+}
+function renderSortArrows(){
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const arr = th.querySelector('.arr');
+    if(arr) arr.textContent = th.dataset.sort === sortKey ? (sortDir === 1 ? '▲' : '▼') : '';
+  });
+}
+function syncSort(){
+  $('sortSelect').value = sortKey;
+  lsSet(SORT_PREF_KEY, JSON.stringify({key:sortKey, dir:sortDir}));
+  renderSortArrows();
+  renderTable();
+}
+function rowClass(c){
+  if(!c.active) return ' class="inactive"';
+  return worst(c) === 'danger' ? ' class="row-danger"' : '';
+}
 function getFiltered(){
   const q = latin($('searchInput').value).trim().toLowerCase();
   const st = $('statusFilter').value;
-  return cars.filter(c => {
+  const missing = c => !c.insuranceDate || !c.registrationDate || !c.inspectionDate;
+  return sortList(cars.filter(c => {
     const hay = latin([c.carName, c.plateNumber, c.insurance, c.serialNumber].join(' ')).toLowerCase();
     if(!c.active && !$('showInactive').checked) return false;
     if(q && !hay.includes(q)) return false;
+    if(st === 'missing') return missing(c);
     if(st && worst(c) !== st) return false;
     return true;
-  });
+  }));
 }
 function renderTable(){
   const list = getFiltered(); const tb = $('tableBody');
@@ -702,7 +825,7 @@ function renderTable(){
     tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. أدخل توكين GitHub لجلب البيانات تلقائياً أو اضغط «إضافة سيارة»') + '</td></tr>';
     return;
   }
-  tb.innerHTML = list.map(c => '<tr' + (c.active ? '' : ' class="inactive"') + '>' +
+  tb.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
     '<td><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>') + '</td>' +
     '<td>' + esc(c.plateNumber) + '</td>' +
     '<td>' + esc(c.insurance || '—') + '</td>' +
@@ -723,6 +846,8 @@ function updateStats(){
   $('stInsSoon').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'warning');
   $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
   $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+  $('stRegSoon').textContent = n(c => level(daysUntil(c.registrationDate)) === 'warning');
+  $('stInspSoon').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'warning');
   $('showInactiveTxt').textContent = 'إظهار السيارات غير النشطة (' + (cars.length - act.length) + ')';
 }
 function refresh(){ renderTable(); updateStats(); }
@@ -787,19 +912,34 @@ function openModal(car){
   $('carModal').classList.add('active');
 }
 function closeModal(){ $('carModal').classList.remove('active'); }
-let confirmCb = null;
-function askConfirm(msg, cb){ $('confirmMsg').textContent = msg; confirmCb = cb; $('confirmModal').classList.add('active'); }
-function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; }
+let confirmCb = null, confirmNoCb = null;
+function askConfirm(msg, cb, opts){
+  opts = opts || {};
+  $('confirmMsg').textContent = msg;
+  $('confirmYes').textContent = opts.yes || 'نعم، متأكد';
+  $('confirmNo').textContent = opts.no || 'إلغاء';
+  confirmCb = cb; confirmNoCb = opts.onNo || null;
+  $('confirmModal').classList.add('active');
+}
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; ghConflictOpen = false; }
 let toastT;
-function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4000); }
+function toast(msg, actionLabel, actionFn, ms){
+  const t = $('toast');
+  t.textContent = msg; t.classList.remove('act');
+  if(actionLabel){
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = actionLabel;
+    b.onclick = () => { clearTimeout(toastT); t.classList.remove('show', 'act'); if(actionFn) actionFn(); };
+    t.appendChild(b); t.classList.add('act');
+  }
+  t.classList.add('show'); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show', 'act'), ms || 4000);
+}
 
 $('addBtn').onclick = () => openModal(null);
 // فقط حفظ و إلغاء يغلقان النافذة
 $('cancelBtn').onclick = closeModal;
-// تعطيل إغلاق النافذة بالنقر خارجها أو الضغط على X
-$('closeBtn').style.display = 'none';
 $('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
-$('confirmNo').onclick = closeConfirm;
+$('confirmNo').onclick = () => { const f = confirmNoCb; closeConfirm(); if(f) f(); };
 $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
 $('searchInput').addEventListener('input', renderTable);
 $('statusFilter').addEventListener('change', renderTable);
@@ -823,20 +963,38 @@ $('carForm').addEventListener('submit', async e => {
     if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
     data[f] = n;
   }
-  if(editingId){
-    const i = cars.findIndex(c => c.id === editingId);
-    if(i > -1) cars[i] = {...cars[i], ...data};
-  }else{
-    cars.push({id:'c_' + Date.now().toString(36), ...data});
+  const commit = async () => {
+    if(editingId){
+      const i = cars.findIndex(c => c.id === editingId);
+      if(i > -1) cars[i] = {...cars[i], ...data};
+    }else{
+      cars.push({id:'c_' + Date.now().toString(36), ...data});
+    }
+    await persist(); closeModal(); refresh();
+  };
+  const normPlate = x => latin(x).replace(/\s+/g, '').toLowerCase();
+  const dup = cars.find(c => c.id !== editingId && normPlate(c.plateNumber) === normPlate(data.plateNumber));
+  if(dup){
+    askConfirm('رقم اللوحة «' + data.plateNumber + '» مسجّل بالفعل للسيارة «' + dup.carName + '»' + (dup.active ? '' : ' (غير نشطة)') + '.\nهل تريد الحفظ على أي حال؟',
+      commit, {yes:'نعم، احفظ', no:'رجوع للتعديل'});
+    return;
   }
-  await persist(); closeModal(); refresh();
+  await commit();
 });
 $('tableBody').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
   if(b.dataset.del){
     const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
-    askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => { cars = cars.filter(x => x.id !== c.id); await persist(); refresh(); });
+    askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => {
+      const idx = cars.findIndex(x => x.id === c.id);
+      const removed = cars[idx];
+      cars = cars.filter(x => x.id !== c.id); await persist(); refresh();
+      toast('تم حذف «' + c.carName + '»', 'تراجع', async () => {
+        cars.splice(Math.min(idx, cars.length), 0, removed);
+        await persist(); refresh(); toast('تم التراجع عن الحذف');
+      }, 10000);
+    });
   }
 });
 
@@ -937,11 +1095,9 @@ function pdfDate(iso, main){
     (second ? '<div style="direction:ltr;text-align:right;font-size:10px;color:#777">' + esc(second) + '</div>' : '') +
     '<span style="display:inline-block;margin-top:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' + c[0] + ';color:' + c[1] + '">' + daysText(d) + '</span>';
 }
-function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
-  const th = 'style="background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
-  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
-  const body = rows.map((c, i) => '<tr>' +
-    '<td ' + td + '>' + (startIdx + i + 1) + '</td>' +
+function reportRow(c, n, td){
+  return '<tr>' +
+    '<td ' + td + '>' + n + '</td>' +
     '<td ' + td + '><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : ' <span style="font-size:10px;color:#888">(غير نشطة)</span>') + '</td>' +
     '<td ' + td + '>' + esc(c.plateNumber) + '</td>' +
     '<td ' + td + '>' + esc(c.insurance || '—') + '</td>' +
@@ -949,7 +1105,33 @@ function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
     '<td ' + td + '>' + pdfDate(c.registrationDate, c.registrationCal) + '</td>' +
     '<td ' + td + '>' + pdfDate(c.inspectionDate, c.inspectionCal) + '</td>' +
     '<td ' + td + '>' + esc(c.yearOfManufacture || '—') + '</td>' +
-    '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>').join('');
+    '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>';
+}
+/* طباعة / حفظ PDF من المتصفح: يعمل بدون إنترنت والنص قابل للتحديد والبحث */
+function printReport(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات للطباعة'); return; }
+  const todayStr = todayLocal(), filtered = list.length !== cars.length;
+  const th = 'style="position:static;background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const heads = ['#','السيارة','اللوحة','شركة التأمين','التأمين','الاستمارة','الفحص','سنة الصنع','القيمة'].map(h => '<th ' + th + '>' + h + '</th>').join('');
+  $('printArea').innerHTML =
+    '<div style="direction:rtl;background:#fff;color:#1f2937;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
+      '<div><div style="font-size:22px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
+      '<div style="font-size:12px;color:#666;margin-top:4px">' + (filtered ? 'نتائج التصفية: ' : 'الإجمالي: ') + list.length + ' سيارة</div></div>' +
+      '<div style="font-size:12px;color:#666;direction:ltr">' + todayStr + ' • ' + hijriStr(todayStr) + ' H</div>' +
+    '</div>' +
+    '<table style="width:100%;min-width:0;border-collapse:collapse"><thead><tr>' + heads + '</tr></thead><tbody>' +
+      list.map((c, i) => reportRow(c, i + 1, td)).join('') + '</tbody></table>' +
+    '<div style="margin-top:10px;font-size:11px;color:#888">أخضر: ساري • أصفر: ينتهي خلال 30 يوم • أحمر: منتهي</div></div>';
+  window.print();
+}
+window.addEventListener('afterprint', () => { $('printArea').innerHTML = ''; });
+function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
+  const th = 'style="background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const body = rows.map((c, i) => reportRow(c, startIdx + i + 1, td)).join('');
   return '<div style="width:1123px;height:794px;background:#fff;color:#1f2937;padding:26px 30px;box-sizing:border-box;direction:rtl;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;position:relative">' +
     '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
       '<div><div style="font-size:24px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
@@ -968,7 +1150,10 @@ function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
 async function exportPDF(){
   const list = getFiltered();
   if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
-  if(!window.html2canvas || !window.jspdf){ toast('تعذّر تحميل مكتبة الـ PDF. تحتاج اتصال إنترنت لتصدير PDF'); return; }
+  if(!window.html2canvas || !window.jspdf){
+    toast('مكتبة الـ PDF غير متاحة (لا يوجد إنترنت). هنفتح الطباعة، اختر «حفظ بصيغة PDF».');
+    printReport(); return;
+  }
   const btn = $('pdfBtn'), old = btn.textContent;
   btn.disabled = true; btn.textContent = 'جاري التجهيز...';
   const holder = document.createElement('div');
@@ -993,8 +1178,26 @@ async function exportPDF(){
   }
 }
 $('pdfBtn').onclick = exportPDF;
+$('printBtn').onclick = printReport;
+
+document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
+  const k = th.dataset.sort;
+  if(sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+  syncSort();
+}));
+$('sortSelect').addEventListener('change', e => { sortKey = e.target.value; sortDir = 1; syncSort(); });
+
+/* إعادة رفع التعديلات المعلّقة عند رجوع الإنترنت */
+window.addEventListener('online', () => { if(dirty && getGhConfig().token) githubPush(true); });
+/* تحذير قبل إغلاق الصفحة لو فيه تعديلات لم تُرفع أو نافذة تعديل مفتوحة */
+window.addEventListener('beforeunload', e => {
+  const pending = (dirty && getGhConfig().token) || ghTimer || ghState === 'syncing' || $('carModal').classList.contains('active');
+  if(pending){ e.preventDefault(); e.returnValue = ''; }
+});
 
 async function init(){
+  $('sortSelect').value = sortKey;
+  renderSortArrows();
   loadLocalData();
   refresh();
   const cfg = getGhConfig();
