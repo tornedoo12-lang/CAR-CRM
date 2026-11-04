@@ -2,119 +2,119 @@
 {
   "car_name": "هيونداى الينترا",
   "plate_number": "د ك ه 8063",
-  "inspection_expiry": "173",
-  "insurance_expiry": "66",
-  "registration_expiry": "717"
+  "inspection_expiry": "2027-04-26",
+  "insurance_expiry": "2027-01-09",
+  "registration_expiry": "2028-10-21"
 },
 {
   "car_name": "نيسان صني عيسوي",
   "plate_number": "ا ي ح 5868",
-  "inspection_expiry": "-670",
-  "insurance_expiry": "-627",
-  "registration_expiry": "-712"
+  "inspection_expiry": "2025-01-03",
+  "insurance_expiry": "2025-02-15",
+  "registration_expiry": "2024-11-22"
 },
 {
   "car_name": "تويوتا ياريس",
   "plate_number": "ر س و  4323",
-  "inspection_expiry": "39",
-  "insurance_expiry": "307",
-  "registration_expiry": "972"
+  "inspection_expiry": "2026-12-13",
+  "insurance_expiry": "2027-09-07",
+  "registration_expiry": "2029-07-03"
 },
 {
   "car_name": "ايسوزو",
   "plate_number": "ا ك م 2570",
-  "inspection_expiry": "43",
-  "insurance_expiry": "235",
+  "inspection_expiry": "2026-12-17",
+  "insurance_expiry": "2027-06-27",
   "registration_expiry": ""
 },
 {
   "car_name": "تويوتا  فان بضاعة",
   "plate_number": "ا ي ن 5533",
-  "inspection_expiry": "34",
-  "insurance_expiry": "285",
-  "registration_expiry": "1٬058"
+  "inspection_expiry": "2026-12-08",
+  "insurance_expiry": "2027-08-16",
+  "registration_expiry": "2029-09-27"
 },
 {
   "car_name": "تويوتا رش",
   "plate_number": "ب ب ب 8154",
-  "inspection_expiry": "240",
-  "insurance_expiry": "64",
-  "registration_expiry": "439"
+  "inspection_expiry": "2027-07-02",
+  "insurance_expiry": "2027-01-07",
+  "registration_expiry": "2028-01-17"
 },
 {
   "car_name": "nisan 1814",
   "plate_number": "ر د ه 3754",
-  "inspection_expiry": "29",
-  "insurance_expiry": "62",
-  "registration_expiry": "1٬073"
+  "inspection_expiry": "2026-12-03",
+  "insurance_expiry": "2027-01-05",
+  "registration_expiry": "2029-10-12"
 },
 {
   "car_name": "nisan 1815",
   "plate_number": "د ن ن 1815",
-  "inspection_expiry": "40",
-  "insurance_expiry": "62",
-  "registration_expiry": "1٬073"
+  "inspection_expiry": "2026-12-14",
+  "insurance_expiry": "2027-01-05",
+  "registration_expiry": "2029-10-12"
 },
 {
   "car_name": "هيونداي توسان",
   "plate_number": "د ي ي 8633",
-  "inspection_expiry": "لا يوجد",
-  "insurance_expiry": "-432",
-  "registration_expiry": "-439"
+  "inspection_expiry": "",
+  "insurance_expiry": "2025-08-29",
+  "registration_expiry": "2025-08-22"
 },
 {
   "car_name": "ليكزس",
   "plate_number": "د ق ن 999",
-  "inspection_expiry": "لا يوجد",
-  "insurance_expiry": "-434",
-  "registration_expiry": "-92"
+  "inspection_expiry": "",
+  "insurance_expiry": "2025-08-27",
+  "registration_expiry": "2026-08-04"
 },
 {
   "car_name": "نيسان باترول",
   "plate_number": "د ه ر 4040",
-  "inspection_expiry": "175",
-  "insurance_expiry": "272",
-  "registration_expiry": "145"
+  "inspection_expiry": "2027-04-28",
+  "insurance_expiry": "2027-08-03",
+  "registration_expiry": "2027-03-29"
 },
 {
   "car_name": "رينو دوكر 1",
   "plate_number": "ب ر ر 7979",
-  "inspection_expiry": "1",
-  "insurance_expiry": "21",
-  "registration_expiry": "615"
+  "inspection_expiry": "2026-11-05",
+  "insurance_expiry": "2026-11-25",
+  "registration_expiry": "2028-07-11"
 },
 {
   "car_name": "رينو دوكر 2",
   "plate_number": "7985 ب ر ر ",
-  "inspection_expiry": "-37",
-  "insurance_expiry": "21",
-  "registration_expiry": "615"
+  "inspection_expiry": "2026-09-28",
+  "insurance_expiry": "2026-11-25",
+  "registration_expiry": "2028-07-11"
 },
 {
   "car_name": "رينو دوكر 3",
   "plate_number": "ب ر ر 7944",
-  "inspection_expiry": "240",
-  "insurance_expiry": "21",
-  "registration_expiry": "615"
+  "inspection_expiry": "2027-07-02",
+  "insurance_expiry": "2026-11-25",
+  "registration_expiry": "2028-07-11"
 },
 {
   "car_name": "ماهيندرا",
   "plate_number": "ب ط د 4793",
-  "inspection_expiry": "-54",
-  "insurance_expiry": "62",
-  "registration_expiry": "-51"
+  "inspection_expiry": "2026-09-11",
+  "insurance_expiry": "2027-01-05",
+  "registration_expiry": "2026-09-14"
 },
 {
   "car_name": "فورد رابتور",
   "plate_number": "س س د 999",
-  "inspection_expiry": "منتهي",
-  "insurance_expiry": "79",
-  "registration_expiry": "419"
+  "inspection_expiry": "",
+  "insurance_expiry": "2027-01-22",
+  "registration_expiry": "2027-12-28"
 },
 {
   "car_name": "رانج روفر",
   "plate_number": "د ق ن 999",
-  "inspection_expiry": "لا يوجد",
-  "insurance_expiry": "307",
-  "registration_expiry": "647"
+  "inspection_expiry": "",
+  "insurance_expiry": "2027-09-07",
+  "registration_expiry": "2028-08-12"
 }]
