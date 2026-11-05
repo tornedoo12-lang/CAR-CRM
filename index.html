@@ -249,7 +249,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
       <div class="form-group"><label for="notes">ملاحظات</label><textarea id="notes"></textarea></div>
       <div class="modal-footer">
-        <button type="submit" class="btn-primary">حفظ</button>
+        <button type="submit" class="btn-primary" id="saveCarBtn">حفظ</button>
         <button type="button" class="btn-gray" id="cancelBtn">إلغاء</button>
       </div>
     </form>
@@ -319,7 +319,7 @@ textarea{resize:vertical;min-height:70px}
 
 <script>
 // ==========================================
-// الإعدادات والثوابت الأساسية
+// 1. الإعدادات والثوابت الأساسية
 // ==========================================
 const STORAGE_KEY = 'cars_crm_data_v5';
 const GH_KEY = 'cars_crm_github_v5';
@@ -328,7 +328,7 @@ const GH_SHA_KEY = 'cars_crm_ghsha_v5';
 const DIRTY_KEY = 'cars_crm_dirty_v5';    
 const SORT_PREF_KEY = 'cars_crm_sort_v5';
 
-// تم دمج رابط جوجل الخاص بك بنجاح
+// رابط جوجل شيت 
 const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbypEZzz_819mimSJ9L8i6KUSieiYf3KNKiftTuHAgpHL33vQ12DR-YPqbRTXPXe2WV2LA/exec"; 
 
 const DEFAULT_GH = {
@@ -340,9 +340,77 @@ const DEFAULT_GH = {
   autoSync: true
 };
 
+// ==========================================
+// 2. إدارة الحالة (State Management - Global Variables Encapsulation)
+// ==========================================
 const $ = id => document.getElementById(id);
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v){ try{ if(v === null || v === undefined) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
+
+const AppState = {
+  cars: [],
+  editingId: null,
+  gh: {
+    state: 'ready',
+    lastSync: null,
+    timer: null,
+    busy: false,
+    queued: false,
+    conflictOpen: false,
+    sha: lsGet(GH_SHA_KEY) || null
+  },
+  dirty: lsGet(DIRTY_KEY) === '1',
+  editSeq: 0,
+  sort: {
+    key: 'urgency',
+    dir: 1
+  }
+};
+
+try {
+  const sp = JSON.parse(lsGet(SORT_PREF_KEY) || 'null');
+  if(sp && ['urgency','original','carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue'].includes(sp.key)){
+    AppState.sort.key = sp.key; 
+    AppState.sort.dir = sp.dir === -1 ? -1 : 1; 
+  }
+} catch(e){}
+
+// ==========================================
+// 3. تخزين عناصر الصفحة (DOM Caching)
+// ==========================================
+const DOM = {
+  tableBody: $('tableBody'),
+  stats: {
+    total: $('stTotal'),
+    insExp: $('stInsExpired'),
+    insSoon: $('stInsSoon'),
+    regExp: $('stRegExpired'),
+    regSoon: $('stRegSoon'),
+    inspExp: $('stInspExpired'),
+    inspSoon: $('stInspSoon')
+  },
+  filters: {
+    search: $('searchInput'),
+    status: $('statusFilter'),
+    inactive: $('showInactive'),
+    sort: $('sortSelect')
+  },
+  text: {
+    inactiveTxt: $('showInactiveTxt'),
+    githubNote: $('githubNote')
+  },
+  modals: {
+    car: $('carModal'),
+    title: $('modalTitle'),
+    form: $('carForm'),
+    saveBtn: $('saveCarBtn'),
+    activeChk: $('active')
+  }
+};
+
+// ==========================================
+// 4. دوال المساعدة (Helpers)
+// ==========================================
 const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
@@ -352,9 +420,6 @@ const DATE_FIELDS = ['insuranceDate','registrationDate','inspectionDate'];
 const CAL_OF = {insuranceDate:'insuranceCal', registrationDate:'registrationCal', inspectionDate:'inspectionCal'};
 const CAL_DEFAULT = {insuranceCal:'g', registrationCal:'h', inspectionCal:'g'};
 const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توسان', 'ليكزس'];
-
-let cars = [];
-let editingId = null;
 
 function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
 function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
@@ -469,16 +534,16 @@ function parseCars(text){
   });
 }
 function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
-function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
+function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:AppState.cars.map(({id, ...r}) => r)}; }
 
 function loadLocalData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
-      cars = withIds(parseCars(raw), 'loc');
+      AppState.cars = withIds(parseCars(raw), 'loc');
     }
   }catch(e){
-    cars = [];
+    AppState.cars = [];
   }
 }
 function saveLocalData(){
@@ -507,12 +572,8 @@ async function sendToGoogleSheets(actionType, carDataObj) {
 }
 
 /* ---------- GitHub Repository Storage ---------- */
-let ghState = 'ready', ghLastSync = null, ghTimer = null;
-let ghConflictOpen = false, ghBusy = false, ghQueued = false, editSeq = 0;
-let ghSha = lsGet(GH_SHA_KEY) || null;
-let dirty = lsGet(DIRTY_KEY) === '1';
-function setSha(v){ ghSha = v || null; lsSet(GH_SHA_KEY, ghSha); }
-function setDirty(v){ dirty = !!v; lsSet(DIRTY_KEY, dirty ? '1' : null); }
+function setSha(v){ AppState.gh.sha = v || null; lsSet(GH_SHA_KEY, AppState.gh.sha); }
+function setDirty(v){ AppState.dirty = !!v; lsSet(DIRTY_KEY, AppState.dirty ? '1' : null); }
 
 function getGhConfig(){
   try{
@@ -582,29 +643,29 @@ function backupLocalFile(tag){
 async function githubPull(silent = false, force = false){
   const cfg = getGhConfig();
   if(!cfg.token){
-    ghState = 'notoken'; renderGhNote();
+    AppState.gh.state = 'notoken'; renderGhNote();
     if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
     return false;
   }
-  ghState = 'syncing'; renderGhNote();
+  AppState.gh.state = 'syncing'; renderGhNote();
   try{
     const r = await ghGetRemote(cfg);
     if(!r.exists){
-      ghState = 'ready'; renderGhNote();
+      AppState.gh.state = 'ready'; renderGhNote();
       if(!silent) toast('الملف غير موجود بعد في المستودع.');
       return true;
     }
     const text = base64ToUtf8(r.content || '');
-    cars = withIds(parseCars(text), 'gh');
+    AppState.cars = withIds(parseCars(text), 'gh');
     saveLocalData();
     setSha(r.sha); setDirty(false);
-    ghLastSync = new Date();
-    ghState = 'ready';
+    AppState.gh.lastSync = new Date();
+    AppState.gh.state = 'ready';
     refresh(); renderGhNote();
-    if(!silent) toast('☁️ تم تحديث البيانات من GitHub بنجاح (' + cars.length + ' سيارة)');
+    if(!silent) toast('☁️ تم تحديث البيانات من GitHub بنجاح (' + AppState.cars.length + ' سيارة)');
     return true;
   }catch(e){
-    ghState = 'error'; renderGhNote();
+    AppState.gh.state = 'error'; renderGhNote();
     if(!silent) toast('تعذّر الجلب من GitHub: ' + (e.message || e));
     return false;
   }
@@ -613,7 +674,7 @@ async function githubPull(silent = false, force = false){
 /* تم استبدال عملية الرفع لتقوم بها أداة Google Sheets */
 async function githubPush(silent = false, force = false){
   setDirty(false);
-  ghState = 'ready';
+  AppState.gh.state = 'ready';
   renderGhNote();
   if(!silent) toast('☁️ يتم الحفظ والتزامن من خلال جوجل شيت مباشرة');
   return true;
@@ -622,27 +683,27 @@ async function githubPush(silent = false, force = false){
 function scheduleGhSync(){
   const cfg = getGhConfig();
   if(!cfg || !cfg.autoSync || !cfg.token) return;
-  clearTimeout(ghTimer);
-  ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 500);
+  clearTimeout(AppState.gh.timer);
+  AppState.gh.timer = setTimeout(() => { AppState.gh.timer = null; githubPush(true); }, 500);
 }
 async function persist(){
-  editSeq++;
+  AppState.editSeq++;
   setDirty(true);
   saveLocalData();
   scheduleGhSync();
 }
 function renderGhNote(){
-  const n = $('githubNote');
+  const n = DOM.text.githubNote;
   const cfg = getGhConfig();
   const repoLabel = `${cfg.owner}/${cfg.repo}:${cfg.branch || 'main'}`;
   let cls = 'note-ok', txt = '';
   if(!cfg.token){
     cls = 'note-warn';
     txt = `☁️ مستودع GitHub «${repoLabel}» جاهز للربط كمصدر بيانات للجدول.`;
-  }else if(ghState === 'syncing'){
+  }else if(AppState.gh.state === 'syncing'){
     cls = 'note-warn';
     txt = `⏳ جاري مزامنة القراءة مع مستودع GitHub «${repoLabel}»...`;
-  }else if(ghState === 'error'){
+  }else if(AppState.gh.state === 'error'){
     cls = 'note-bad';
     txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من اتصال الإنترنت أو الـ Token.`;
   }else{
@@ -679,7 +740,7 @@ $('githubForm').addEventListener('submit', async e => {
   e.preventDefault();
   const cfg = readGhFormConfig();
   saveGhConfig(cfg);
-  ghState = cfg.token ? 'ready' : 'notoken';
+  AppState.gh.state = cfg.token ? 'ready' : 'notoken';
   renderGhNote();
   $('githubModal').classList.remove('active');
   if(cfg.token){
@@ -702,46 +763,40 @@ $('ghResetDefaultBtn').onclick = async () => {
 };
 
 /* ---------- العرض ---------- */
-const SORT_KEYS = ['urgency','original','carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue'];
-let sortKey = 'urgency', sortDir = 1;
-try{
-  const sp = JSON.parse(lsGet(SORT_PREF_KEY) || 'null');
-  if(sp && SORT_KEYS.includes(sp.key)){ sortKey = sp.key; sortDir = sp.dir === -1 ? -1 : 1; }
-}catch(e){}
 function minDays(c){
   const ds = [c.insuranceDate, c.registrationDate, c.inspectionDate].map(daysUntil).filter(d => d !== null);
   return ds.length ? Math.min(...ds) : Infinity;
 }
 function sortList(list){
-  if(sortKey === 'original') return list;
+  if(AppState.sort.key === 'original') return list;
   const empty = v => v === '' || v == null;
   return list.slice().sort((a, b) => {
-    if(sortKey === 'urgency'){
+    if(AppState.sort.key === 'urgency'){
       if(a.active !== b.active) return a.active ? -1 : 1;
       const x = minDays(a), y = minDays(b);
-      if(x !== y) return (x < y ? -1 : 1) * sortDir;
+      if(x !== y) return (x < y ? -1 : 1) * AppState.sort.dir;
       return String(a.carName).localeCompare(String(b.carName), 'ar');
     }
-    const va = a[sortKey], vb = b[sortKey];
+    const va = a[AppState.sort.key], vb = b[AppState.sort.key];
     if(empty(va) && empty(vb)) return 0;
     if(empty(va)) return 1;
     if(empty(vb)) return -1;
     let r;
-    if(sortKey === 'yearOfManufacture' || sortKey === 'carValue') r = (Number(va) || 0) - (Number(vb) || 0);
-    else if(DATE_FIELDS.includes(sortKey)) r = va < vb ? -1 : (va > vb ? 1 : 0);
+    if(AppState.sort.key === 'yearOfManufacture' || AppState.sort.key === 'carValue') r = (Number(va) || 0) - (Number(vb) || 0);
+    else if(DATE_FIELDS.includes(AppState.sort.key)) r = va < vb ? -1 : (va > vb ? 1 : 0);
     else r = String(va).localeCompare(String(vb), 'ar', {numeric:true});
-    return r * sortDir;
+    return r * AppState.sort.dir;
   });
 }
 function renderSortArrows(){
   document.querySelectorAll('th[data-sort]').forEach(th => {
     const arr = th.querySelector('.arr');
-    if(arr) arr.textContent = th.dataset.sort === sortKey ? (sortDir === 1 ? '▲' : '▼') : '';
+    if(arr) arr.textContent = th.dataset.sort === AppState.sort.key ? (AppState.sort.dir === 1 ? '▲' : '▼') : '';
   });
 }
 function syncSort(){
-  $('sortSelect').value = sortKey;
-  lsSet(SORT_PREF_KEY, JSON.stringify({key:sortKey, dir:sortDir}));
+  DOM.filters.sort.value = AppState.sort.key;
+  lsSet(SORT_PREF_KEY, JSON.stringify({key: AppState.sort.key, dir: AppState.sort.dir}));
   renderSortArrows();
   renderTable();
 }
@@ -750,12 +805,12 @@ function rowClass(c){
   return worst(c) === 'danger' ? ' class="row-danger"' : '';
 }
 function getFiltered(){
-  const q = latin($('searchInput').value).trim().toLowerCase();
-  const st = $('statusFilter').value;
+  const q = latin(DOM.filters.search.value).trim().toLowerCase();
+  const st = DOM.filters.status.value;
   const missing = c => !c.insuranceDate || !c.registrationDate || !c.inspectionDate;
-  return sortList(cars.filter(c => {
+  return sortList(AppState.cars.filter(c => {
     const hay = latin([c.carName, c.plateNumber, c.insurance, c.serialNumber].join(' ')).toLowerCase();
-    if(!c.active && !$('showInactive').checked) return false;
+    if(!c.active && !DOM.filters.inactive.checked) return false;
     if(q && !hay.includes(q)) return false;
     if(st === 'missing') return missing(c);
     if(st && worst(c) !== st) return false;
@@ -763,12 +818,12 @@ function getFiltered(){
   }));
 }
 function renderTable(){
-  const list = getFiltered(); const tb = $('tableBody');
+  const list = getFiltered();
   if(!list.length){
-    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. تأكد من الربط أو اضغط «إضافة سيارة»') + '</td></tr>';
+    DOM.tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (AppState.cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. تأكد من الربط أو اضغط «إضافة سيارة»') + '</td></tr>';
     return;
   }
-  tb.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
+  DOM.tableBody.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
     '<td><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>') + '</td>' +
     '<td>' + esc(c.plateNumber) + '</td>' +
     '<td>' + esc(c.insurance || '—') + '</td>' +
@@ -783,15 +838,15 @@ function renderTable(){
     '</div></td></tr>').join('');
 }
 function updateStats(){
-  const act = cars.filter(c => c.active), n = f => act.filter(f).length;
-  $('stTotal').textContent = act.length;
-  $('stInsExpired').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'danger');
-  $('stInsSoon').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'warning');
-  $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
-  $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
-  $('stRegSoon').textContent = n(c => level(daysUntil(c.registrationDate)) === 'warning');
-  $('stInspSoon').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'warning');
-  $('showInactiveTxt').textContent = 'إظهار السيارات غير النشطة (' + (cars.length - act.length) + ')';
+  const act = AppState.cars.filter(c => c.active), n = f => act.filter(f).length;
+  DOM.stats.total.textContent = act.length;
+  DOM.stats.insExp.textContent = n(c => level(daysUntil(c.insuranceDate)) === 'danger');
+  DOM.stats.insSoon.textContent = n(c => level(daysUntil(c.insuranceDate)) === 'warning');
+  DOM.stats.regExp.textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
+  DOM.stats.inspExp.textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+  DOM.stats.regSoon.textContent = n(c => level(daysUntil(c.registrationDate)) === 'warning');
+  DOM.stats.inspSoon.textContent = n(c => level(daysUntil(c.inspectionDate)) === 'warning');
+  DOM.text.inactiveTxt.textContent = 'إظهار السيارات غير النشطة (' + (AppState.cars.length - act.length) + ')';
 }
 function refresh(){ renderTable(); updateStats(); }
 
@@ -836,9 +891,9 @@ $('carValue').addEventListener('input', e => { e.target.value = latin(e.target.v
 ['plateNumber','serialNumber'].forEach(f => $(f).addEventListener('input', e => { e.target.value = latin(e.target.value); }));
 
 function openModal(car){
-  editingId = car ? car.id : null;
-  $('modalTitle').textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
-  $('carForm').reset();
+  AppState.editingId = car ? car.id : null;
+  DOM.modals.title.textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
+  DOM.modals.form.reset();
   if(car){
     FORM_FIELDS.forEach(f => { $(f).value = latin(car[f]); });
   }
@@ -851,10 +906,10 @@ function openModal(car){
     updateCalToggleUI(f);
     updateHint(f);
   });
-  $('active').checked = car ? car.active !== false : true;
-  $('carModal').classList.add('active');
+  DOM.modals.activeChk.checked = car ? car.active !== false : true;
+  DOM.modals.car.classList.add('active');
 }
-function closeModal(){ $('carModal').classList.remove('active'); }
+function closeModal(){ DOM.modals.car.classList.remove('active'); }
 let confirmCb = null, confirmNoCb = null;
 function askConfirm(msg, cb, opts){
   opts = opts || {};
@@ -864,7 +919,7 @@ function askConfirm(msg, cb, opts){
   confirmCb = cb; confirmNoCb = opts.onNo || null;
   $('confirmModal').classList.add('active');
 }
-function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; ghConflictOpen = false; }
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; AppState.gh.conflictOpen = false; }
 let toastT;
 function toast(msg, actionLabel, actionFn, ms){
   const t = $('toast');
@@ -883,9 +938,9 @@ $('cancelBtn').onclick = closeModal;
 $('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
 $('confirmNo').onclick = () => { const f = confirmNoCb; closeConfirm(); if(f) f(); };
 $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
-$('searchInput').addEventListener('input', renderTable);
-$('statusFilter').addEventListener('change', renderTable);
-$('showInactive').addEventListener('change', renderTable);
+DOM.filters.search.addEventListener('input', renderTable);
+DOM.filters.status.addEventListener('change', renderTable);
+DOM.filters.inactive.addEventListener('change', renderTable);
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
     closeConfirm();
@@ -893,39 +948,54 @@ document.addEventListener('keydown', e => {
   }
 });
 
-$('carForm').addEventListener('submit', async e => {
+DOM.modals.form.addEventListener('submit', async e => {
   e.preventDefault();
   const data = {};
   FORM_FIELDS.forEach(f => { data[f] = latin($(f).value).trim(); });
   DATE_FIELDS.forEach(f => { data[CAL_OF[f]] = $(f).dataset.cal || CAL_DEFAULT[CAL_OF[f]]; });
-  data.active = $('active').checked;
+  data.active = DOM.modals.activeChk.checked;
   for(const f of DATE_FIELDS){
     const n = normDate(data[f]);
     if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
     data[f] = n;
   }
+  
   const commit = async () => {
-    const actionType = editingId ? 'edit' : 'add';
+    const actionType = AppState.editingId ? 'edit' : 'add';
     
-    // 1. مزامنة التعديل فوراً مع جوجل شيت
-    const syncOk = await sendToGoogleSheets(actionType, data);
-    if(!syncOk) {
-      toast('⚠️ تعذر الاتصال بجوجل شيت، سيتم الحفظ محلياً في المتصفح.', null, null, 5000);
-    } else {
-      toast('✅ تم الحفظ بنجاح في النظام وجوجل شيت');
-    }
+    // (Pessimistic UI Fix): تغيير حالة زر الحفظ وإيقافه لحين الرد من جوجل
+    const originalBtnText = DOM.modals.saveBtn.textContent;
+    DOM.modals.saveBtn.disabled = true;
+    DOM.modals.saveBtn.textContent = 'جاري الحفظ...';
 
-    // 2. تحديث الواجهة محلياً
-    if(editingId){
-      const i = cars.findIndex(c => c.id === editingId);
-      if(i > -1) cars[i] = {...cars[i], ...data};
-    }else{
-      cars.push({id:'c_' + Date.now().toString(36), ...data});
+    try {
+      const syncOk = await sendToGoogleSheets(actionType, data);
+      
+      if(!syncOk) {
+        // منع الحفظ وإظهار رسالة خطأ في حالة فشل الاتصال بجوجل شيت 
+        toast('⚠️ تعذر الاتصال بجوجل شيت. لم يتم الحفظ لمنع تعارض البيانات.', null, null, 5000);
+        return;
+      } 
+      
+      toast('✅ تم الحفظ بنجاح في النظام وجوجل شيت');
+      
+      // تحديث واجهة المستخدم محلياً فقط بعد نجاح العملية في جوجل شيت
+      if(AppState.editingId){
+        const i = AppState.cars.findIndex(c => c.id === AppState.editingId);
+        if(i > -1) AppState.cars[i] = {...AppState.cars[i], ...data};
+      }else{
+        AppState.cars.push({id:'c_' + Date.now().toString(36), ...data});
+      }
+      await persist(); closeModal(); refresh();
+      
+    } finally {
+      DOM.modals.saveBtn.disabled = false;
+      DOM.modals.saveBtn.textContent = originalBtnText;
     }
-    await persist(); closeModal(); refresh();
   };
+  
   const normPlate = x => latin(x).replace(/\s+/g, '').toLowerCase();
-  const dup = cars.find(c => c.id !== editingId && normPlate(c.plateNumber) === normPlate(data.plateNumber));
+  const dup = AppState.cars.find(c => c.id !== AppState.editingId && normPlate(c.plateNumber) === normPlate(data.plateNumber));
   if(dup){
     askConfirm('رقم اللوحة «' + data.plateNumber + '» مسجّل بالفعل للسيارة «' + dup.carName + '»' + (dup.active ? '' : ' (غير نشطة)') + '.\nهل تريد الحفظ على أي حال؟',
       commit, {yes:'نعم، احفظ', no:'رجوع للتعديل'});
@@ -933,27 +1003,27 @@ $('carForm').addEventListener('submit', async e => {
   }
   await commit();
 });
-$('tableBody').addEventListener('click', e => {
+
+DOM.tableBody.addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
-  if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
+  if(b.dataset.edit) openModal(AppState.cars.find(c => c.id === b.dataset.edit));
   if(b.dataset.del){
-    const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
+    const c = AppState.cars.find(x => x.id === b.dataset.del); if(!c) return;
     askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => {
       
-      // 1. إرسال طلب الحذف لجوجل شيت
+      // (Pessimistic UI Fix): انتظار تأكيد الحذف من جوجل شيت أولاً
       const syncOk = await sendToGoogleSheets('delete', { plateNumber: c.plateNumber });
-      if(!syncOk) toast('⚠️ تم الحذف من المتصفح فقط بسبب خطأ في اتصال الشيت.');
+      
+      if(!syncOk) {
+         toast('⚠️ تعذر الحذف بسبب مشكلة في الاتصال بجوجل شيت.');
+         return;
+      }
 
-      const idx = cars.findIndex(x => x.id === c.id);
-      const removed = cars[idx];
-      cars = cars.filter(x => x.id !== c.id); await persist(); refresh();
-      toast('تم حذف «' + c.carName + '»', 'تراجع', async () => {
-        cars.splice(Math.min(idx, cars.length), 0, removed);
-        
-        // إعادة التزامن للشيت في حالة التراجع عن الحذف
-        await sendToGoogleSheets('add', removed);
-        await persist(); refresh(); toast('تم التراجع عن الحذف');
-      }, 10000);
+      const idx = AppState.cars.findIndex(x => x.id === c.id);
+      AppState.cars = AppState.cars.filter(x => x.id !== c.id); 
+      await persist(); 
+      refresh();
+      toast('تم حذف «' + c.carName + '» بنجاح.');
     });
   }
 });
@@ -973,8 +1043,8 @@ $('restoreFile').addEventListener('change', async e => {
   try{
     const clean = parseCars(await f.text());
     if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
-    askConfirm('سيتم استبدال البيانات الحالية (' + cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
-      cars = withIds(clean, 'r'); await persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة بنجاح');
+    askConfirm('سيتم استبدال البيانات الحالية (' + AppState.cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
+      AppState.cars = withIds(clean, 'r'); await persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة بنجاح');
     });
   }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
 });
@@ -1030,7 +1100,6 @@ function exportExcel(){
     }catch(e){}
   }
 
-  /* بديل تلقائي CSV متوافق مع Excel باللغة العربية في حال عدم توفر الإنترنت */
   const headers = Object.keys(rows[0]);
   const csvCell = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
   const csvLines = [
@@ -1067,11 +1136,11 @@ function reportRow(c, n, td){
     '<td ' + td + '>' + esc(c.yearOfManufacture || '—') + '</td>' +
     '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>';
 }
-/* طباعة / حفظ PDF من المتصفح: يعمل بدون إنترنت والنص قابل للتحديد والبحث */
+
 function printReport(){
   const list = getFiltered();
   if(!list.length){ toast('لا توجد سيارات للطباعة'); return; }
-  const todayStr = todayLocal(), filtered = list.length !== cars.length;
+  const todayStr = todayLocal(), filtered = list.length !== AppState.cars.length;
   const th = 'style="position:static;background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
   const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
   const heads = ['#','السيارة','اللوحة','شركة التأمين','التأمين','الاستمارة','الفحص','سنة الصنع','القيمة'].map(h => '<th ' + th + '>' + h + '</th>').join('');
@@ -1124,7 +1193,7 @@ async function exportPDF(){
     const doc = new window.jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
     if(document.fonts && document.fonts.ready) await document.fonts.ready;
     for(let p = 0; p < pages; p++){
-      holder.innerHTML = pageHtml(list.slice(p*PER, (p+1)*PER), p*PER, p+1, pages, list.length, list.length !== cars.length, todayStr);
+      holder.innerHTML = pageHtml(list.slice(p*PER, (p+1)*PER), p*PER, p+1, pages, list.length, list.length !== AppState.cars.length, todayStr);
       const canvas = await html2canvas(holder.firstChild, {scale:2, backgroundColor:'#ffffff', logging:false});
       if(p > 0) doc.addPage();
       doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
@@ -1142,21 +1211,21 @@ $('printBtn').onclick = printReport;
 
 document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
   const k = th.dataset.sort;
-  if(sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+  if(AppState.sort.key === k) AppState.sort.dir = -AppState.sort.dir; 
+  else { AppState.sort.key = k; AppState.sort.dir = 1; }
   syncSort();
 }));
-$('sortSelect').addEventListener('change', e => { sortKey = e.target.value; sortDir = 1; syncSort(); });
+DOM.filters.sort.addEventListener('change', e => { AppState.sort.key = e.target.value; AppState.sort.dir = 1; syncSort(); });
 
-/* إعادة رفع التعديلات المعلّقة عند رجوع الإنترنت */
-window.addEventListener('online', () => { if(dirty && getGhConfig().token) githubPush(true); });
-/* تحذير قبل إغلاق الصفحة لو فيه تعديلات لم تُرفع أو نافذة تعديل مفتوحة */
+window.addEventListener('online', () => { if(AppState.dirty && getGhConfig().token) githubPush(true); });
+
 window.addEventListener('beforeunload', e => {
-  const pending = (dirty && getGhConfig().token) || ghTimer || ghState === 'syncing' || $('carModal').classList.contains('active');
+  const pending = (AppState.dirty && getGhConfig().token) || AppState.gh.timer || AppState.gh.state === 'syncing' || DOM.modals.car.classList.contains('active');
   if(pending){ e.preventDefault(); e.returnValue = ''; }
 });
 
 async function init(){
-  $('sortSelect').value = sortKey;
+  DOM.filters.sort.value = AppState.sort.key;
   renderSortArrows();
   loadLocalData();
   refresh();
