@@ -128,15 +128,5 @@
     "inspectionDate": "",
     "yearOfManufacture": "2023",
     "carValue": ""
-  },
-  {
-    "carName": "test_1",
-    "plateNumber": "test_1",
-    "insurance": "test_1",
-    "insuranceDate": "",
-    "registrationDate": "",
-    "inspectionDate": "",
-    "yearOfManufacture": "",
-    "carValue": "1"
   }
 ]
