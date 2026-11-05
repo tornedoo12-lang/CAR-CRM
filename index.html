@@ -328,7 +328,7 @@ const GH_SHA_KEY = 'cars_crm_ghsha_v5';
 const DIRTY_KEY = 'cars_crm_dirty_v5';    
 const SORT_PREF_KEY = 'cars_crm_sort_v5';
 
-// 🔴 تم إضافة رابط جوجل شيت بتاعك هنا بنجاح 🔴
+// تم دمج رابط جوجل الخاص بك بنجاح
 const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbypEZzz_819mimSJ9L8i6KUSieiYf3KNKiftTuHAgpHL33vQ12DR-YPqbRTXPXe2WV2LA/exec"; 
 
 const DEFAULT_GH = {
@@ -489,10 +489,6 @@ function saveLocalData(){
 
 /* ---------- دالة الإرسال إلى جوجل شيت ---------- */
 async function sendToGoogleSheets(actionType, carDataObj) {
-  if(!GOOGLE_API_URL || GOOGLE_API_URL.includes("REPLACE_ME")) {
-    console.warn("تنبيه: لم يتم إضافة رابط جوجل شيت في الكود.");
-    return false;
-  }
   try {
     const response = await fetch(GOOGLE_API_URL, {
       method: 'POST',
