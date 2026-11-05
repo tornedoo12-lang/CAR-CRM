@@ -10,16 +10,6 @@
     "carValue": "35٬000"
   },
   {
-    "carName": "نيسان صني عيسوي",
-    "plateNumber": "ا ي ح 5868",
-    "insurance": "الراجحي",
-    "insuranceDate": "2025-02-15",
-    "registrationDate": "2024-11-22",
-    "inspectionDate": "2025-01-03",
-    "yearOfManufacture": "2010",
-    "carValue": "10٬000"
-  },
-  {
     "carName": "تويوتا ياريس",
     "plateNumber": "ر س و  4323",
     "insurance": "اتحاد الخليج",
@@ -80,26 +70,6 @@
     "carValue": ""
   },
   {
-    "carName": "هيونداي توسان",
-    "plateNumber": "د ي ي 8633",
-    "insurance": "اسيج",
-    "insuranceDate": "2025-08-29",
-    "registrationDate": "2025-08-22",
-    "inspectionDate": "",
-    "yearOfManufacture": "",
-    "carValue": ""
-  },
-  {
-    "carName": "ليكزس",
-    "plateNumber": "د ق ن 999",
-    "insurance": "ولاء",
-    "insuranceDate": "2025-08-27",
-    "registrationDate": "2026-08-04",
-    "inspectionDate": "",
-    "yearOfManufacture": "2023",
-    "carValue": ""
-  },
-  {
     "carName": "نيسان باترول",
     "plateNumber": "د ه ر 4040",
     "insurance": "الراجحي",
@@ -108,16 +78,6 @@
     "inspectionDate": "2027-04-28",
     "yearOfManufacture": "2022",
     "carValue": ""
-  },
-  {
-    "carName": "رينو دوكر 1",
-    "plateNumber": "ب ر ر 7979",
-    "insurance": "ولاء",
-    "insuranceDate": "2026-11-25",
-    "registrationDate": "2028-07-11",
-    "inspectionDate": "2026-11-05",
-    "yearOfManufacture": "2020",
-    "carValue": "20٬000"
   },
   {
     "carName": "رينو دوكر 2",
