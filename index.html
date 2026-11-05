@@ -64,4 +64,1114 @@ th{background:var(--thead);color:var(--thead-text);padding:13px 12px;text-align:
 thead th{position:sticky;top:0;z-index:98}
 thead th:first-child{border-top-right-radius:10px}
 thead th:last-child{border-top-left-radius:10px}
-th[data-sort]{cursor:pointer;user
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{filter:brightness(1.3)}
+th .arr{display:inline-block;min-width:12px;margin-right:4px;font-size:10px}
+th small{font-weight:400;opacity:.75;font-size:11px}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr.row-danger td{background:var(--row-bad)}
+tr.row-danger td:first-child{box-shadow:inset -4px 0 0 var(--danger)}
+tr:hover td{background:var(--hover)}
+.date-line{white-space:nowrap;direction:ltr;text-align:right;font-weight:600}
+.sub{color:var(--muted);font-size:11px;direction:ltr;text-align:right;white-space:nowrap}
+.inactive td{opacity:.55}
+.badge-off{display:inline-block;margin-right:6px;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:var(--hover);color:var(--muted);border:1px solid var(--border)}
+.chk{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;cursor:pointer}
+.chk input{width:auto;margin:0}
+.days{display:inline-block;margin-top:4px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.lvl-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.lvl-warning{background:var(--warn-bg);color:var(--warn-fg)}
+.lvl-danger{background:var(--bad-bg);color:var(--bad-fg)}
+.lvl-none{background:var(--hover);color:var(--muted);border:1px dashed var(--border);font-weight:600}
+.action-buttons{display:flex;gap:6px}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:var(--card);padding:26px;border-radius:10px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-header h2{font-size:20px}
+.close-btn{background:none;color:var(--muted);font-size:28px;padding:0 6px}
+.form-group{margin-bottom:13px}
+.form-group label:not(.chk){display:block;margin-bottom:5px;font-weight:600;font-size:13px}
+.form-group input:not([type="checkbox"]),.form-group textarea{width:100%}
+.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
+.label-row label{margin-bottom:0 !important}
+.cal-toggle{padding:3px 10px;font-size:11px;border-radius:14px;background:var(--hover);color:var(--text);border:1px solid var(--border);cursor:pointer;font-weight:700;transition:all .15s;white-space:nowrap}
+.cal-toggle.is-h{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-fg)}
+.cal-toggle.is-g{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-fg)}
+.cal-toggle:hover{transform:scale(1.03)}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;min-height:14px}
+.hint.bad{color:var(--danger)}
+.form-note{font-size:12px;color:var(--muted);background:var(--hover);padding:8px 12px;border-radius:6px;margin-bottom:13px;line-height:1.7}
+textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.confirm-box{max-width:430px;text-align:center}
+.confirm-box h2{font-size:20px;margin-bottom:8px}
+.confirm-box p{margin:6px 0 18px;line-height:1.8;font-size:14px;white-space:pre-line}
+.confirm-box .modal-footer{justify-content:center}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:11px 20px;border-radius:8px;font-size:14px;z-index:5000;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#toast.show{opacity:1}
+#toast.act{pointer-events:auto}
+#toast button{margin-right:14px;padding:4px 14px;font-size:13px;background:rgba(255,255,255,.2);color:#fff}
+#toast button:hover{background:rgba(255,255,255,.32)}
+#printArea{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  :root{color-scheme:light}
+  body{background:#fff !important;padding:0 !important;min-height:0}
+  body > *:not(#printArea){display:none !important}
+  #printArea{display:block !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea tr{page-break-inside:avoid}
+  #printArea thead{display:table-header-group}
+}
+@media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container" id="appContainer">
+  <header>
+    <h1>🚗 نظام إدارة السيارات</h1>
+    <div class="header-controls">
+      <button class="btn-primary" id="addBtn">+ إضافة سيارة</button>
+      <button class="btn-excel" id="excelBtn">📊 تصدير Excel</button>
+      <button class="btn-primary" id="pdfBtn">📄 تحميل PDF</button>
+      <button class="btn-gray" id="printBtn">🖨️ طباعة</button>
+      <button class="btn-primary" id="backupBtn">💾 نسخة احتياطية</button>
+      <button class="btn-gray" id="restoreBtn">♻️ استرجاع</button>
+      <button class="btn-gh" id="githubBtn">☁️ إعدادات الربط</button>
+      <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <div id="githubNote" class="note" role="status"></div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-number" id="stTotal">0</div><div class="stat-label">السيارات النشطة</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInsExpired">0</div><div class="stat-label">تأمين منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInsSoon">0</div><div class="stat-label">تأمين ينتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stRegExpired">0</div><div class="stat-label">استمارة منتهية</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stRegSoon">0</div><div class="stat-label">استمارة تنتهي خلال 30 يوم</div></div>
+    <div class="stat-card"><div class="stat-number bad" id="stInspExpired">0</div><div class="stat-label">فحص منتهي</div></div>
+    <div class="stat-card"><div class="stat-number warn" id="stInspSoon">0</div><div class="stat-label">فحص ينتهي خلال 30 يوم</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="ابحث عن السيارة أو اللوحة أو شركة التأمين..." aria-label="بحث">
+    <select id="statusFilter" aria-label="تصفية الحالة">
+      <option value="">جميع الحالات</option>
+      <option value="ok">سارية</option>
+      <option value="warning">قريبة الانتهاء (30 يوم)</option>
+      <option value="danger">فيها منتهي</option>
+      <option value="missing">ناقص تواريخ (غير مسجّلة)</option>
+    </select>
+    <select id="sortSelect" aria-label="الترتيب">
+      <option value="urgency">ترتيب: الأقرب انتهاءً أولاً</option>
+      <option value="original">ترتيب: الأصلي (كما في الملف)</option>
+      <option value="carName">ترتيب: اسم السيارة</option>
+      <option value="plateNumber">ترتيب: رقم اللوحة</option>
+      <option value="insurance">ترتيب: شركة التأمين</option>
+      <option value="insuranceDate">ترتيب: انتهاء التأمين</option>
+      <option value="registrationDate">ترتيب: انتهاء الاستمارة</option>
+      <option value="inspectionDate">ترتيب: انتهاء الفحص</option>
+      <option value="yearOfManufacture">ترتيب: سنة الصنع</option>
+      <option value="carValue">ترتيب: القيمة</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="showInactive"> <span id="showInactiveTxt">إظهار السيارات غير النشطة</span></label>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="carName">السيارة<span class="arr"></span></th>
+          <th data-sort="plateNumber">رقم اللوحة<span class="arr"></span></th>
+          <th data-sort="insurance">شركة التأمين<span class="arr"></span></th>
+          <th data-sort="insuranceDate">التأمين <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="registrationDate">الاستمارة <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="inspectionDate">الفحص <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="yearOfManufacture">سنة الصنع<span class="arr"></span></th>
+          <th data-sort="carValue">القيمة<span class="arr"></span></th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- نافذة إضافة / تعديل سيارة -->
+<div id="carModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">إضافة سيارة جديدة</h2>
+    </div>
+    <form id="carForm">
+      <div class="row2">
+        <div class="form-group"><label for="carName">نوع السيارة *</label><input type="text" id="carName" required></div>
+        <div class="form-group"><label for="plateNumber">رقم اللوحة *</label><input type="text" id="plateNumber" required></div>
+      </div>
+      <div class="form-group"><label for="insurance">شركة التأمين</label><input type="text" id="insurance"></div>
+      <div class="form-note">اكتب التاريخ ميلادياً (مثال 2028-10-21) أو هجرياً (مثال 1450-06-03)، أو اضغط على <b>زر التبديل</b> فوق الخانة لتحويل التاريخ المكتوب وتغيير التقويم الأساسي المعروض في الجدول.</div>
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="insuranceDate">انتهاء التأمين</label>
+            <button type="button" class="cal-toggle" id="tog_insuranceDate" data-for="insuranceDate">📅 ميلادي ⇄ هجري</button>
+          </div>
+          <input type="text" id="insuranceDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_insuranceDate"></div>
+        </div>
+        <div class="form-group">
+          <div class="label-row">
+            <label for="registrationDate">انتهاء الاستمارة</label>
+            <button type="button" class="cal-toggle" id="tog_registrationDate" data-for="registrationDate">📅 هجري ⇄ ميلادي</button>
+          </div>
+          <input type="text" id="registrationDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_registrationDate"></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="inspectionDate">انتهاء الفحص</label>
+            <button type="button" class="cal-toggle" id="tog_inspectionDate" data-for="inspectionDate">📅 ميلادي ⇄ هجري</button>
+          </div>
+          <input type="text" id="inspectionDate" inputmode="numeric" dir="ltr" placeholder="YYYY-MM-DD" maxlength="10" autocomplete="off">
+          <div class="hint" id="h_inspectionDate"></div>
+        </div>
+        <div class="form-group"><label class="chk" style="margin-top:26px"><input type="checkbox" id="active" checked> السيارة نشطة</label><div class="hint">غير النشطة (مباعة أو متوقفة) لا تدخل في الإحصائيات.</div></div>
+      </div>
+      <div class="row2">
+        <div class="form-group"><label for="yearOfManufacture">سنة الصنع</label><input type="text" id="yearOfManufacture" inputmode="numeric" dir="ltr" placeholder="2020" maxlength="4" autocomplete="off"></div>
+        <div class="form-group"><label for="carValue">قيمة السيارة</label><input type="text" id="carValue" inputmode="decimal" dir="ltr" autocomplete="off"></div>
+      </div>
+      <div class="form-group"><label for="serialNumber">الرقم التسلسلي</label><input type="text" id="serialNumber"></div>
+      <div class="form-group"><label for="notes">ملاحظات</label><textarea id="notes"></textarea></div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">حفظ</button>
+        <button type="button" class="btn-gray" id="cancelBtn">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- نافذة إعدادات GitHub Data Storage -->
+<div id="githubModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>☁️ التخزين السحابي عبر GitHub API</h2>
+      <button class="close-btn" type="button" id="closeGhBtn" aria-label="إغلاق">&times;</button>
+    </div>
+    <form id="githubForm">
+      <div class="form-note">
+        بيانات المستودع الافتراضية محفوظة وجاهزة، ما عليك سوى إدخال <b>رمز الوصول الشخصي (Token)</b> وسيتم حفظه في متصفحك على هذا الجهاز لجلب ومزامنة البيانات تلقائياً.
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label for="ghOwner">اسم المستخدم / المنظمة (Owner) *</label>
+          <input type="text" id="ghOwner" dir="ltr" placeholder="tornedoo12-lang" required>
+        </div>
+        <div class="form-group">
+          <label for="ghRepo">اسم المستودع (Repository) *</label>
+          <input type="text" id="ghRepo" dir="ltr" placeholder="CAR-CRM" required>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label for="ghBranch">الفرع (Branch) *</label>
+          <input type="text" id="ghBranch" dir="ltr" placeholder="main" required>
+        </div>
+        <div class="form-group">
+          <label for="ghPath">مسار ملف البيانات (File Path) *</label>
+          <input type="text" id="ghPath" dir="ltr" placeholder="cars-data.json" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ghToken">رمز الوصول الشخصي (Personal Access Token)</label>
+        <input type="password" id="ghToken" dir="ltr" placeholder="أدخل التوكين هنا (ghp_xxxx...)" autocomplete="off">
+        <div class="hint">يُحفظ التوكين محلياً داخل متصفحك ولا يُكتب في الكود أبداً.</div>
+      </div>
+      <div class="form-group">
+        <label class="chk"><input type="checkbox" id="ghAutoSync" checked> <span>مزامنة وحفظ تلقائي في GitHub عند أي تعديل</span></label>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn-primary">💾 حفظ الإعدادات والجلب</button>
+        <button type="button" class="btn-primary" id="ghPullNowBtn">⬇️ جلب البيانات الآن (Pull)</button>
+        <button type="button" class="btn-gray" id="ghResetDefaultBtn">🔄 استعادة الافتراضي</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="modal-footer">
+      <button type="button" class="btn-danger" id="confirmYes">نعم، متأكد</button>
+      <button type="button" class="btn-gray" id="confirmNo">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+<div id="toast" role="status"></div>
+
+<script>
+// ==========================================
+// الإعدادات والثوابت الأساسية
+// ==========================================
+const STORAGE_KEY = 'cars_crm_data_v5';
+const GH_KEY = 'cars_crm_github_v5';
+const DATA_FILE = 'cars-data.json';
+const GH_SHA_KEY = 'cars_crm_ghsha_v5';   
+const DIRTY_KEY = 'cars_crm_dirty_v5';    
+const SORT_PREF_KEY = 'cars_crm_sort_v5';
+
+// 🔴 تم إضافة رابط جوجل شيت بتاعك هنا بنجاح 🔴
+const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbypEZzz_819mimSJ9L8i6KUSieiYf3KNKiftTuHAgpHL33vQ12DR-YPqbRTXPXe2WV2LA/exec"; 
+
+const DEFAULT_GH = {
+  owner: 'tornedoo12-lang',
+  repo: 'CAR-CRM',
+  branch: 'main',
+  path: 'cars-data.json',
+  token: '',
+  autoSync: true
+};
+
+const $ = id => document.getElementById(id);
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ if(v === null || v === undefined) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
+const latin = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const esc = s => latin(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const FIELDS = ['carName','plateNumber','insurance','insuranceDate','insuranceCal','registrationDate','registrationCal','inspectionDate','inspectionCal','yearOfManufacture','carValue','serialNumber','active','notes'];
+const FORM_FIELDS = ['carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue','serialNumber','notes'];
+const DATE_FIELDS = ['insuranceDate','registrationDate','inspectionDate'];
+const CAL_OF = {insuranceDate:'insuranceCal', registrationDate:'registrationCal', inspectionDate:'inspectionCal'};
+const CAL_DEFAULT = {insuranceCal:'g', registrationCal:'h', inspectionCal:'g'};
+const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توسان', 'ليكزس'];
+
+let cars = [];
+let editingId = null;
+
+function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
+function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
+
+/* ---------- التواريخ: ميلادي وهجري + أزرار التبديل ---------- */
+const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
+function isoToMs(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null; }
+function msToIso(ms){ return new Date(ms).toISOString().slice(0, 10); }
+function hijriParts(ms){
+  if(!HF) return null;
+  const p = HF.formatToParts(new Date(ms));
+  const g = t => { const x = p.find(q => q.type === t); return x ? parseInt(x.value.replace(/\D/g, ''), 10) : NaN; };
+  return {y:g('year'), m:g('month'), d:g('day')};
+}
+function hijriStr(iso, sep = '/'){
+  const ms = isoToMs(iso); if(ms === null) return '';
+  const h = hijriParts(ms); return h ? h.y + sep + pad(h.m) + sep + pad(h.d) : '';
+}
+function fromHijri(y, m, d){
+  if(!HF || m < 1 || m > 12 || d < 1 || d > 30) return null;
+  const approx = Date.UTC(622, 6, 16) + ((y-1)*354.3671 + (m-1)*29.5306 + (d-1)) * 86400000;
+  for(let k = 0; k <= 60; k++){
+    for(const s of (k ? [k, -k] : [0])){
+      const ms = approx + s*86400000; const h = hijriParts(ms);
+      if(h && h.y === y && h.m === m && h.d === d) return msToIso(ms);
+    }
+  }
+  return null;
+}
+function normDate(s){
+  s = latin(s).trim().replace(/[\/.]/g, '-'); if(!s) return '';
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s); if(!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  if(y >= 1300 && y <= 1600) return fromHijri(y, mo, d);
+  const ms = Date.UTC(y, mo-1, d), dt = new Date(ms);
+  if(dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo-1 || dt.getUTCDate() !== d) return null;
+  return msToIso(ms);
+}
+function updateCalToggleUI(f){
+  const cal = $(f).dataset.cal || CAL_DEFAULT[CAL_OF[f]];
+  const btn = $('tog_' + f);
+  if(!btn) return;
+  if(cal === 'h'){
+    btn.textContent = '🌙 هجري ⇄ ميلادي';
+    btn.className = 'cal-toggle is-h';
+    btn.title = 'التقويم الحالي: هجري (اضغط للتبديل إلى ميلادي)';
+  }else{
+    btn.textContent = '☀️ ميلادي ⇄ هجري';
+    btn.className = 'cal-toggle is-g';
+    btn.title = 'التقويم الحالي: ميلادي (اضغط للتبديل إلى هجري)';
+  }
+}
+function toggleDateFieldCal(f){
+  const inp = $(f);
+  const currentCal = inp.dataset.cal || CAL_DEFAULT[CAL_OF[f]];
+  const nextCal = currentCal === 'h' ? 'g' : 'h';
+  inp.dataset.cal = nextCal;
+  const raw = latin(inp.value).trim();
+  if(raw){
+    const iso = normDate(raw);
+    if(iso){
+      inp.value = nextCal === 'h' ? (hijriStr(iso, '-') || iso) : iso;
+    }
+  }
+  updateCalToggleUI(f);
+  updateHint(f);
+}
+
+function daysUntil(s){
+  const ms = isoToMs(latin(s)); if(ms === null) return null;
+  const t = new Date(); return Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+}
+function level(d){ if(d === null) return 'none'; if(d < 0) return 'danger'; if(d <= 30) return 'warning'; return 'ok'; }
+function daysText(d){
+  if(d === null) return '';
+  if(d < 0) return 'منتهي منذ ' + Math.abs(d) + ' يوم';
+  if(d === 0) return 'ينتهي اليوم';
+  return 'متبقي ' + d + ' يوم';
+}
+function worst(car){
+  const ls = [car.insuranceDate, car.registrationDate, car.inspectionDate].map(x => level(daysUntil(x)));
+  if(ls.includes('danger')) return 'danger';
+  if(ls.includes('warning')) return 'warning';
+  if(ls.includes('ok')) return 'ok';
+  return 'none';
+}
+function dateCell(iso, main){
+  const d = daysUntil(iso);
+  if(d === null) return '<span class="days lvl-none">غير مسجّل</span>';
+  const h = hijriStr(iso);
+  const first = main === 'h' ? (h ? h + ' هـ' : iso) : iso + ' م';
+  const second = main === 'h' ? iso + ' م' : (h ? h + ' هـ' : '');
+  return '<div class="date-line">' + esc(first) + '</div>' + (second ? '<div class="sub">' + esc(second) + '</div>' : '') +
+         '<span class="days lvl-' + level(d) + '">' + daysText(d) + '</span>';
+}
+function fmtNum(v){ const n = Number(latin(v)); return (v === '' || v == null || isNaN(n)) ? '—' : n.toLocaleString('en-US'); }
+
+/* ---------- معالجة وحفظ البيانات محلياً ---------- */
+function parseCars(text){
+  let d; try{ d = JSON.parse(text); }catch(e){ throw new Error('ملف البيانات غير صالح أو تالف'); }
+  const arr = Array.isArray(d) ? d : (d && d.cars);
+  if(!Array.isArray(arr) || !arr.every(c => c && typeof c === 'object' && 'carName' in c)) throw new Error('ملف البيانات غير صالح أو تالف');
+  return arr.map(c => {
+    const o = {};
+    FIELDS.forEach(k => {
+      if(DATE_FIELDS.includes(k)){ const n = normDate(c[k]); o[k] = n === null ? '' : n; }
+      else if(k in CAL_DEFAULT){ o[k] = (c[k] === 'h' || c[k] === 'g') ? c[k] : CAL_DEFAULT[k]; }
+      else if(k === 'active'){ o[k] = !(c.active === false || c.active === 'false' || (c.active === undefined && LEGACY_INACTIVE.includes(String(c.carName).trim()))); }
+      else o[k] = c[k] == null ? '' : latin(c[k]);
+    });
+    return o;
+  });
+}
+function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
+function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:cars.map(({id, ...r}) => r)}; }
+
+function loadLocalData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      cars = withIds(parseCars(raw), 'loc');
+    }
+  }catch(e){
+    cars = [];
+  }
+}
+function saveLocalData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(makePayload()));
+  }catch(e){}
+}
+
+/* ---------- دالة الإرسال إلى جوجل شيت ---------- */
+async function sendToGoogleSheets(actionType, carDataObj) {
+  if(!GOOGLE_API_URL || GOOGLE_API_URL.includes("REPLACE_ME")) {
+    console.warn("تنبيه: لم يتم إضافة رابط جوجل شيت في الكود.");
+    return false;
+  }
+  try {
+    const response = await fetch(GOOGLE_API_URL, {
+      method: 'POST',
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: actionType,
+        data: carDataObj
+      })
+    });
+    const result = await response.json();
+    return result.status === "success";
+  } catch (error) {
+    console.error("فشل الاتصال بجوجل شيت:", error);
+    return false;
+  }
+}
+
+/* ---------- GitHub Repository Storage ---------- */
+let ghState = 'ready', ghLastSync = null, ghTimer = null;
+let ghConflictOpen = false, ghBusy = false, ghQueued = false, editSeq = 0;
+let ghSha = lsGet(GH_SHA_KEY) || null;
+let dirty = lsGet(DIRTY_KEY) === '1';
+function setSha(v){ ghSha = v || null; lsSet(GH_SHA_KEY, ghSha); }
+function setDirty(v){ dirty = !!v; lsSet(DIRTY_KEY, dirty ? '1' : null); }
+
+function getGhConfig(){
+  try{
+    const s = localStorage.getItem(GH_KEY);
+    if(s){
+      const parsed = JSON.parse(s);
+      return {
+        owner: parsed.owner || DEFAULT_GH.owner,
+        repo: parsed.repo || DEFAULT_GH.repo,
+        branch: parsed.branch || DEFAULT_GH.branch,
+        path: parsed.path || DEFAULT_GH.path,
+        token: parsed.token || '',
+        autoSync: parsed.autoSync !== false
+      };
+    }
+  }catch(e){}
+  localStorage.setItem(GH_KEY, JSON.stringify(DEFAULT_GH));
+  return {...DEFAULT_GH};
+}
+function saveGhConfig(cfg){
+  const safeCfg = {
+    owner: cfg.owner || DEFAULT_GH.owner,
+    repo: cfg.repo || DEFAULT_GH.repo,
+    branch: cfg.branch || DEFAULT_GH.branch,
+    path: cfg.path || DEFAULT_GH.path,
+    token: cfg.token || '',
+    autoSync: cfg.autoSync !== false
+  };
+  try{
+    const prev = JSON.parse(localStorage.getItem(GH_KEY) || 'null');
+    if(prev && (prev.owner !== safeCfg.owner || prev.repo !== safeCfg.repo || prev.branch !== safeCfg.branch || prev.path !== safeCfg.path)) setSha(null);
+  }catch(e){}
+  localStorage.setItem(GH_KEY, JSON.stringify(safeCfg));
+}
+function base64ToUtf8(b64){
+  const bin = atob(b64.replace(/\s/g, ''));
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function encodeGhPath(path){
+  return path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+}
+async function ghGetRemote(cfg){
+  const branch = cfg.branch || 'main';
+  const path = encodeGhPath(cfg.path || DATA_FILE);
+  const baseUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
+  const headers = {
+    'Accept': 'application/vnd.github+json',
+    'Authorization': `Bearer ${cfg.token}`,
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  const res = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}`, {headers, cache: 'no-store'});
+  if(res.status === 404) return {exists:false, baseUrl, headers, branch};
+  if(!res.ok){
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return {exists:true, sha:data.sha, content:data.content, baseUrl, headers, branch};
+}
+function backupLocalFile(tag){
+  saveBlob('cars-local-' + tag + '-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+}
+
+/* جلب البيانات من GitHub (القراءة فقط) */
+async function githubPull(silent = false, force = false){
+  const cfg = getGhConfig();
+  if(!cfg.token){
+    ghState = 'notoken'; renderGhNote();
+    if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
+    return false;
+  }
+  ghState = 'syncing'; renderGhNote();
+  try{
+    const r = await ghGetRemote(cfg);
+    if(!r.exists){
+      ghState = 'ready'; renderGhNote();
+      if(!silent) toast('الملف غير موجود بعد في المستودع.');
+      return true;
+    }
+    const text = base64ToUtf8(r.content || '');
+    cars = withIds(parseCars(text), 'gh');
+    saveLocalData();
+    setSha(r.sha); setDirty(false);
+    ghLastSync = new Date();
+    ghState = 'ready';
+    refresh(); renderGhNote();
+    if(!silent) toast('☁️ تم تحديث البيانات من GitHub بنجاح (' + cars.length + ' سيارة)');
+    return true;
+  }catch(e){
+    ghState = 'error'; renderGhNote();
+    if(!silent) toast('تعذّر الجلب من GitHub: ' + (e.message || e));
+    return false;
+  }
+}
+
+/* تم استبدال عملية الرفع لتقوم بها أداة Google Sheets */
+async function githubPush(silent = false, force = false){
+  setDirty(false);
+  ghState = 'ready';
+  renderGhNote();
+  if(!silent) toast('☁️ يتم الحفظ والتزامن من خلال جوجل شيت مباشرة');
+  return true;
+}
+
+function scheduleGhSync(){
+  const cfg = getGhConfig();
+  if(!cfg || !cfg.autoSync || !cfg.token) return;
+  clearTimeout(ghTimer);
+  ghTimer = setTimeout(() => { ghTimer = null; githubPush(true); }, 500);
+}
+async function persist(){
+  editSeq++;
+  setDirty(true);
+  saveLocalData();
+  scheduleGhSync();
+}
+function renderGhNote(){
+  const n = $('githubNote');
+  const cfg = getGhConfig();
+  const repoLabel = `${cfg.owner}/${cfg.repo}:${cfg.branch || 'main'}`;
+  let cls = 'note-ok', txt = '';
+  if(!cfg.token){
+    cls = 'note-warn';
+    txt = `☁️ مستودع GitHub «${repoLabel}» جاهز للربط كمصدر بيانات للجدول.`;
+  }else if(ghState === 'syncing'){
+    cls = 'note-warn';
+    txt = `⏳ جاري مزامنة القراءة مع مستودع GitHub «${repoLabel}»...`;
+  }else if(ghState === 'error'){
+    cls = 'note-bad';
+    txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من اتصال الإنترنت أو الـ Token.`;
+  }else{
+    txt = `☁️ متصل بمستودع GitHub «${repoLabel}» للقراءة • يتم التعديل والكتابة عبر جوجل شيت`;
+  }
+  n.className = 'note ' + cls;
+  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب أحدث البيانات</button></div>`;
+}
+
+function fillGhForm(cfg){
+  $('ghOwner').value = cfg.owner || DEFAULT_GH.owner;
+  $('ghRepo').value = cfg.repo || DEFAULT_GH.repo;
+  $('ghBranch').value = cfg.branch || DEFAULT_GH.branch;
+  $('ghPath').value = cfg.path || DEFAULT_GH.path;
+  $('ghToken').value = cfg.token || '';
+  $('ghAutoSync').checked = cfg.autoSync !== false;
+}
+$('githubBtn').onclick = () => {
+  fillGhForm(getGhConfig());
+  $('githubModal').classList.add('active');
+};
+$('closeGhBtn').onclick = () => $('githubModal').classList.remove('active');
+function readGhFormConfig(){
+  return {
+    owner: $('ghOwner').value.trim() || DEFAULT_GH.owner,
+    repo: $('ghRepo').value.trim() || DEFAULT_GH.repo,
+    branch: $('ghBranch').value.trim() || DEFAULT_GH.branch,
+    path: $('ghPath').value.trim() || DEFAULT_GH.path,
+    token: $('ghToken').value.trim(),
+    autoSync: $('ghAutoSync').checked
+  };
+}
+$('githubForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cfg = readGhFormConfig();
+  saveGhConfig(cfg);
+  ghState = cfg.token ? 'ready' : 'notoken';
+  renderGhNote();
+  $('githubModal').classList.remove('active');
+  if(cfg.token){
+    toast('تم حفظ إعدادات الربط، جاري جلب البيانات...');
+    await githubPull(false);
+  }else{
+    toast('تم حفظ إعدادات الربط (بدون توكين)');
+  }
+});
+$('ghPullNowBtn').onclick = async () => {
+  const cfg = readGhFormConfig();
+  saveGhConfig(cfg);
+  await githubPull(false);
+};
+$('ghResetDefaultBtn').onclick = async () => {
+  saveGhConfig({...DEFAULT_GH});
+  fillGhForm(DEFAULT_GH);
+  renderGhNote();
+  toast('تمت استعادة الإعدادات الافتراضية');
+};
+
+/* ---------- العرض ---------- */
+const SORT_KEYS = ['urgency','original','carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue'];
+let sortKey = 'urgency', sortDir = 1;
+try{
+  const sp = JSON.parse(lsGet(SORT_PREF_KEY) || 'null');
+  if(sp && SORT_KEYS.includes(sp.key)){ sortKey = sp.key; sortDir = sp.dir === -1 ? -1 : 1; }
+}catch(e){}
+function minDays(c){
+  const ds = [c.insuranceDate, c.registrationDate, c.inspectionDate].map(daysUntil).filter(d => d !== null);
+  return ds.length ? Math.min(...ds) : Infinity;
+}
+function sortList(list){
+  if(sortKey === 'original') return list;
+  const empty = v => v === '' || v == null;
+  return list.slice().sort((a, b) => {
+    if(sortKey === 'urgency'){
+      if(a.active !== b.active) return a.active ? -1 : 1;
+      const x = minDays(a), y = minDays(b);
+      if(x !== y) return (x < y ? -1 : 1) * sortDir;
+      return String(a.carName).localeCompare(String(b.carName), 'ar');
+    }
+    const va = a[sortKey], vb = b[sortKey];
+    if(empty(va) && empty(vb)) return 0;
+    if(empty(va)) return 1;
+    if(empty(vb)) return -1;
+    let r;
+    if(sortKey === 'yearOfManufacture' || sortKey === 'carValue') r = (Number(va) || 0) - (Number(vb) || 0);
+    else if(DATE_FIELDS.includes(sortKey)) r = va < vb ? -1 : (va > vb ? 1 : 0);
+    else r = String(va).localeCompare(String(vb), 'ar', {numeric:true});
+    return r * sortDir;
+  });
+}
+function renderSortArrows(){
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    const arr = th.querySelector('.arr');
+    if(arr) arr.textContent = th.dataset.sort === sortKey ? (sortDir === 1 ? '▲' : '▼') : '';
+  });
+}
+function syncSort(){
+  $('sortSelect').value = sortKey;
+  lsSet(SORT_PREF_KEY, JSON.stringify({key:sortKey, dir:sortDir}));
+  renderSortArrows();
+  renderTable();
+}
+function rowClass(c){
+  if(!c.active) return ' class="inactive"';
+  return worst(c) === 'danger' ? ' class="row-danger"' : '';
+}
+function getFiltered(){
+  const q = latin($('searchInput').value).trim().toLowerCase();
+  const st = $('statusFilter').value;
+  const missing = c => !c.insuranceDate || !c.registrationDate || !c.inspectionDate;
+  return sortList(cars.filter(c => {
+    const hay = latin([c.carName, c.plateNumber, c.insurance, c.serialNumber].join(' ')).toLowerCase();
+    if(!c.active && !$('showInactive').checked) return false;
+    if(q && !hay.includes(q)) return false;
+    if(st === 'missing') return missing(c);
+    if(st && worst(c) !== st) return false;
+    return true;
+  }));
+}
+function renderTable(){
+  const list = getFiltered(); const tb = $('tableBody');
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state">' + (cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. تأكد من الربط أو اضغط «إضافة سيارة»') + '</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
+    '<td><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>') + '</td>' +
+    '<td>' + esc(c.plateNumber) + '</td>' +
+    '<td>' + esc(c.insurance || '—') + '</td>' +
+    '<td>' + dateCell(c.insuranceDate, c.insuranceCal) + '</td>' +
+    '<td>' + dateCell(c.registrationDate, c.registrationCal) + '</td>' +
+    '<td>' + dateCell(c.inspectionDate, c.inspectionCal) + '</td>' +
+    '<td>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td>' + fmtNum(c.carValue) + '</td>' +
+    '<td><div class="action-buttons">' +
+      '<button class="btn-primary btn-small" data-edit="' + c.id + '">تعديل</button>' +
+      '<button class="btn-danger btn-small" data-del="' + c.id + '">حذف</button>' +
+    '</div></td></tr>').join('');
+}
+function updateStats(){
+  const act = cars.filter(c => c.active), n = f => act.filter(f).length;
+  $('stTotal').textContent = act.length;
+  $('stInsExpired').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'danger');
+  $('stInsSoon').textContent = n(c => level(daysUntil(c.insuranceDate)) === 'warning');
+  $('stRegExpired').textContent = n(c => level(daysUntil(c.registrationDate)) === 'danger');
+  $('stInspExpired').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'danger');
+  $('stRegSoon').textContent = n(c => level(daysUntil(c.registrationDate)) === 'warning');
+  $('stInspSoon').textContent = n(c => level(daysUntil(c.inspectionDate)) === 'warning');
+  $('showInactiveTxt').textContent = 'إظهار السيارات غير النشطة (' + (cars.length - act.length) + ')';
+}
+function refresh(){ renderTable(); updateStats(); }
+
+/* ---------- النماذج والحفظ ---------- */
+function updateHint(f){
+  const v = latin($(f).value).trim(), h = $('h_' + f);
+  h.className = 'hint';
+  if(!v){ h.textContent = ''; return; }
+  const n = normDate(v);
+  if(n === null){ h.textContent = 'تاريخ غير صالح'; h.className = 'hint bad'; return; }
+  const cal = $(f).dataset.cal || 'g';
+  const hs = hijriStr(n);
+  if(cal === 'h') h.textContent = 'الموافق ميلادياً: ' + n + ' م (يُعرض الهجري أولاً)';
+  else h.textContent = hs ? 'الموافق هجرياً: ' + hs + ' هـ (يُعرض الميلادي أولاً)' : '';
+}
+DATE_FIELDS.forEach(f => {
+  $('tog_' + f).addEventListener('click', () => toggleDateFieldCal(f));
+  $(f).addEventListener('input', e => {
+    const d = latin(e.target.value).replace(/\D/g, '').slice(0, 8);
+    let out = d;
+    if(d.length > 6) out = d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6);
+    else if(d.length > 4) out = d.slice(0,4) + '-' + d.slice(4);
+    e.target.value = out;
+    if(d.length >= 4){
+      const y = parseInt(d.slice(0, 4), 10);
+      e.target.dataset.cal = (y >= 1300 && y <= 1600) ? 'h' : 'g';
+      updateCalToggleUI(f);
+    }
+    updateHint(f);
+  });
+  $(f).addEventListener('change', e => {
+    const n = normDate(e.target.value);
+    if(n){
+      const cal = e.target.dataset.cal || 'g';
+      e.target.value = cal === 'h' ? (hijriStr(n, '-') || n) : n;
+    }
+    updateHint(f);
+  });
+});
+$('yearOfManufacture').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/\D/g, '').slice(0, 4); });
+$('carValue').addEventListener('input', e => { e.target.value = latin(e.target.value).replace(/[^\d.]/g, ''); });
+['plateNumber','serialNumber'].forEach(f => $(f).addEventListener('input', e => { e.target.value = latin(e.target.value); }));
+
+function openModal(car){
+  editingId = car ? car.id : null;
+  $('modalTitle').textContent = car ? 'تعديل السيارة' : 'إضافة سيارة جديدة';
+  $('carForm').reset();
+  if(car){
+    FORM_FIELDS.forEach(f => { $(f).value = latin(car[f]); });
+  }
+  DATE_FIELDS.forEach(f => {
+    const cal = (car && car[CAL_OF[f]]) || CAL_DEFAULT[CAL_OF[f]];
+    $(f).dataset.cal = cal;
+    if(car && car[f]){
+      $(f).value = cal === 'h' ? (hijriStr(car[f], '-') || car[f]) : car[f];
+    }
+    updateCalToggleUI(f);
+    updateHint(f);
+  });
+  $('active').checked = car ? car.active !== false : true;
+  $('carModal').classList.add('active');
+}
+function closeModal(){ $('carModal').classList.remove('active'); }
+let confirmCb = null, confirmNoCb = null;
+function askConfirm(msg, cb, opts){
+  opts = opts || {};
+  $('confirmMsg').textContent = msg;
+  $('confirmYes').textContent = opts.yes || 'نعم، متأكد';
+  $('confirmNo').textContent = opts.no || 'إلغاء';
+  confirmCb = cb; confirmNoCb = opts.onNo || null;
+  $('confirmModal').classList.add('active');
+}
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; ghConflictOpen = false; }
+let toastT;
+function toast(msg, actionLabel, actionFn, ms){
+  const t = $('toast');
+  t.textContent = msg; t.classList.remove('act');
+  if(actionLabel){
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = actionLabel;
+    b.onclick = () => { clearTimeout(toastT); t.classList.remove('show', 'act'); if(actionFn) actionFn(); };
+    t.appendChild(b); t.classList.add('act');
+  }
+  t.classList.add('show'); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show', 'act'), ms || 4000);
+}
+
+$('addBtn').onclick = () => openModal(null);
+$('cancelBtn').onclick = closeModal;
+$('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
+$('confirmNo').onclick = () => { const f = confirmNoCb; closeConfirm(); if(f) f(); };
+$('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
+$('searchInput').addEventListener('input', renderTable);
+$('statusFilter').addEventListener('change', renderTable);
+$('showInactive').addEventListener('change', renderTable);
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    closeConfirm();
+    $('githubModal').classList.remove('active');
+  }
+});
+
+$('carForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = {};
+  FORM_FIELDS.forEach(f => { data[f] = latin($(f).value).trim(); });
+  DATE_FIELDS.forEach(f => { data[CAL_OF[f]] = $(f).dataset.cal || CAL_DEFAULT[CAL_OF[f]]; });
+  data.active = $('active').checked;
+  for(const f of DATE_FIELDS){
+    const n = normDate(data[f]);
+    if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
+    data[f] = n;
+  }
+  const commit = async () => {
+    const actionType = editingId ? 'edit' : 'add';
+    
+    // 1. مزامنة التعديل فوراً مع جوجل شيت
+    const syncOk = await sendToGoogleSheets(actionType, data);
+    if(!syncOk) {
+      toast('⚠️ تعذر الاتصال بجوجل شيت، سيتم الحفظ محلياً في المتصفح.', null, null, 5000);
+    } else {
+      toast('✅ تم الحفظ بنجاح في النظام وجوجل شيت');
+    }
+
+    // 2. تحديث الواجهة محلياً
+    if(editingId){
+      const i = cars.findIndex(c => c.id === editingId);
+      if(i > -1) cars[i] = {...cars[i], ...data};
+    }else{
+      cars.push({id:'c_' + Date.now().toString(36), ...data});
+    }
+    await persist(); closeModal(); refresh();
+  };
+  const normPlate = x => latin(x).replace(/\s+/g, '').toLowerCase();
+  const dup = cars.find(c => c.id !== editingId && normPlate(c.plateNumber) === normPlate(data.plateNumber));
+  if(dup){
+    askConfirm('رقم اللوحة «' + data.plateNumber + '» مسجّل بالفعل للسيارة «' + dup.carName + '»' + (dup.active ? '' : ' (غير نشطة)') + '.\nهل تريد الحفظ على أي حال؟',
+      commit, {yes:'نعم، احفظ', no:'رجوع للتعديل'});
+    return;
+  }
+  await commit();
+});
+$('tableBody').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.edit) openModal(cars.find(c => c.id === b.dataset.edit));
+  if(b.dataset.del){
+    const c = cars.find(x => x.id === b.dataset.del); if(!c) return;
+    askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => {
+      
+      // 1. إرسال طلب الحذف لجوجل شيت
+      const syncOk = await sendToGoogleSheets('delete', { plateNumber: c.plateNumber });
+      if(!syncOk) toast('⚠️ تم الحذف من المتصفح فقط بسبب خطأ في اتصال الشيت.');
+
+      const idx = cars.findIndex(x => x.id === c.id);
+      const removed = cars[idx];
+      cars = cars.filter(x => x.id !== c.id); await persist(); refresh();
+      toast('تم حذف «' + c.carName + '»', 'تراجع', async () => {
+        cars.splice(Math.min(idx, cars.length), 0, removed);
+        
+        // إعادة التزامن للشيت في حالة التراجع عن الحذف
+        await sendToGoogleSheets('add', removed);
+        await persist(); refresh(); toast('تم التراجع عن الحذف');
+      }, 10000);
+    });
+  }
+});
+
+/* ---------- نسخة احتياطية واسترجاع ---------- */
+function saveBlob(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+$('backupBtn').onclick = () => {
+  saveBlob('cars-backup-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
+  toast('تم تحميل ملف النسخة الاحتياطية');
+};
+$('restoreBtn').onclick = () => $('restoreFile').click();
+$('restoreFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const clean = parseCars(await f.text());
+    if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
+    askConfirm('سيتم استبدال البيانات الحالية (' + cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
+      cars = withIds(clean, 'r'); await persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة بنجاح');
+    });
+  }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
+});
+
+/* ---------- تصدير Excel ---------- */
+function exportExcel(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
+  const todayStr = todayLocal();
+  const rows = list.map((c, i) => {
+    const dIns = daysUntil(c.insuranceDate);
+    const dReg = daysUntil(c.registrationDate);
+    const dInsp = daysUntil(c.inspectionDate);
+    const valNum = Number(latin(c.carValue));
+    return {
+      '#': i + 1,
+      'نوع السيارة': c.carName || '',
+      'الحالة': c.active ? 'نشطة' : 'غير نشطة',
+      'رقم اللوحة': c.plateNumber || '',
+      'شركة التأمين': c.insurance || '',
+      'انتهاء التأمين (ميلادي)': c.insuranceDate || '',
+      'انتهاء التأمين (هجري)': hijriStr(c.insuranceDate, '-') || '',
+      'حالة التأمين': daysText(dIns) || '—',
+      'انتهاء الاستمارة (ميلادي)': c.registrationDate || '',
+      'انتهاء الاستمارة (هجري)': hijriStr(c.registrationDate, '-') || '',
+      'حالة الاستمارة': daysText(dReg) || '—',
+      'انتهاء الفحص (ميلادي)': c.inspectionDate || '',
+      'انتهاء الفحص (هجري)': hijriStr(c.inspectionDate, '-') || '',
+      'حالة الفحص': daysText(dInsp) || '—',
+      'سنة الصنع': c.yearOfManufacture || '',
+      'قيمة السيارة': (c.carValue !== '' && !isNaN(valNum)) ? valNum : (c.carValue || ''),
+      'الرقم التسلسلي': c.serialNumber || '',
+      'ملاحظات': c.notes || ''
+    };
+  });
+
+  if(window.XLSX){
+    try{
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        {wch:5}, {wch:22}, {wch:11}, {wch:15}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:18}, {wch:18}, {wch:18},
+        {wch:11}, {wch:14}, {wch:16}, {wch:28}
+      ];
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      XLSX.utils.book_append_sheet(wb, ws, 'السيارات');
+      XLSX.writeFile(wb, 'cars-report-' + todayStr + '.xlsx');
+      toast('📊 تم تحميل ملف الإكسيل (.xlsx) بنجاح');
+      return;
+    }catch(e){}
+  }
+
+  /* بديل تلقائي CSV متوافق مع Excel باللغة العربية في حال عدم توفر الإنترنت */
+  const headers = Object.keys(rows[0]);
+  const csvCell = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csvLines = [
+    headers.map(csvCell).join(','),
+    ...rows.map(r => headers.map(k => csvCell(r[k])).join(','))
+  ];
+  const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+  saveBlob('cars-report-' + todayStr + '.csv', blob);
+  toast('📊 تم تحميل ملف الإكسيل (.csv) بنجاح');
+}
+$('excelBtn').onclick = exportExcel;
+
+/* ---------- تصدير PDF ---------- */
+const LV = {ok:['#d4edda','#155724'], warning:['#fff3cd','#856404'], danger:['#f8d7da','#721c24']};
+function pdfDate(iso, main){
+  const d = daysUntil(iso);
+  if(d === null) return '<span style="color:#999">—</span>';
+  const c = LV[level(d)], h = hijriStr(iso);
+  const first = main === 'h' ? (h ? h + ' هـ' : iso) : iso + ' م';
+  const second = main === 'h' ? iso + ' م' : (h ? h + ' هـ' : '');
+  return '<div style="direction:ltr;text-align:right;font-weight:700">' + esc(first) + '</div>' +
+    (second ? '<div style="direction:ltr;text-align:right;font-size:10px;color:#777">' + esc(second) + '</div>' : '') +
+    '<span style="display:inline-block;margin-top:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:' + c[0] + ';color:' + c[1] + '">' + daysText(d) + '</span>';
+}
+function reportRow(c, n, td){
+  return '<tr>' +
+    '<td ' + td + '>' + n + '</td>' +
+    '<td ' + td + '><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : ' <span style="font-size:10px;color:#888">(غير نشطة)</span>') + '</td>' +
+    '<td ' + td + '>' + esc(c.plateNumber) + '</td>' +
+    '<td ' + td + '>' + esc(c.insurance || '—') + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.insuranceDate, c.insuranceCal) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.registrationDate, c.registrationCal) + '</td>' +
+    '<td ' + td + '>' + pdfDate(c.inspectionDate, c.inspectionCal) + '</td>' +
+    '<td ' + td + '>' + esc(c.yearOfManufacture || '—') + '</td>' +
+    '<td ' + td + '>' + fmtNum(c.carValue) + '</td></tr>';
+}
+/* طباعة / حفظ PDF من المتصفح: يعمل بدون إنترنت والنص قابل للتحديد والبحث */
+function printReport(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات للطباعة'); return; }
+  const todayStr = todayLocal(), filtered = list.length !== cars.length;
+  const th = 'style="position:static;background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const heads = ['#','السيارة','اللوحة','شركة التأمين','التأمين','الاستمارة','الفحص','سنة الصنع','القيمة'].map(h => '<th ' + th + '>' + h + '</th>').join('');
+  $('printArea').innerHTML =
+    '<div style="direction:rtl;background:#fff;color:#1f2937;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
+      '<div><div style="font-size:22px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
+      '<div style="font-size:12px;color:#666;margin-top:4px">' + (filtered ? 'نتائج التصفية: ' : 'الإجمالي: ') + list.length + ' سيارة</div></div>' +
+      '<div style="font-size:12px;color:#666;direction:ltr">' + todayStr + ' • ' + hijriStr(todayStr) + ' H</div>' +
+    '</div>' +
+    '<table style="width:100%;min-width:0;border-collapse:collapse"><thead><tr>' + heads + '</tr></thead><tbody>' +
+      list.map((c, i) => reportRow(c, i + 1, td)).join('') + '</tbody></table>' +
+    '<div style="margin-top:10px;font-size:11px;color:#888">أخضر: ساري • أصفر: ينتهي خلال 30 يوم • أحمر: منتهي</div></div>';
+  window.print();
+}
+window.addEventListener('afterprint', () => { $('printArea').innerHTML = ''; });
+function pageHtml(rows, startIdx, pageNo, pages, total, filtered, todayStr){
+  const th = 'style="background:#2c3e50;color:#fff;padding:9px 8px;text-align:right;font-size:12px;white-space:nowrap"';
+  const td = 'style="padding:7px 8px;border-bottom:1px solid #e5e7eb;font-size:12px;vertical-align:middle;text-align:right"';
+  const body = rows.map((c, i) => reportRow(c, startIdx + i + 1, td)).join('');
+  return '<div style="width:1123px;height:794px;background:#fff;color:#1f2937;padding:26px 30px;box-sizing:border-box;direction:rtl;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;position:relative">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;border-bottom:3px solid #2c3e50;padding-bottom:9px">' +
+      '<div><div style="font-size:24px;font-weight:700;color:#2c3e50">تقرير السيارات</div>' +
+      '<div style="font-size:12px;color:#666;margin-top:4px">' + (filtered ? 'نتائج التصفية: ' : 'الإجمالي: ') + total + ' سيارة</div></div>' +
+      '<div style="font-size:12px;color:#666;direction:ltr">' + todayStr + ' • ' + hijriStr(todayStr) + ' H</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse"><thead><tr>' +
+      '<th ' + th + '>#</th><th ' + th + '>السيارة</th><th ' + th + '>اللوحة</th><th ' + th + '>شركة التأمين</th>' +
+      '<th ' + th + '>التأمين</th><th ' + th + '>الاستمارة</th><th ' + th + '>الفحص</th>' +
+      '<th ' + th + '>سنة الصنع</th><th ' + th + '>القيمة</th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table>' +
+    '<div style="position:absolute;bottom:16px;left:30px;right:30px;display:flex;justify-content:space-between;font-size:11px;color:#888">' +
+      '<span>أخضر: ساري • أصفر: ينتهي خلال 30 يوم • أحمر: منتهي</span><span>صفحة ' + pageNo + ' من ' + pages + '</span>' +
+    '</div></div>';
+}
+async function exportPDF(){
+  const list = getFiltered();
+  if(!list.length){ toast('لا توجد سيارات لتصديرها'); return; }
+  if(!window.html2canvas || !window.jspdf){
+    toast('مكتبة الـ PDF غير متاحة (لا يوجد إنترنت). هنفتح الطباعة، اختر «حفظ بصيغة PDF».');
+    printReport(); return;
+  }
+  const btn = $('pdfBtn'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = 'جاري التجهيز...';
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-99999px;top:0;';
+  document.body.appendChild(holder);
+  try{
+    const PER = 10, pages = Math.ceil(list.length / PER), todayStr = todayLocal();
+    const doc = new window.jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    for(let p = 0; p < pages; p++){
+      holder.innerHTML = pageHtml(list.slice(p*PER, (p+1)*PER), p*PER, p+1, pages, list.length, list.length !== cars.length, todayStr);
+      const canvas = await html2canvas(holder.firstChild, {scale:2, backgroundColor:'#ffffff', logging:false});
+      if(p > 0) doc.addPage();
+      doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
+    }
+    saveBlob('cars-report-' + todayStr + '.pdf', doc.output('blob'));
+    toast('تم تجهيز ملف PDF');
+  }catch(err){
+    toast('تعذّر إنشاء الـ PDF' + (err && err.message ? ': ' + err.message : ''));
+  }finally{
+    holder.remove(); btn.disabled = false; btn.textContent = old;
+  }
+}
+$('pdfBtn').onclick = exportPDF;
+$('printBtn').onclick = printReport;
+
+document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
+  const k = th.dataset.sort;
+  if(sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+  syncSort();
+}));
+$('sortSelect').addEventListener('change', e => { sortKey = e.target.value; sortDir = 1; syncSort(); });
+
+/* إعادة رفع التعديلات المعلّقة عند رجوع الإنترنت */
+window.addEventListener('online', () => { if(dirty && getGhConfig().token) githubPush(true); });
+/* تحذير قبل إغلاق الصفحة لو فيه تعديلات لم تُرفع أو نافذة تعديل مفتوحة */
+window.addEventListener('beforeunload', e => {
+  const pending = (dirty && getGhConfig().token) || ghTimer || ghState === 'syncing' || $('carModal').classList.contains('active');
+  if(pending){ e.preventDefault(); e.returnValue = ''; }
+});
+
+async function init(){
+  $('sortSelect').value = sortKey;
+  renderSortArrows();
+  loadLocalData();
+  refresh();
+  const cfg = getGhConfig();
+  renderGhNote();
+  if(cfg.token){
+    await githubPull(true);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
