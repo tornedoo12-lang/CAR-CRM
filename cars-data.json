@@ -128,5 +128,15 @@
     "inspectionDate": "",
     "yearOfManufacture": "2023",
     "carValue": ""
+  },
+  {
+    "carName": "Text",
+    "plateNumber": "Test 1234",
+    "insurance": "Test",
+    "insuranceDate": "",
+    "registrationDate": "",
+    "inspectionDate": "",
+    "yearOfManufacture": "",
+    "carValue": ""
   }
 ]
