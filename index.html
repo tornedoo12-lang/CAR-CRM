@@ -7,10 +7,11 @@
 <style>
 :root{
   color-scheme:light;
-  --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#7f8c8d;
+  --bg1:#667eea;--bg2:#764ba2;--card:#ffffff;--text:#2c3e50;--muted:#6c7a7b;
   --border:#e5e7eb;--hover:#f5f7fa;--thead:#2c3e50;--thead-text:#ffffff;--input:#ffffff;
-  --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#95a5a6;
+  --accent:#3498db;--accent-hover:#2980b9;--danger:#e74c3c;--danger-hover:#c0392b;--gray:#7f8c8d;
   --gh:#24292f;--gh-hover:#1b1f23;--row-bad:rgba(231,76,60,.07);
+  --warn-num:#9a6700;
   --ok-bg:#d4edda;--ok-fg:#155724;--warn-bg:#fff3cd;--warn-fg:#856404;--bad-bg:#f8d7da;--bad-fg:#721c24;
 }
 @media (prefers-color-scheme:dark){
@@ -19,6 +20,7 @@
     --bg1:#1b1f3b;--bg2:#2a1d3d;--card:#1e2230;--text:#e8eaf0;--muted:#9aa3b2;
     --border:#333a4d;--hover:#262b3b;--thead:#11141f;--thead-text:#e8eaf0;--input:#161a26;
     --gh:#2f363d;--gh-hover:#444d56;--row-bad:rgba(231,76,60,.14);
+    --warn-num:#f5c76b;
     --ok-bg:rgba(46,204,113,.18);--ok-fg:#7be0a3;--warn-bg:rgba(243,156,18,.2);--warn-fg:#f5c76b;--bad-bg:rgba(231,76,60,.22);--bad-fg:#ff9b90;
   }
 }
@@ -29,7 +31,7 @@ header{background:var(--card);padding:20px;border-radius:10px;margin-bottom:16px
 h1{font-size:26px;flex:1;min-width:200px}
 .header-controls{display:flex;gap:8px;flex-wrap:wrap}
 button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s, opacity .2s}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,th:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button:disabled{opacity:.6;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){background:var(--accent-hover)}
@@ -50,7 +52,7 @@ input,select,textarea{padding:10px 14px;border:1px solid var(--border);border-ra
 .stat-card{background:var(--card);padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .stat-number{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-number.bad{color:var(--danger)}
-.stat-number.warn{color:#f39c12}
+.stat-number.warn{color:var(--warn-num)}
 .stat-label{color:var(--muted);font-size:12px;margin-top:5px}
 .table-container{background:var(--card);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);overflow-x:clip}
 @media(max-width:1150px){.table-container{overflow:auto;max-height:80vh}}
@@ -110,7 +112,31 @@ textarea{resize:vertical;min-height:70px}
 #toast.act{pointer-events:auto}
 #toast button{margin-right:14px;padding:4px 14px;font-size:13px;background:rgba(255,255,255,.2);color:#fff}
 #toast button:hover{background:rgba(255,255,255,.32)}
-@media(max-width:768px){header{flex-direction:column;align-items:stretch}.row2{grid-template-columns:1fr}}
+
+/* ---------- الجوال: تحويل الجدول إلى بطاقات ---------- */
+@media(max-width:768px){
+  body{padding:12px}
+  header{flex-direction:column;align-items:stretch}
+  .row2{grid-template-columns:1fr}
+  .modal-content{padding:18px}
+  .table-container{background:transparent;box-shadow:none;overflow:visible;max-height:none}
+  table,tbody,tr,td{display:block;width:100%}
+  table{min-width:0}
+  thead{display:none}
+  tbody tr{background:var(--card);border-radius:10px;margin-bottom:12px;padding:6px 10px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  tbody tr.row-danger{box-shadow:0 2px 10px rgba(0,0,0,.15), inset -4px 0 0 var(--danger)}
+  tbody tr.row-danger td,tbody tr:hover td,td{background:transparent !important;box-shadow:none !important}
+  td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:8px 4px;border-bottom:1px dashed var(--border)}
+  td:last-child{border-bottom:0}
+  td::before{content:attr(data-label);flex:0 0 36%;font-weight:700;font-size:12px;color:var(--muted)}
+  td.empty-state{display:block;border:0}
+  td.empty-state::before{content:none}
+  .cell{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-end}
+  .date-line,.sub{text-align:left}
+  .action-buttons{width:100%;justify-content:flex-end}
+  .action-buttons button{padding:9px 16px;font-size:13px}
+  .empty-state td,.empty-state{padding:24px}
+}
 </style>
 </head>
 <body>
@@ -166,14 +192,14 @@ textarea{resize:vertical;min-height:70px}
     <table>
       <thead>
         <tr>
-          <th data-sort="carName">السيارة<span class="arr"></span></th>
-          <th data-sort="plateNumber">رقم اللوحة<span class="arr"></span></th>
-          <th data-sort="insurance">شركة التأمين<span class="arr"></span></th>
-          <th data-sort="insuranceDate">التأمين <small>(ميلادي / هجري)</small><span class="arr"></span></th>
-          <th data-sort="registrationDate">الاستمارة <small>(ميلادي / هجري)</small><span class="arr"></span></th>
-          <th data-sort="inspectionDate">الفحص <small>(ميلادي / هجري)</small><span class="arr"></span></th>
-          <th data-sort="yearOfManufacture">سنة الصنع<span class="arr"></span></th>
-          <th data-sort="carValue">القيمة<span class="arr"></span></th>
+          <th data-sort="carName" tabindex="0" aria-sort="none">السيارة<span class="arr"></span></th>
+          <th data-sort="plateNumber" tabindex="0" aria-sort="none">رقم اللوحة<span class="arr"></span></th>
+          <th data-sort="insurance" tabindex="0" aria-sort="none">شركة التأمين<span class="arr"></span></th>
+          <th data-sort="insuranceDate" tabindex="0" aria-sort="none">التأمين <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="registrationDate" tabindex="0" aria-sort="none">الاستمارة <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="inspectionDate" tabindex="0" aria-sort="none">الفحص <small>(ميلادي / هجري)</small><span class="arr"></span></th>
+          <th data-sort="yearOfManufacture" tabindex="0" aria-sort="none">سنة الصنع<span class="arr"></span></th>
+          <th data-sort="carValue" tabindex="0" aria-sort="none">القيمة<span class="arr"></span></th>
           <th>الإجراءات</th>
         </tr>
       </thead>
@@ -183,14 +209,15 @@ textarea{resize:vertical;min-height:70px}
 </div>
 
 <!-- نافذة إضافة / تعديل سيارة -->
-<div id="carModal" class="modal">
+<div id="carModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="modalTitle">إضافة سيارة جديدة</h2>
+      <button class="close-btn" type="button" id="closeCarBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="carForm">
       <div class="row2">
-        <div class="form-group"><label for="carName">نوع السيارة *</label><input type="text" id="carName" required></div>
+        <div class="form-group"><label for="carName">نوع السيارة *</label><input type="text" id="carName" required data-autofocus></div>
         <div class="form-group"><label for="plateNumber">رقم اللوحة *</label><input type="text" id="plateNumber" required></div>
       </div>
       <div class="form-group"><label for="insurance">شركة التأمين</label><input type="text" id="insurance"></div>
@@ -239,10 +266,10 @@ textarea{resize:vertical;min-height:70px}
 </div>
 
 <!-- نافذة إعدادات GitHub Data Storage -->
-<div id="githubModal" class="modal">
+<div id="githubModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="ghTitle">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>☁️ إعدادات الربط وجلب البيانات (GitHub)</h2>
+      <h2 id="ghTitle">☁️ إعدادات الربط وجلب البيانات (GitHub)</h2>
       <button class="close-btn" type="button" id="closeGhBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="githubForm">
@@ -252,7 +279,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="row2">
         <div class="form-group">
           <label for="ghOwner">اسم المستخدم / المنظمة (Owner) *</label>
-          <input type="text" id="ghOwner" dir="ltr" placeholder="tornedoo12-lang" required>
+          <input type="text" id="ghOwner" dir="ltr" placeholder="tornedoo12-lang" required data-autofocus>
         </div>
         <div class="form-group">
           <label for="ghRepo">اسم المستودع (Repository) *</label>
@@ -283,12 +310,12 @@ textarea{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div id="confirmModal" class="modal">
+<div id="confirmModal" class="modal" role="alertdialog" aria-modal="true" aria-describedby="confirmMsg">
   <div class="modal-content confirm-box">
     <p id="confirmMsg"></p>
     <div class="modal-footer">
       <button type="button" class="btn-danger" id="confirmYes">نعم، متأكد</button>
-      <button type="button" class="btn-gray" id="confirmNo">إلغاء</button>
+      <button type="button" class="btn-gray" id="confirmNo" data-autofocus>إلغاء</button>
     </div>
   </div>
 </div>
@@ -375,6 +402,7 @@ const DOM = {
     saveBtn: $('saveCarBtn'),
     activeChk: $('active'),
     github: $('githubModal'),
+    confirm: $('confirmModal'),
     ghToken: $('ghToken')
   }
 };
@@ -392,33 +420,51 @@ const CAL_OF = {insuranceDate:'insuranceCal', registrationDate:'registrationCal'
 const CAL_DEFAULT = {insuranceCal:'g', registrationCal:'h', inspectionCal:'g'};
 const LEGACY_INACTIVE = ['نيسان صني عيسوي', 'هيونداي توسان', 'ليكزس'];
 
+function debounce(fn, ms){
+  let t;
+  return function(...args){ clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+}
+
 function todayLocal(){ const t = new Date(); return t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate()); }
 function nowStamp(){ const t = new Date(); return todayLocal() + '_' + pad(t.getHours()) + '-' + pad(t.getMinutes()); }
 
-/* ---------- التواريخ: ميلادي وهجري + أزرار التبديل ---------- */
+/* ---------- التواريخ: ميلادي وهجري + أزرار التبديل (مع ذاكرة مؤقتة) ---------- */
 const HF = (() => { try{ return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {year:'numeric', month:'numeric', day:'numeric', timeZone:'UTC'}); }catch(e){ return null; } })();
 function isoToMs(iso){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : null; }
 function msToIso(ms){ return new Date(ms).toISOString().slice(0, 10); }
+
+const _hpCache = new Map();
 function hijriParts(ms){
   if(!HF) return null;
+  let r = _hpCache.get(ms);
+  if(r !== undefined) return r;
   const p = HF.formatToParts(new Date(ms));
   const g = t => { const x = p.find(q => q.type === t); return x ? parseInt(x.value.replace(/\D/g, ''), 10) : NaN; };
-  return {y:g('year'), m:g('month'), d:g('day')};
+  r = {y:g('year'), m:g('month'), d:g('day')};
+  if(_hpCache.size > 5000) _hpCache.clear();
+  _hpCache.set(ms, r);
+  return r;
 }
 function hijriStr(iso, sep = '/'){
   const ms = isoToMs(iso); if(ms === null) return '';
   const h = hijriParts(ms); return h ? h.y + sep + pad(h.m) + sep + pad(h.d) : '';
 }
+const _fhCache = new Map();
 function fromHijri(y, m, d){
   if(!HF || m < 1 || m > 12 || d < 1 || d > 30) return null;
+  const key = y + '-' + m + '-' + d;
+  if(_fhCache.has(key)) return _fhCache.get(key);
+  let found = null;
   const approx = Date.UTC(622, 6, 16) + ((y-1)*354.3671 + (m-1)*29.5306 + (d-1)) * 86400000;
+  outer:
   for(let k = 0; k <= 60; k++){
     for(const s of (k ? [k, -k] : [0])){
       const ms = approx + s*86400000; const h = hijriParts(ms);
-      if(h && h.y === y && h.m === m && h.d === d) return msToIso(ms);
+      if(h && h.y === y && h.m === m && h.d === d){ found = msToIso(ms); break outer; }
     }
   }
-  return null;
+  _fhCache.set(key, found);
+  return found;
 }
 function normDate(s){
   s = latin(s).trim().replace(/[\/.]/g, '-'); if(!s) return '';
@@ -459,9 +505,19 @@ function toggleDateFieldCal(f){
   updateHint(f);
 }
 
+// ذاكرة مؤقتة لحساب الأيام المتبقية (تُمسح تلقائياً عند تغيّر اليوم)
+let _dayKey = '';
+const _duCache = new Map();
 function daysUntil(s){
-  const ms = isoToMs(latin(s)); if(ms === null) return null;
-  const t = new Date(); return Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+  const iso = latin(s);
+  const t = new Date();
+  const key = t.getFullYear() + '-' + t.getMonth() + '-' + t.getDate();
+  if(key !== _dayKey){ _dayKey = key; _duCache.clear(); }
+  if(_duCache.has(iso)) return _duCache.get(iso);
+  const ms = isoToMs(iso);
+  const r = ms === null ? null : Math.round((ms - Date.UTC(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+  _duCache.set(iso, r);
+  return r;
 }
 function level(d){ if(d === null) return 'none'; if(d < 0) return 'danger'; if(d <= 30) return 'warning'; return 'ok'; }
 function daysText(d){
@@ -504,6 +560,7 @@ function parseCars(text){
     return o;
   });
 }
+// المعرّفات تُولَّد محلياً دائماً ولا تأتي من الملفات الخارجية
 function withIds(arr, pre){ return arr.map((c, i) => ({id: pre + i + '_' + Math.random().toString(36).slice(2, 7), ...c})); }
 function makePayload(){ return {app:'cars-crm', version:5, updatedAt:new Date().toISOString(), cars:AppState.cars.map(({id, ...r}) => r)}; }
 
@@ -657,7 +714,33 @@ function renderGhNote(){
           (AppState.gh.lastSync ? ` • آخر تحديث ${pad(AppState.gh.lastSync.getHours())}:${pad(AppState.gh.lastSync.getMinutes())}` : '');
   }
   n.className = 'note ' + cls;
-  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب أحدث البيانات</button></div>`;
+  // بدون onclick مضمّن: الزر يُربط بالأحداث عبر addEventListener
+  n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" data-act="pull">⬇️ جلب أحدث البيانات</button></div>`;
+  const pullBtn = n.querySelector('[data-act="pull"]');
+  if(pullBtn) pullBtn.addEventListener('click', () => githubPull(false));
+}
+
+/* ---------- النوافذ المنبثقة: إمكانية الوصول (focus trap + إعادة التركيز) ---------- */
+const FOCUSABLE = 'button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])';
+function visibleFocusables(root){
+  return Array.from(root.querySelectorAll(FOCUSABLE)).filter(el => !el.disabled && el.getClientRects().length > 0);
+}
+function openDialog(modal, focusEl){
+  modal._returnFocus = document.activeElement;
+  modal.classList.add('active');
+  const target = focusEl || modal.querySelector('[data-autofocus]') || visibleFocusables(modal)[0];
+  if(target) setTimeout(() => target.focus(), 30);
+}
+function closeDialog(modal){
+  if(!modal.classList.contains('active')) return;
+  modal.classList.remove('active');
+  const r = modal._returnFocus;
+  modal._returnFocus = null;
+  if(r && r.isConnected && typeof r.focus === 'function') r.focus();
+}
+function topDialog(){
+  const open = document.querySelectorAll('.modal.active');
+  return open.length ? open[open.length - 1] : null;
 }
 
 function fillGhForm(cfg){
@@ -669,11 +752,10 @@ function fillGhForm(cfg){
 }
 function openGhModal(focusToken = false){
   fillGhForm(getGhConfig());
-  DOM.modals.github.classList.add('active');
-  if(focusToken) setTimeout(() => DOM.modals.ghToken.focus(), 100);
+  openDialog(DOM.modals.github, focusToken ? DOM.modals.ghToken : null);
 }
 $('githubBtn').onclick = () => openGhModal(false);
-$('closeGhBtn').onclick = () => DOM.modals.github.classList.remove('active');
+$('closeGhBtn').onclick = () => closeDialog(DOM.modals.github);
 function readGhFormConfig(){
   return {
     owner: $('ghOwner').value.trim() || DEFAULT_GH.owner,
@@ -689,7 +771,7 @@ $('githubForm').addEventListener('submit', async e => {
   saveGhConfig(cfg);
   AppState.gh.state = cfg.token ? 'ready' : 'notoken';
   renderGhNote();
-  DOM.modals.github.classList.remove('active');
+  closeDialog(DOM.modals.github);
   if(cfg.token){
     toast('تم حفظ إعدادات الربط، جاري جلب البيانات...');
     await githubPull(false);
@@ -738,7 +820,9 @@ function sortList(list){
 function renderSortArrows(){
   document.querySelectorAll('th[data-sort]').forEach(th => {
     const arr = th.querySelector('.arr');
-    if(arr) arr.textContent = th.dataset.sort === AppState.sort.key ? (AppState.sort.dir === 1 ? '▲' : '▼') : '';
+    const active = th.dataset.sort === AppState.sort.key;
+    if(arr) arr.textContent = active ? (AppState.sort.dir === 1 ? '▲' : '▼') : '';
+    th.setAttribute('aria-sort', active ? (AppState.sort.dir === 1 ? 'ascending' : 'descending') : 'none');
   });
 }
 function syncSort(){
@@ -764,25 +848,34 @@ function getFiltered(){
     return true;
   }));
 }
+// خلية جدول: data-label يُستخدم كعنوان في عرض البطاقات على الجوال
+function td(label, html){
+  return '<td data-label="' + label + '"><div class="cell">' + html + '</div></td>';
+}
 function renderTable(){
   const list = getFiltered();
   if(!list.length){
     DOM.tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (AppState.cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. أدخل التوكين لجلب البيانات أو اضغط «إضافة سيارة»') + '</td></tr>';
     return;
   }
-  DOM.tableBody.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
-    '<td><strong>' + esc(c.carName) + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>') + '</td>' +
-    '<td>' + esc(c.plateNumber) + '</td>' +
-    '<td>' + esc(c.insurance || '—') + '</td>' +
-    '<td>' + dateCell(c.insuranceDate, c.insuranceCal) + '</td>' +
-    '<td>' + dateCell(c.registrationDate, c.registrationCal) + '</td>' +
-    '<td>' + dateCell(c.inspectionDate, c.inspectionCal) + '</td>' +
-    '<td>' + esc(c.yearOfManufacture || '—') + '</td>' +
-    '<td>' + fmtNum(c.carValue) + '</td>' +
-    '<td><div class="action-buttons">' +
-      '<button class="btn-primary btn-small" data-edit="' + c.id + '">تعديل</button>' +
-      '<button class="btn-danger btn-small" data-del="' + c.id + '">حذف</button>' +
-    '</div></td></tr>').join('');
+  DOM.tableBody.innerHTML = list.map(c => {
+    const id = esc(c.id), name = esc(c.carName);
+    return '<tr' + rowClass(c) + '>' +
+      td('السيارة', '<strong>' + name + '</strong>' + (c.active ? '' : '<span class="badge-off">غير نشطة</span>')) +
+      td('رقم اللوحة', esc(c.plateNumber)) +
+      td('شركة التأمين', esc(c.insurance || '—')) +
+      td('التأمين', dateCell(c.insuranceDate, c.insuranceCal)) +
+      td('الاستمارة', dateCell(c.registrationDate, c.registrationCal)) +
+      td('الفحص', dateCell(c.inspectionDate, c.inspectionCal)) +
+      td('سنة الصنع', esc(c.yearOfManufacture || '—')) +
+      td('القيمة', fmtNum(c.carValue)) +
+      td('الإجراءات',
+        '<div class="action-buttons">' +
+          '<button class="btn-primary btn-small" data-edit="' + id + '" aria-label="تعديل ' + name + '">تعديل</button>' +
+          '<button class="btn-danger btn-small" data-del="' + id + '" aria-label="حذف ' + name + '">حذف</button>' +
+        '</div>') +
+      '</tr>';
+  }).join('');
 }
 function updateStats(){
   const act = AppState.cars.filter(c => c.active), n = f => act.filter(f).length;
@@ -803,7 +896,10 @@ function updateHint(f){
   h.className = 'hint';
   if(!v){ h.textContent = ''; return; }
   const n = normDate(v);
-  if(n === null){ h.textContent = 'تاريخ غير صالح'; h.className = 'hint bad'; return; }
+  if(n === null){
+    h.textContent = (!HF && /^1[3-6]\d\d-/.test(v)) ? 'متصفحك لا يدعم التقويم الهجري، اكتب التاريخ ميلادياً' : 'تاريخ غير صالح';
+    h.className = 'hint bad'; return;
+  }
   const cal = $(f).dataset.cal || 'g';
   const hs = hijriStr(n);
   if(cal === 'h') h.textContent = 'الموافق ميلادياً: ' + n + ' م (يُعرض الهجري أولاً)';
@@ -854,9 +950,9 @@ function openModal(car){
     updateHint(f);
   });
   DOM.modals.activeChk.checked = car ? car.active !== false : true;
-  DOM.modals.car.classList.add('active');
+  openDialog(DOM.modals.car);
 }
-function closeModal(){ DOM.modals.car.classList.remove('active'); }
+function closeModal(){ closeDialog(DOM.modals.car); }
 let confirmCb = null, confirmNoCb = null;
 function askConfirm(msg, cb, opts){
   opts = opts || {};
@@ -864,9 +960,9 @@ function askConfirm(msg, cb, opts){
   $('confirmYes').textContent = opts.yes || 'نعم، متأكد';
   $('confirmNo').textContent = opts.no || 'إلغاء';
   confirmCb = cb; confirmNoCb = opts.onNo || null;
-  $('confirmModal').classList.add('active');
+  openDialog(DOM.modals.confirm);
 }
-function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; }
+function closeConfirm(){ closeDialog(DOM.modals.confirm); confirmCb = null; confirmNoCb = null; }
 let toastT;
 function toast(msg, actionLabel, actionFn, ms){
   const t = $('toast');
@@ -882,16 +978,32 @@ function toast(msg, actionLabel, actionFn, ms){
 
 $('addBtn').onclick = () => openModal(null);
 $('cancelBtn').onclick = closeModal;
-DOM.modals.github.addEventListener('click', e => { if(e.target === DOM.modals.github) DOM.modals.github.classList.remove('active'); });
+$('closeCarBtn').onclick = closeModal;
+DOM.modals.github.addEventListener('click', e => { if(e.target === DOM.modals.github) closeDialog(DOM.modals.github); });
 $('confirmNo').onclick = () => { const f = confirmNoCb; closeConfirm(); if(f) f(); };
 $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
-DOM.filters.search.addEventListener('input', renderTable);
+
+// البحث مع debounce حتى لا يُعاد بناء الجدول عند كل حرف
+DOM.filters.search.addEventListener('input', debounce(renderTable, 200));
 DOM.filters.status.addEventListener('change', renderTable);
 DOM.filters.inactive.addEventListener('change', renderTable);
+
 document.addEventListener('keydown', e => {
+  const m = topDialog();
+  if(!m) return;
   if(e.key === 'Escape'){
-    closeConfirm();
-    DOM.modals.github.classList.remove('active');
+    e.preventDefault();
+    if(m === DOM.modals.confirm) closeConfirm();
+    else closeDialog(m);
+    return;
+  }
+  if(e.key === 'Tab'){
+    const items = visibleFocusables(m);
+    if(!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if(!m.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    else if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
   }
 });
 
@@ -907,22 +1019,27 @@ DOM.modals.form.addEventListener('submit', async e => {
     data[f] = n;
   }
 
+  // السيارة قبل التعديل: نحتاج رقم لوحتها القديم لتحديد الصف الصحيح في الشيت
+  const editingCar = AppState.editingId ? AppState.cars.find(c => c.id === AppState.editingId) : null;
+
   const commit = async () => {
-    const actionType = AppState.editingId ? 'edit' : 'add';
+    const actionType = editingCar ? 'edit' : 'add';
     const originalBtnText = DOM.modals.saveBtn.textContent;
     DOM.modals.saveBtn.disabled = true;
     DOM.modals.saveBtn.textContent = 'جاري الحفظ...';
 
     try {
-      const res = await sendToGoogleSheets(actionType, data);
+      // عند التعديل نرسل رقم اللوحة الأصلي مع البيانات الجديدة
+      const payload = editingCar ? {...data, originalPlate: editingCar.plateNumber} : data;
+      const res = await sendToGoogleSheets(actionType, payload);
       if(!res.ok) {
         toast('⚠️ فشل الحفظ في جوجل شيت' + (res.message ? ': ' + res.message : ''), null, null, 6000);
         return;
       }
 
       toast('✅ تم الحفظ بنجاح في النظام وجوجل شيت');
-      if(AppState.editingId){
-        const i = AppState.cars.findIndex(c => c.id === AppState.editingId);
+      if(editingCar){
+        const i = AppState.cars.findIndex(c => c.id === editingCar.id);
         if(i > -1) AppState.cars[i] = {...AppState.cars[i], ...data};
       }else{
         AppState.cars.push({id:'c_' + Date.now().toString(36), ...data});
@@ -984,12 +1101,18 @@ $('restoreFile').addEventListener('change', async e => {
   }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
 });
 
-document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
+function sortByHeader(th){
   const k = th.dataset.sort;
   if(AppState.sort.key === k) AppState.sort.dir = -AppState.sort.dir;
   else { AppState.sort.key = k; AppState.sort.dir = 1; }
   syncSort();
-}));
+}
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => sortByHeader(th));
+  th.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); sortByHeader(th); }
+  });
+});
 DOM.filters.sort.addEventListener('change', e => { AppState.sort.key = e.target.value; AppState.sort.dir = 1; syncSort(); });
 
 window.addEventListener('beforeunload', e => {
