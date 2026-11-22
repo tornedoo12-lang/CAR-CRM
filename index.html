@@ -260,12 +260,12 @@ textarea{resize:vertical;min-height:70px}
 <div id="githubModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>☁️ التخزين السحابي عبر GitHub API</h2>
+      <h2>☁️ إعدادات الربط وجلب البيانات (GitHub)</h2>
       <button class="close-btn" type="button" id="closeGhBtn" aria-label="إغلاق">&times;</button>
     </div>
     <form id="githubForm">
       <div class="form-note">
-        بيانات المستودع الافتراضية محفوظة وجاهزة، ما عليك سوى إدخال <b>رمز الوصول الشخصي (Token)</b> وسيتم حفظه في متصفحك على هذا الجهاز لجلب ومزامنة البيانات تلقائياً.
+        أدخل <b>رمز الوصول الشخصي (Token)</b> لجلب بيانات السيارات من GitHub تلقائياً. التعديل والإضافة والحذف يتم حفظهم مباشرة في Google Sheets.
       </div>
       <div class="row2">
         <div class="form-group">
@@ -290,10 +290,7 @@ textarea{resize:vertical;min-height:70px}
       <div class="form-group">
         <label for="ghToken">رمز الوصول الشخصي (Personal Access Token)</label>
         <input type="password" id="ghToken" dir="ltr" placeholder="أدخل التوكين هنا (ghp_xxxx...)" autocomplete="off">
-        <div class="hint">يُحفظ التوكين محلياً داخل متصفحك ولا يُكتب في الكود أبداً.</div>
-      </div>
-      <div class="form-group">
-        <label class="chk"><input type="checkbox" id="ghAutoSync" checked> <span>مزامنة وحفظ تلقائي في GitHub عند أي تعديل</span></label>
+        <div class="hint">يُحفظ التوكين محلياً داخل متصفحك فقط ولا يُكتب في الكود أبداً.</div>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn-primary">💾 حفظ الإعدادات والجلب</button>
@@ -324,24 +321,21 @@ textarea{resize:vertical;min-height:70px}
 const STORAGE_KEY = 'cars_crm_data_v5';
 const GH_KEY = 'cars_crm_github_v5';
 const DATA_FILE = 'cars-data.json';
-const GH_SHA_KEY = 'cars_crm_ghsha_v5';   
-const DIRTY_KEY = 'cars_crm_dirty_v5';    
+const GH_SHA_KEY = 'cars_crm_ghsha_v5';
 const SORT_PREF_KEY = 'cars_crm_sort_v5';
 
-// رابط جوجل شيت 
-const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbypEZzz_819mimSJ9L8i6KUSieiYf3KNKiftTuHAgpHL33vQ12DR-YPqbRTXPXe2WV2LA/exec"; 
+const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbypEZzz_819mimSJ9L8i6KUSieiYf3KNKiftTuHAgpHL33vQ12DR-YPqbRTXPXe2WV2LA/exec";
 
 const DEFAULT_GH = {
   owner: 'tornedoo12-lang',
   repo: 'CAR-CRM',
   branch: 'main',
   path: 'cars-data.json',
-  token: '',
-  autoSync: true
+  token: ''
 };
 
 // ==========================================
-// 2. إدارة الحالة (State Management - Global Variables Encapsulation)
+// 2. إدارة الحالة (AppState)
 // ==========================================
 const $ = id => document.getElementById(id);
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -353,14 +347,8 @@ const AppState = {
   gh: {
     state: 'ready',
     lastSync: null,
-    timer: null,
-    busy: false,
-    queued: false,
-    conflictOpen: false,
     sha: lsGet(GH_SHA_KEY) || null
   },
-  dirty: lsGet(DIRTY_KEY) === '1',
-  editSeq: 0,
   sort: {
     key: 'urgency',
     dir: 1
@@ -370,8 +358,8 @@ const AppState = {
 try {
   const sp = JSON.parse(lsGet(SORT_PREF_KEY) || 'null');
   if(sp && ['urgency','original','carName','plateNumber','insurance','insuranceDate','registrationDate','inspectionDate','yearOfManufacture','carValue'].includes(sp.key)){
-    AppState.sort.key = sp.key; 
-    AppState.sort.dir = sp.dir === -1 ? -1 : 1; 
+    AppState.sort.key = sp.key;
+    AppState.sort.dir = sp.dir === -1 ? -1 : 1;
   }
 } catch(e){}
 
@@ -404,7 +392,9 @@ const DOM = {
     title: $('modalTitle'),
     form: $('carForm'),
     saveBtn: $('saveCarBtn'),
-    activeChk: $('active')
+    activeChk: $('active'),
+    github: $('githubModal'),
+    ghToken: $('ghToken')
   }
 };
 
@@ -563,17 +553,19 @@ async function sendToGoogleSheets(actionType, carDataObj) {
         data: carDataObj
       })
     });
+    if (!response.ok) {
+      return { ok: false, message: 'HTTP ' + response.status };
+    }
     const result = await response.json();
-    return result.status === "success";
+    return { ok: result.status === "success", message: result.message || '' };
   } catch (error) {
     console.error("فشل الاتصال بجوجل شيت:", error);
-    return false;
+    return { ok: false, message: 'تعذر الاتصال بالخادم' };
   }
 }
 
-/* ---------- GitHub Repository Storage ---------- */
+/* ---------- GitHub Repository Storage (للقراءة فقط) ---------- */
 function setSha(v){ AppState.gh.sha = v || null; lsSet(GH_SHA_KEY, AppState.gh.sha); }
-function setDirty(v){ AppState.dirty = !!v; lsSet(DIRTY_KEY, AppState.dirty ? '1' : null); }
 
 function getGhConfig(){
   try{
@@ -585,12 +577,11 @@ function getGhConfig(){
         repo: parsed.repo || DEFAULT_GH.repo,
         branch: parsed.branch || DEFAULT_GH.branch,
         path: parsed.path || DEFAULT_GH.path,
-        token: parsed.token || '',
-        autoSync: parsed.autoSync !== false
+        token: parsed.token || ''
       };
     }
   }catch(e){}
-  localStorage.setItem(GH_KEY, JSON.stringify(DEFAULT_GH));
+  lsSet(GH_KEY, JSON.stringify(DEFAULT_GH));
   return {...DEFAULT_GH};
 }
 function saveGhConfig(cfg){
@@ -599,14 +590,13 @@ function saveGhConfig(cfg){
     repo: cfg.repo || DEFAULT_GH.repo,
     branch: cfg.branch || DEFAULT_GH.branch,
     path: cfg.path || DEFAULT_GH.path,
-    token: cfg.token || '',
-    autoSync: cfg.autoSync !== false
+    token: cfg.token || ''
   };
   try{
     const prev = JSON.parse(localStorage.getItem(GH_KEY) || 'null');
     if(prev && (prev.owner !== safeCfg.owner || prev.repo !== safeCfg.repo || prev.branch !== safeCfg.branch || prev.path !== safeCfg.path)) setSha(null);
   }catch(e){}
-  localStorage.setItem(GH_KEY, JSON.stringify(safeCfg));
+  lsSet(GH_KEY, JSON.stringify(safeCfg));
 }
 function base64ToUtf8(b64){
   const bin = atob(b64.replace(/\s/g, ''));
@@ -635,16 +625,12 @@ async function ghGetRemote(cfg){
   const data = await res.json();
   return {exists:true, sha:data.sha, content:data.content, baseUrl, headers, branch};
 }
-function backupLocalFile(tag){
-  saveBlob('cars-local-' + tag + '-' + nowStamp() + '.json', new Blob([JSON.stringify(makePayload(), null, 2)], {type:'application/json'}));
-}
 
-/* جلب البيانات من GitHub (القراءة فقط) */
-async function githubPull(silent = false, force = false){
+async function githubPull(silent = false){
   const cfg = getGhConfig();
   if(!cfg.token){
     AppState.gh.state = 'notoken'; renderGhNote();
-    if(!silent) toast('الرجاء إدخال الـ Token في إعدادات GitHub أولاً');
+    if(!silent) toast('الرجاء إدخال الـ Token في إعدادات الربط أولاً');
     return false;
   }
   AppState.gh.state = 'syncing'; renderGhNote();
@@ -658,7 +644,7 @@ async function githubPull(silent = false, force = false){
     const text = base64ToUtf8(r.content || '');
     AppState.cars = withIds(parseCars(text), 'gh');
     saveLocalData();
-    setSha(r.sha); setDirty(false);
+    setSha(r.sha);
     AppState.gh.lastSync = new Date();
     AppState.gh.state = 'ready';
     refresh(); renderGhNote();
@@ -671,27 +657,6 @@ async function githubPull(silent = false, force = false){
   }
 }
 
-/* تم استبدال عملية الرفع لتقوم بها أداة Google Sheets */
-async function githubPush(silent = false, force = false){
-  setDirty(false);
-  AppState.gh.state = 'ready';
-  renderGhNote();
-  if(!silent) toast('☁️ يتم الحفظ والتزامن من خلال جوجل شيت مباشرة');
-  return true;
-}
-
-function scheduleGhSync(){
-  const cfg = getGhConfig();
-  if(!cfg || !cfg.autoSync || !cfg.token) return;
-  clearTimeout(AppState.gh.timer);
-  AppState.gh.timer = setTimeout(() => { AppState.gh.timer = null; githubPush(true); }, 500);
-}
-async function persist(){
-  AppState.editSeq++;
-  setDirty(true);
-  saveLocalData();
-  scheduleGhSync();
-}
 function renderGhNote(){
   const n = DOM.text.githubNote;
   const cfg = getGhConfig();
@@ -699,15 +664,16 @@ function renderGhNote(){
   let cls = 'note-ok', txt = '';
   if(!cfg.token){
     cls = 'note-warn';
-    txt = `☁️ مستودع GitHub «${repoLabel}» جاهز للربط كمصدر بيانات للجدول.`;
+    txt = `☁️ مستودع GitHub «${repoLabel}» جاهز • أدخل الـ Token لجلب البيانات.`;
   }else if(AppState.gh.state === 'syncing'){
     cls = 'note-warn';
-    txt = `⏳ جاري مزامنة القراءة مع مستودع GitHub «${repoLabel}»...`;
+    txt = `⏳ جاري جلب أحدث البيانات من GitHub «${repoLabel}»...`;
   }else if(AppState.gh.state === 'error'){
     cls = 'note-bad';
-    txt = `⚠️ تعذّرت المزامنة مع GitHub «${repoLabel}». تأكد من اتصال الإنترنت أو الـ Token.`;
+    txt = `⚠️ تعذّر الجلب من GitHub «${repoLabel}». تأكد من اتصال الإنترنت أو صلاحية الـ Token.`;
   }else{
-    txt = `☁️ متصل بمستودع GitHub «${repoLabel}» للقراءة • يتم التعديل والكتابة عبر جوجل شيت`;
+    txt = `☁️ متصل بـ GitHub «${repoLabel}» للقراءة • الحفظ والتعديل يتم عبر جوجل شيت` +
+          (AppState.gh.lastSync ? ` • آخر تحديث ${pad(AppState.gh.lastSync.getHours())}:${pad(AppState.gh.lastSync.getMinutes())}` : '');
   }
   n.className = 'note ' + cls;
   n.innerHTML = `<span>${esc(txt)}</span><div style="display:flex;gap:6px"><button type="button" class="btn-small btn-gh" onclick="githubPull(false)">⬇️ جلب أحدث البيانات</button></div>`;
@@ -718,22 +684,22 @@ function fillGhForm(cfg){
   $('ghRepo').value = cfg.repo || DEFAULT_GH.repo;
   $('ghBranch').value = cfg.branch || DEFAULT_GH.branch;
   $('ghPath').value = cfg.path || DEFAULT_GH.path;
-  $('ghToken').value = cfg.token || '';
-  $('ghAutoSync').checked = cfg.autoSync !== false;
+  DOM.modals.ghToken.value = cfg.token || '';
 }
-$('githubBtn').onclick = () => {
+function openGhModal(focusToken = false){
   fillGhForm(getGhConfig());
-  $('githubModal').classList.add('active');
-};
-$('closeGhBtn').onclick = () => $('githubModal').classList.remove('active');
+  DOM.modals.github.classList.add('active');
+  if(focusToken) setTimeout(() => DOM.modals.ghToken.focus(), 100);
+}
+$('githubBtn').onclick = () => openGhModal(false);
+$('closeGhBtn').onclick = () => DOM.modals.github.classList.remove('active');
 function readGhFormConfig(){
   return {
     owner: $('ghOwner').value.trim() || DEFAULT_GH.owner,
     repo: $('ghRepo').value.trim() || DEFAULT_GH.repo,
     branch: $('ghBranch').value.trim() || DEFAULT_GH.branch,
     path: $('ghPath').value.trim() || DEFAULT_GH.path,
-    token: $('ghToken').value.trim(),
-    autoSync: $('ghAutoSync').checked
+    token: DOM.modals.ghToken.value.trim()
   };
 }
 $('githubForm').addEventListener('submit', async e => {
@@ -742,12 +708,12 @@ $('githubForm').addEventListener('submit', async e => {
   saveGhConfig(cfg);
   AppState.gh.state = cfg.token ? 'ready' : 'notoken';
   renderGhNote();
-  $('githubModal').classList.remove('active');
+  DOM.modals.github.classList.remove('active');
   if(cfg.token){
     toast('تم حفظ إعدادات الربط، جاري جلب البيانات...');
     await githubPull(false);
   }else{
-    toast('تم حفظ إعدادات الربط (بدون توكين)');
+    toast('تم حفظ الإعدادات (بدون توكين)');
   }
 });
 $('ghPullNowBtn').onclick = async () => {
@@ -755,11 +721,11 @@ $('ghPullNowBtn').onclick = async () => {
   saveGhConfig(cfg);
   await githubPull(false);
 };
-$('ghResetDefaultBtn').onclick = async () => {
+$('ghResetDefaultBtn').onclick = () => {
   saveGhConfig({...DEFAULT_GH});
   fillGhForm(DEFAULT_GH);
   renderGhNote();
-  toast('تمت استعادة الإعدادات الافتراضية');
+  toast('تمت استعادة الإعدادات الافتراضية ومسح التوكين');
 };
 
 /* ---------- العرض ---------- */
@@ -820,7 +786,7 @@ function getFiltered(){
 function renderTable(){
   const list = getFiltered();
   if(!list.length){
-    DOM.tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (AppState.cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. تأكد من الربط أو اضغط «إضافة سيارة»') + '</td></tr>';
+    DOM.tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (AppState.cars.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سيارات محملة حالياً. أدخل التوكين لجلب البيانات أو اضغط «إضافة سيارة»') + '</td></tr>';
     return;
   }
   DOM.tableBody.innerHTML = list.map(c => '<tr' + rowClass(c) + '>' +
@@ -919,7 +885,7 @@ function askConfirm(msg, cb, opts){
   confirmCb = cb; confirmNoCb = opts.onNo || null;
   $('confirmModal').classList.add('active');
 }
-function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; AppState.gh.conflictOpen = false; }
+function closeConfirm(){ $('confirmModal').classList.remove('active'); confirmCb = null; confirmNoCb = null; }
 let toastT;
 function toast(msg, actionLabel, actionFn, ms){
   const t = $('toast');
@@ -935,7 +901,7 @@ function toast(msg, actionLabel, actionFn, ms){
 
 $('addBtn').onclick = () => openModal(null);
 $('cancelBtn').onclick = closeModal;
-$('githubModal').addEventListener('click', e => { if(e.target === $('githubModal')) $('githubModal').classList.remove('active'); });
+DOM.modals.github.addEventListener('click', e => { if(e.target === DOM.modals.github) DOM.modals.github.classList.remove('active'); });
 $('confirmNo').onclick = () => { const f = confirmNoCb; closeConfirm(); if(f) f(); };
 $('confirmYes').onclick = () => { const cb = confirmCb; closeConfirm(); if(cb) cb(); };
 DOM.filters.search.addEventListener('input', renderTable);
@@ -944,7 +910,7 @@ DOM.filters.inactive.addEventListener('change', renderTable);
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){
     closeConfirm();
-    $('githubModal').classList.remove('active');
+    DOM.modals.github.classList.remove('active');
   }
 });
 
@@ -959,41 +925,34 @@ DOM.modals.form.addEventListener('submit', async e => {
     if(n === null){ toast('تاريخ غير صالح. اكتبه مثل 2026-12-31 (ميلادي) أو 1448-06-04 (هجري)'); $(f).focus(); return; }
     data[f] = n;
   }
-  
+
   const commit = async () => {
     const actionType = AppState.editingId ? 'edit' : 'add';
-    
-    // (Pessimistic UI Fix): تغيير حالة زر الحفظ وإيقافه لحين الرد من جوجل
     const originalBtnText = DOM.modals.saveBtn.textContent;
     DOM.modals.saveBtn.disabled = true;
     DOM.modals.saveBtn.textContent = 'جاري الحفظ...';
 
     try {
-      const syncOk = await sendToGoogleSheets(actionType, data);
-      
-      if(!syncOk) {
-        // منع الحفظ وإظهار رسالة خطأ في حالة فشل الاتصال بجوجل شيت 
-        toast('⚠️ تعذر الاتصال بجوجل شيت. لم يتم الحفظ لمنع تعارض البيانات.', null, null, 5000);
+      const res = await sendToGoogleSheets(actionType, data);
+      if(!res.ok) {
+        toast('⚠️ فشل الحفظ في جوجل شيت' + (res.message ? ': ' + res.message : ''), null, null, 6000);
         return;
-      } 
-      
+      }
+
       toast('✅ تم الحفظ بنجاح في النظام وجوجل شيت');
-      
-      // تحديث واجهة المستخدم محلياً فقط بعد نجاح العملية في جوجل شيت
       if(AppState.editingId){
         const i = AppState.cars.findIndex(c => c.id === AppState.editingId);
         if(i > -1) AppState.cars[i] = {...AppState.cars[i], ...data};
       }else{
         AppState.cars.push({id:'c_' + Date.now().toString(36), ...data});
       }
-      await persist(); closeModal(); refresh();
-      
+      saveLocalData(); closeModal(); refresh();
     } finally {
       DOM.modals.saveBtn.disabled = false;
       DOM.modals.saveBtn.textContent = originalBtnText;
     }
   };
-  
+
   const normPlate = x => latin(x).replace(/\s+/g, '').toLowerCase();
   const dup = AppState.cars.find(c => c.id !== AppState.editingId && normPlate(c.plateNumber) === normPlate(data.plateNumber));
   if(dup){
@@ -1010,18 +969,13 @@ DOM.tableBody.addEventListener('click', e => {
   if(b.dataset.del){
     const c = AppState.cars.find(x => x.id === b.dataset.del); if(!c) return;
     askConfirm('هل تريد حذف «' + c.carName + '»؟', async () => {
-      
-      // (Pessimistic UI Fix): انتظار تأكيد الحذف من جوجل شيت أولاً
-      const syncOk = await sendToGoogleSheets('delete', { plateNumber: c.plateNumber });
-      
-      if(!syncOk) {
-         toast('⚠️ تعذر الحذف بسبب مشكلة في الاتصال بجوجل شيت.');
-         return;
+      const res = await sendToGoogleSheets('delete', { plateNumber: c.plateNumber });
+      if(!res.ok) {
+        toast('⚠️ تعذر الحذف من جوجل شيت' + (res.message ? ': ' + res.message : ''), null, null, 6000);
+        return;
       }
-
-      const idx = AppState.cars.findIndex(x => x.id === c.id);
-      AppState.cars = AppState.cars.filter(x => x.id !== c.id); 
-      await persist(); 
+      AppState.cars = AppState.cars.filter(x => x.id !== c.id);
+      saveLocalData();
       refresh();
       toast('تم حذف «' + c.carName + '» بنجاح.');
     });
@@ -1043,8 +997,8 @@ $('restoreFile').addEventListener('change', async e => {
   try{
     const clean = parseCars(await f.text());
     if(!clean.length) throw new Error('الملف لا يحتوي على سيارات');
-    askConfirm('سيتم استبدال البيانات الحالية (' + AppState.cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', async () => {
-      AppState.cars = withIds(clean, 'r'); await persist(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة بنجاح');
+    askConfirm('سيتم استبدال البيانات المحلية الحالية (' + AppState.cars.length + ' سيارة) بنسخة فيها ' + clean.length + ' سيارة. متأكد؟', () => {
+      AppState.cars = withIds(clean, 'r'); saveLocalData(); refresh(); toast('تم استرجاع ' + clean.length + ' سيارة محلياً');
     });
   }catch(err){ toast('الملف غير صالح، اختر ملف نسخة احتياطية من هذا النظام'); }
 });
@@ -1112,7 +1066,7 @@ function exportExcel(){
 }
 $('excelBtn').onclick = exportExcel;
 
-/* ---------- تصدير PDF ---------- */
+/* ---------- تصدير PDF والطباعة ---------- */
 const LV = {ok:['#d4edda','#155724'], warning:['#fff3cd','#856404'], danger:['#f8d7da','#721c24']};
 function pdfDate(iso, main){
   const d = daysUntil(iso);
@@ -1211,16 +1165,14 @@ $('printBtn').onclick = printReport;
 
 document.querySelectorAll('th[data-sort]').forEach(th => th.addEventListener('click', () => {
   const k = th.dataset.sort;
-  if(AppState.sort.key === k) AppState.sort.dir = -AppState.sort.dir; 
+  if(AppState.sort.key === k) AppState.sort.dir = -AppState.sort.dir;
   else { AppState.sort.key = k; AppState.sort.dir = 1; }
   syncSort();
 }));
 DOM.filters.sort.addEventListener('change', e => { AppState.sort.key = e.target.value; AppState.sort.dir = 1; syncSort(); });
 
-window.addEventListener('online', () => { if(AppState.dirty && getGhConfig().token) githubPush(true); });
-
 window.addEventListener('beforeunload', e => {
-  const pending = (AppState.dirty && getGhConfig().token) || AppState.gh.timer || AppState.gh.state === 'syncing' || DOM.modals.car.classList.contains('active');
+  const pending = AppState.gh.state === 'syncing' || DOM.modals.saveBtn.disabled || DOM.modals.car.classList.contains('active');
   if(pending){ e.preventDefault(); e.returnValue = ''; }
 });
 
@@ -1233,6 +1185,8 @@ async function init(){
   renderGhNote();
   if(cfg.token){
     await githubPull(true);
+  } else {
+    openGhModal(true);
   }
 }
 
